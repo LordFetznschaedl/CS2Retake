@@ -20,16 +20,16 @@ namespace CS2Retake.Entity
         public BombSiteEnum BombSite { get; set; } = BombSiteEnum.Undefined;
 
         
-        public float VectorX { get; set; }
-        public float VectorY { get; set; }
-        public float VectorZ { get; set; }
+        public float PositionX { get; set; }
+        public float PositionY { get; set; }
+        public float PositionZ { get; set; }
 
         public float QAngleX { get; set; }
         public float QAngleY { get; set; }
         public float QAngleZ { get; set; }
 
         [JsonIgnore]
-        public Vector Vector => new Vector(this.VectorX, this.VectorY, this.VectorZ);
+        public Vector Position => new Vector(this.PositionX, this.PositionY, this.PositionZ);
         [JsonIgnore]
         public QAngle QAngle => new QAngle(this.QAngleX, this.QAngleY, this.QAngleZ);
 
@@ -37,11 +37,11 @@ namespace CS2Retake.Entity
         public bool SpawnIsInUse { get; set; } = false;
 
 
-        public SpawnPointEntity(Vector vector, QAngle qAngle, CsTeam team, BombSiteEnum bombSite, SpawnTypeEnum spawnType = SpawnTypeEnum.Normal) 
+        public SpawnPointEntity(Vector position, QAngle qAngle, CsTeam team, BombSiteEnum bombSite, SpawnTypeEnum spawnType = SpawnTypeEnum.Normal) 
         {
-            this.VectorX = vector.X;
-            this.VectorY = vector.Y;
-            this.VectorZ = vector.Z;
+            this.PositionX = position.X;
+            this.PositionY = position.Y;
+            this.PositionZ = position.Z;
 
             this.QAngleX = qAngle.X;
             this.QAngleY = qAngle.Y;
@@ -52,11 +52,11 @@ namespace CS2Retake.Entity
             this.SpawnType = spawnType;
         }
 
-        public SpawnPointEntity(float vectorX, float vectorY, float vectorZ, float qAngleX, float qAngleY, float qAngleZ, CsTeam team, BombSiteEnum bombSite, SpawnTypeEnum spawnType = SpawnTypeEnum.Normal)
+        public SpawnPointEntity(float positionX, float positionY, float positionZ, float qAngleX, float qAngleY, float qAngleZ, CsTeam team, BombSiteEnum bombSite, SpawnTypeEnum spawnType = SpawnTypeEnum.Normal)
         {
-            this.VectorX = vectorX;
-            this.VectorY = vectorY;
-            this.VectorZ = vectorZ;
+            this.PositionX = positionX;
+            this.PositionY = positionY;
+            this.PositionZ = positionZ;
 
             this.QAngleX = qAngleX;
             this.QAngleY = qAngleY;

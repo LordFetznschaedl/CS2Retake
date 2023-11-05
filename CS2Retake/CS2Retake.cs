@@ -9,7 +9,7 @@ using CS2Retake.Entity;
 
 namespace CS2Retake
 {
-    public class CS2Retake : BasePlugin
+    public class CS2Retake : BasePlugin  
     {
         public override string ModuleName => "CS2Retake";
         public override string ModuleVersion => "0.0.1";
@@ -25,70 +25,104 @@ namespace CS2Retake
             this.Log(this.ModuleDescription);
 
             this.RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
+            this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
 
-            if(this._currentMap == null)
+            if (this._currentMap == null)
             {
-                this._currentMap = new MapEntity(Server.MapName, this.ModuleDirectory);
+                this._currentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
             }
 
             this.RegisterListener<Listeners.OnMapStart>((mapName) =>
             {
-                this._currentMap = new MapEntity(mapName, this.ModuleDirectory);
+                this.Log($"Map changed to {mapName}");
+                this._currentMap = new MapEntity(mapName, this.ModuleDirectory, this.ModuleName);
             });
         }
+
+        
 
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
         public void OnCommandInfo(CCSPlayerController? player, CommandInfo command)
         {
             if (player == null)
             {
-                Console.WriteLine("Command has been called by the server.");
+                this.Log("Command has been called by the server.");
                 return;
             }
 
-            player.PrintToChat(PluginInfo());
-            player.PrintToConsole(PluginInfo());
+            command.ReplyToCommand(PluginInfo());
         }
 
-        [ConsoleCommand("css_retakewrite", "This command writes the spawns")]
+        [ConsoleCommand("css_retakespawn", "This command teleports the player to a spawn with the given index in the args")]
+        public void OnCommandSpawn(CCSPlayerController? player, CommandInfo command)
+        {
+            if (player == null)
+            {
+                this.Log("Command has been called by the server.");
+                return;
+            }
+            if(!player.PlayerPawn.IsValid)
+            {
+                this.Log("PlayerPawn not valid");
+                return;
+            }
+
+            if (command.ArgCount != 2)
+            {
+                this.Log($"ArgCount: {command.ArgCount} - ArgString: {command.ArgString}");
+                command.ReplyToCommand($"One argument with a valid spawn index is needed! Example: !retakespawn 0");
+                return;
+            }
+
+            if(!int.TryParse(command.ArgByIndex(1), out int spawnIndex))
+            {
+                this.Log("Argument index not a valid integer!");
+                return;
+            }
+
+            
+
+            this._currentMap.TeleportPlayerToSpawn(player, spawnIndex);
+        }
+
+        [ConsoleCommand("css_retakewrite", "This command writes the spawns for the current map")]
         public void OnCommandWrite(CCSPlayerController? player, CommandInfo command)
         {
             this._currentMap.WriteSpawns();
         }
 
+        [ConsoleCommand("css_retakeread", "This command reads the spawns for the current map")]
+        public void OnCommandRead(CCSPlayerController? player, CommandInfo command)
+        {
+            this._currentMap.ReadSpawns();
+            this.Log($"{this._currentMap.SpawnPoints.Count} spawnpoints read");
+        }
+
         [GameEventHandler]
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
-            return HookResult.Continue;
-
             if (@event == null)
             {
                 return HookResult.Continue;
             }
-            if(@event.Userid.IsValid)
+            if(!@event.Userid.IsValid)
             {
                 return HookResult.Continue;
             }
 
-
-            var spawnPoint = this._currentMap.GetRandomSpawn((CsTeam)@event.Userid.TeamNum);
-
-            var absOrigin = @event.Userid.CBodyComponent!.SceneNode!.AbsOrigin;
-            absOrigin.X = 0;
-            absOrigin.Y = 0;
-            absOrigin.Z = 0;
-
-            var absRotation = @event.Userid.CBodyComponent!.SceneNode!.AbsRotation;
-            absRotation.X = 0;
-            absRotation.Y = 0;
-            absRotation.Z = 0;
-
-            //@event.Userid.Teleport();
-
-            this.Log(@event.Userid.TeamNum.ToString());
+            this._currentMap.TeleportPlayerToSpawn(@event.Userid);
 
             return HookResult.Continue;
         }
+
+        [GameEventHandler]
+        private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
+        {
+            this._currentMap.ResetSpawnInUse();
+
+            return HookResult.Continue;
+        }
+
 
         private string PluginInfo()
         {
@@ -98,7 +132,7 @@ namespace CS2Retake
         private void Log(string message)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine(message);
+            Console.WriteLine($"[{this.ModuleName}] {message}");
             Console.ResetColor();
         }
     }
