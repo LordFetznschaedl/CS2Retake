@@ -39,7 +39,6 @@ namespace CS2Retake
             });
         }
 
-        
 
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
         public void OnCommandInfo(CCSPlayerController? player, CommandInfo command)
@@ -79,8 +78,6 @@ namespace CS2Retake
                 this.Log("Argument index not a valid integer!");
                 return;
             }
-
-            
 
             this._currentMap.TeleportPlayerToSpawn(player, spawnIndex);
         }
@@ -126,7 +123,7 @@ namespace CS2Retake
 
         private string PluginInfo()
         {
-            return $"Plugin: {ModuleName} - Version: {ModuleVersion}";
+            return $"Plugin: {this.ModuleName} - Version: {this.ModuleVersion} by {this.ModuleAuthor}";
         }
 
         private void Log(string message)

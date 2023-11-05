@@ -76,6 +76,7 @@ namespace CS2Retake.Entity
 
             if(spawn == null)
             {
+                this.Log($"Spawn is null. Moving player to Spectator");
                 player.SwitchTeam(CsTeam.Spectator);
                 return;
             }
