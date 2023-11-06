@@ -6,6 +6,7 @@ using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Entity;
+using CS2Retake.Logic;
 
 namespace CS2Retake
 {
@@ -23,6 +24,8 @@ namespace CS2Retake
         {
             this.Log(PluginInfo());
             this.Log(this.ModuleDescription);
+
+            RetakeLogic.GetInstance().ModuleName= this.ModuleName;
 
             this.RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
             this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
@@ -89,6 +92,13 @@ namespace CS2Retake
         }
 
         [ConsoleCommand("css_retakeread", "This command reads the spawns for the current map")]
+        public void OnCommandRead(CCSPlayerController? player, CommandInfo command)
+        {
+            this._currentMap.ReadSpawns();
+            this.Log($"{this._currentMap.SpawnPoints.Count} spawnpoints read");
+        }
+
+        [ConsoleCommand("css_retakescramble", "This command reads the spawns for the current map")]
         public void OnCommandRead(CCSPlayerController? player, CommandInfo command)
         {
             this._currentMap.ReadSpawns();
