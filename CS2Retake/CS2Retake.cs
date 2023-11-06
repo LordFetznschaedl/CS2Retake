@@ -99,10 +99,9 @@ namespace CS2Retake
         }
 
         [ConsoleCommand("css_retakescramble", "This command reads the spawns for the current map")]
-        public void OnCommandRead(CCSPlayerController? player, CommandInfo command)
+        public void OnCommandScramble(CCSPlayerController? player, CommandInfo command)
         {
-            this._currentMap.ReadSpawns();
-            this.Log($"{this._currentMap.SpawnPoints.Count} spawnpoints read");
+            RetakeLogic.GetInstance().ScrambleTeams();
         }
 
         [GameEventHandler]
