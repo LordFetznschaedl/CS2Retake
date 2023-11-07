@@ -16,8 +16,6 @@ namespace CS2Retake
         public override string ModuleVersion => "0.0.1";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
-
-        private MapEntity _currentMap { get; set; } = null;
        
 
         public override void Load(bool hotReload)
@@ -26,19 +24,20 @@ namespace CS2Retake
             this.Log(this.ModuleDescription);
 
             RetakeLogic.GetInstance().ModuleName= this.ModuleName;
+            MapLogic.GetInstance().ModuleName= this.ModuleName;
 
             this.RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
             this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
 
-            if (this._currentMap == null)
+            if (MapLogic.GetInstance().CurrentMap == null)
             {
-                this._currentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
+                MapLogic.GetInstance().CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
             }
 
             this.RegisterListener<Listeners.OnMapStart>((mapName) =>
             {
                 this.Log($"Map changed to {mapName}");
-                this._currentMap = new MapEntity(mapName, this.ModuleDirectory, this.ModuleName);
+                MapLogic.GetInstance().CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
             });
         }
 
@@ -82,20 +81,20 @@ namespace CS2Retake
                 return;
             }
 
-            this._currentMap.TeleportPlayerToSpawn(player, spawnIndex);
+            MapLogic.GetInstance().CurrentMap.TeleportPlayerToSpawn(player, spawnIndex);
         }
 
         [ConsoleCommand("css_retakewrite", "This command writes the spawns for the current map")]
         public void OnCommandWrite(CCSPlayerController? player, CommandInfo command)
         {
-            this._currentMap.WriteSpawns();
+            MapLogic.GetInstance().CurrentMap.WriteSpawns();
         }
 
         [ConsoleCommand("css_retakeread", "This command reads the spawns for the current map")]
         public void OnCommandRead(CCSPlayerController? player, CommandInfo command)
         {
-            this._currentMap.ReadSpawns();
-            this.Log($"{this._currentMap.SpawnPoints.Count} spawnpoints read");
+            MapLogic.GetInstance().CurrentMap.ReadSpawns();
+            this.Log($"{MapLogic.GetInstance().CurrentMap.SpawnPoints.Count} spawnpoints read");
         }
 
         [ConsoleCommand("css_retakescramble", "This command reads the spawns for the current map")]
@@ -116,7 +115,7 @@ namespace CS2Retake
                 return HookResult.Continue;
             }
 
-            this._currentMap.TeleportPlayerToSpawn(@event.Userid);
+            MapLogic.GetInstance().CurrentMap.TeleportPlayerToSpawn(@event.Userid);
 
             return HookResult.Continue;
         }
@@ -124,7 +123,7 @@ namespace CS2Retake
         [GameEventHandler]
         private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
         {
-            this._currentMap.ResetSpawnInUse();
+            MapLogic.GetInstance().CurrentMap.ResetSpawnInUse();
 
             return HookResult.Continue;
         }
