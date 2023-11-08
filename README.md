@@ -18,9 +18,10 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 # todo:  
 - permission system for spawn creation, read and write
 - weapon assign system
-- scramble
 - config system
 - auto assign teams
 - auto plant
+- spawn loading system
+  
 
 
