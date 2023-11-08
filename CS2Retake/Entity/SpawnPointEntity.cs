@@ -52,6 +52,21 @@ namespace CS2Retake.Entity
             this.SpawnType = spawnType;
         }
 
+        public SpawnPointEntity(Vector position, QAngle qAngle, BombSiteEnum bombSite, CsTeam team, SpawnTypeEnum spawnType = SpawnTypeEnum.Normal)
+        {
+            this.PositionX = position.X;
+            this.PositionY = position.Y;
+            this.PositionZ = position.Z;
+
+            this.QAngleX = qAngle.X;
+            this.QAngleY = qAngle.Y;
+            this.QAngleZ = qAngle.Z;
+
+            this.Team = team;
+            this.BombSite = bombSite;
+            this.SpawnType = spawnType;
+        }
+
         public SpawnPointEntity(float positionX, float positionY, float positionZ, float qAngleX, float qAngleY, float qAngleZ, CsTeam team, BombSiteEnum bombSite, SpawnTypeEnum spawnType = SpawnTypeEnum.Normal)
         {
             this.PositionX = positionX;
@@ -65,6 +80,10 @@ namespace CS2Retake.Entity
             this.Team = team;
             this.BombSite = bombSite;
             this.SpawnType = spawnType;
+        }
+
+        public SpawnPointEntity()
+        {
         }
     }
 }

@@ -7,6 +7,7 @@ using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Entity;
 using CS2Retake.Logic;
+using CS2Retake.Utils;
 
 namespace CS2Retake
 {
@@ -28,6 +29,7 @@ namespace CS2Retake
 
             this.RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
             this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
+            this.RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
 
             if (MapLogic.GetInstance().CurrentMap == null)
             {
@@ -40,6 +42,7 @@ namespace CS2Retake
                 MapLogic.GetInstance().CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
             });
         }
+
 
 
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
@@ -81,7 +84,7 @@ namespace CS2Retake
                 return;
             }
 
-            MapLogic.GetInstance().CurrentMap.TeleportPlayerToSpawn(player, spawnIndex);
+            MapLogic.GetInstance().CurrentMap.TeleportPlayerToSpawn(player, BombSiteEnum.Undefined ,spawnIndex);
         }
 
         [ConsoleCommand("css_retakewrite", "This command writes the spawns for the current map")]
@@ -106,6 +109,11 @@ namespace CS2Retake
         [GameEventHandler]
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
+            if(MapLogic.GetInstance().BombSite == BombSiteEnum.Undefined) 
+            { 
+                MapLogic.GetInstance().RandomBombSite();
+            }
+
             if (@event == null)
             {
                 return HookResult.Continue;
@@ -115,7 +123,7 @@ namespace CS2Retake
                 return HookResult.Continue;
             }
 
-            MapLogic.GetInstance().CurrentMap.TeleportPlayerToSpawn(@event.Userid);
+            MapLogic.GetInstance().CurrentMap.TeleportPlayerToSpawn(@event.Userid, MapLogic.GetInstance().BombSite);
 
             return HookResult.Continue;
         }
@@ -123,11 +131,37 @@ namespace CS2Retake
         [GameEventHandler]
         private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
         {
-            MapLogic.GetInstance().CurrentMap.ResetSpawnInUse();
+            RetakeLogic.GetInstance().RemoveNotPlantedBombs();
+            RetakeLogic.GetInstance().PlantBomb();
 
             return HookResult.Continue;
         }
 
+        [GameEventHandler]
+        private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
+        {
+            if (@event.Winner == (int)CsTeam.Terrorist)
+            {
+                MapLogic.GetInstance().TerroristRoundWinStreak++;
+                Server.PrintToChatAll($"[{ChatColors.Gold}CS2Retake{ChatColors.White}] The Terrorists have won {ChatColors.Red}{MapLogic.GetInstance().TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
+            }
+            else
+            {
+                MapLogic.GetInstance().TerroristRoundWinStreak = 0;
+            }
+
+            if(MapLogic.GetInstance().TerroristRoundWinStreak == 5)
+            {
+                Server.PrintToChatAll($"[{ChatColors.Gold}CS2Retake{ChatColors.White}] Teams will be scrambled now!");
+                MapLogic.GetInstance().TerroristRoundWinStreak = 0;
+                RetakeLogic.GetInstance().ScrambleTeams();
+            }
+
+            MapLogic.GetInstance().RandomBombSite();
+            MapLogic.GetInstance().CurrentMap.ResetSpawnInUse();
+
+            return HookResult.Continue;
+        }
 
         private string PluginInfo()
         {

@@ -1,4 +1,7 @@
-﻿using CS2Retake.Entity;
+﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
+using CS2Retake.Entity;
+using CS2Retake.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -13,6 +16,10 @@ namespace CS2Retake.Logic
         public string ModuleName { get; set; }
         public MapEntity CurrentMap { get; set; }
 
+        public BombSiteEnum BombSite { get; set; } = BombSiteEnum.Undefined;
+
+        public int TerroristRoundWinStreak { get; set; } = 0;
+
         public static MapLogic GetInstance()
         {
             if (_instance == null)
@@ -24,6 +31,12 @@ namespace CS2Retake.Logic
 
         private MapLogic() { }
 
+
+        public void RandomBombSite()
+        {
+            this.BombSite = (BombSiteEnum)new Random().NextInt64(0, 1);
+        }
+       
 
 
         private void Log(string message)
