@@ -9,6 +9,7 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 !retakespawn - teleports you to the spawn index given as an argument  
 !retakewrite - writes the spawns of the current map to the corresponding map config  
 !retakeread - reads the spawns of the current map from the corresponding map config  
+!retakescramble - scrambles the teams instantly  
   
 ---
 # installation:  
