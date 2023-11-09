@@ -100,6 +100,23 @@ namespace CS2Retake
             this.Log($"{MapLogic.GetInstance().CurrentMap.SpawnPoints.Count} spawnpoints read");
         }
 
+        [ConsoleCommand("css_retakedetect", "This command checks all spawns and writes the spawns for the current map")]
+        public void OnCommandDetect(CCSPlayerController? player, CommandInfo command)
+        {
+            if (player == null)
+            {
+                this.Log("Command has been called by the server.");
+                return;
+            }
+            if (!player.PlayerPawn.IsValid)
+            {
+                this.Log("PlayerPawn not valid");
+                return;
+            }
+
+            MapLogic.GetInstance().DetectSpawnsInBombZone(player);
+        }
+
         [ConsoleCommand("css_retakescramble", "This command reads the spawns for the current map")]
         public void OnCommandScramble(CCSPlayerController? player, CommandInfo command)
         {
@@ -131,7 +148,6 @@ namespace CS2Retake
         [GameEventHandler]
         private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
         {
-            RetakeLogic.GetInstance().RemoveNotPlantedBombs();
             RetakeLogic.GetInstance().PlantBomb();
 
             return HookResult.Continue;

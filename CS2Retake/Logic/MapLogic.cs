@@ -1,4 +1,6 @@
-﻿using CounterStrikeSharp.API.Core;
+﻿using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Entity;
 using CS2Retake.Utils;
@@ -7,6 +9,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using System.Timers;
 
 namespace CS2Retake.Logic
 {
@@ -37,7 +40,32 @@ namespace CS2Retake.Logic
             this.BombSite = (BombSiteEnum)new Random().NextInt64(0, 1);
         }
        
+        public void DetectSpawnsInBombZone(CCSPlayerController player)
+        {
+            
 
+            foreach(var spawnPoint in this.CurrentMap.SpawnPoints.Select((value, index) => new { index, value })) 
+            {
+                
+                
+                this.CurrentMap.TeleportPlayerToSpawn(player, BombSiteEnum.Undefined, spawnPoint.index);
+
+                
+
+                if (player.PlayerPawn.Value.InBombZone)
+                {
+                    spawnPoint.value.IsInBombSite = true;
+                }
+
+                var message = $"Detecting if spawnpoint is in BombSite: Spawn {spawnPoint.index + 1} of {this.CurrentMap.SpawnPoints.Count} - IsInBombSite: {spawnPoint.value.IsInBombSite} - InBombZone: {player.PlayerPawn.Value.InBombZone}";
+                this.Log(message);
+                player.PrintToChat(message);
+            }
+
+            this.CurrentMap.WriteSpawns();
+        }
+
+        
 
         private void Log(string message)
         {

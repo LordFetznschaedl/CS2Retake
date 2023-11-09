@@ -15,10 +15,12 @@ namespace CS2Retake.Entity
 {
     public class SpawnPointEntity
     {
+        [JsonIgnore]
         public SpawnTypeEnum SpawnType { get; set; } = SpawnTypeEnum.Undefined;
+
         public CsTeam Team { get; set; } = CsTeam.None;
         public BombSiteEnum BombSite { get; set; } = BombSiteEnum.Undefined;
-
+        public bool IsInBombSite { get; set; }
         
         public float PositionX { get; set; }
         public float PositionY { get; set; }
