@@ -9,23 +9,23 @@ using System.Threading.Tasks;
 using CounterStrikeSharp.API.Modules.Utils;
 using System.Security.Cryptography;
 
-namespace CS2Retake.Logic
+namespace CS2Retake.Manager
 {
-    public class RetakeLogic
+    public class RetakeManager
     {
-        private static RetakeLogic _instance;
+        private static RetakeManager _instance;
         public string ModuleName { get; set; }
 
-        public static RetakeLogic GetInstance()
+        public static RetakeManager GetInstance()
         {
             if(_instance == null)
             {
-                _instance = new RetakeLogic();
+                _instance = new RetakeManager();
             }
             return _instance;
         }
 
-        private RetakeLogic() {}
+        private RetakeManager() {}
 
         public void ScrambleTeams()
         {
