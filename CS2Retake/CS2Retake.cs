@@ -8,6 +8,7 @@ using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Entity;
 using CS2Retake.Manager;
 using CS2Retake.Utils;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CS2Retake
 {
@@ -33,9 +34,9 @@ namespace CS2Retake
             }
 
             this.RegisterListener<Listeners.OnMapStart>(mapname => this.OnMapStart(mapname));
-
+            this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
+            this.RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
         }
-
 
 
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
@@ -188,11 +189,12 @@ namespace CS2Retake
 
             MapManager.GetInstance().AddSpawn(player, (CsTeam)team, (BombSiteEnum)bombSite);
         }
-        
 
         [GameEventHandler]
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
+            this.Log($"OnPlayerSpawn");
+
             if (MapManager.GetInstance().BombSite == BombSiteEnum.Undefined) 
             { 
                 MapManager.GetInstance().RandomBombSite();
@@ -208,6 +210,7 @@ namespace CS2Retake
             }
 
             MapManager.GetInstance().TeleportPlayerToSpawn(@event.Userid, MapManager.GetInstance().BombSite);
+            RetakeManager.GetInstance().GiveBombToTerroristInBombZone(@event.Userid);
 
             return HookResult.Continue;
         }
@@ -215,14 +218,21 @@ namespace CS2Retake
         [GameEventHandler]
         private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
         {
+            this.Log($"OnRoundStart");
+
             RetakeManager.GetInstance().PlantBomb();
+            
 
             return HookResult.Continue;
         }
 
+        
+
         [GameEventHandler]
         private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
         {
+            this.Log($"OnRoundEnd");
+
             if (@event.Winner == (int)CsTeam.Terrorist)
             {
                 MapManager.GetInstance().TerroristRoundWinStreak++;
@@ -240,6 +250,7 @@ namespace CS2Retake
                 RetakeManager.GetInstance().ScrambleTeams();
             }
 
+            RetakeManager.GetInstance().SteamIdOfBombCarrier = ulong.MinValue;
             MapManager.GetInstance().ResetForNextRound();
 
             return HookResult.Continue;

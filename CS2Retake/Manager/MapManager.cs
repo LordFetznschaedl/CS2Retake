@@ -25,6 +25,8 @@ namespace CS2Retake.Manager
 
         public int TerroristRoundWinStreak { get; set; } = 0;
 
+        
+
         public static MapManager GetInstance()
         {
             if (_instance == null)
@@ -72,17 +74,19 @@ namespace CS2Retake.Manager
 
         public void TeleportPlayerToSpawn(CCSPlayerController player, BombSiteEnum bombSite, int? spawnIndex = null)
         {
+            var team = (CsTeam)player.TeamNum;
             SpawnPointEntity? spawn;
             if (!spawnIndex.HasValue)
             {
-                var team = (CsTeam)player.TeamNum;
-                
-                if(team == CsTeam.Terrorist && this.HasToBeInBombZone) 
+                this.Log($"HasToBeInBombZone: {this.HasToBeInBombZone}");
+
+                spawn = this.CurrentMap.GetRandomSpawn(team, bombSite, team == CsTeam.CounterTerrorist ? false : this.HasToBeInBombZone);
+
+                if (team == CsTeam.Terrorist && this.HasToBeInBombZone)
                 {
+                    RetakeManager.GetInstance().SteamIdOfBombCarrier = player.SteamID;
                     this.HasToBeInBombZone = false;
                 }
-                
-                spawn = this.CurrentMap.GetRandomSpawn(team, bombSite, team == CsTeam.CounterTerrorist ? false : this.HasToBeInBombZone);
             }
             else if (spawnIndex.Value > (this.CurrentMap.SpawnPoints.Count - 1) || spawnIndex.Value < 0)
             {
@@ -104,6 +108,8 @@ namespace CS2Retake.Manager
             player.PrintToConsole($"[CS2Retake] Spawnpoint: {spawn.SpawnId}");
             player.PlayerPawn.Value.Teleport(spawn.Position, spawn.QAngle, new Vector(0f, 0f, 0f));
 
+            
+            
         }
 
         public void ResetForNextRound()

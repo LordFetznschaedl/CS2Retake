@@ -8,6 +8,7 @@ using System.Text;
 using System.Threading.Tasks;
 using CounterStrikeSharp.API.Modules.Utils;
 using System.Security.Cryptography;
+using CS2Retake.Entity;
 
 namespace CS2Retake.Manager
 {
@@ -15,7 +16,9 @@ namespace CS2Retake.Manager
     {
         private static RetakeManager _instance;
         public string ModuleName { get; set; }
+        public bool BombHasBeenAssigned { get; set; } = false;
 
+        public ulong SteamIdOfBombCarrier { get; set; } = ulong.MinValue;
 
         public static RetakeManager GetInstance()
         {
@@ -47,24 +50,25 @@ namespace CS2Retake.Manager
             }
         }
 
+        public void GiveBombToTerroristInBombZone(CCSPlayerController player)
+        {
+            if(player == null || !player.IsValid)
+            {
+                this.Log($"Player not valid");
+                return;
+            }
+            
+            if(player.SteamID != SteamIdOfBombCarrier)
+            {
+                return;
+            }
+
+            player.GiveNamedItem($"planted_c4");
+        }
+
         public void PlantBomb()
         {
-            var terroristPlayers = this.GetPlayerControllers().Where(x => x.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
-
-            if (!terroristPlayers.Any())
-            {
-                this.Log($"No terrorist players have been found!");
-                return;
-            }
-
-            var random = new Random();
-            var bombCarrier = terroristPlayers.OrderBy(x => random.Next()).Where(x => x.PlayerPawn.Value.InBombZone).FirstOrDefault();
-
-            if(bombCarrier == null)
-            {
-                this.Log($"No terrorist players in bombzone found!");
-                return;
-            }
+            
         }
 
         public void ConfigureForRetake()
