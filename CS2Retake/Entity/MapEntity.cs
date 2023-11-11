@@ -37,7 +37,7 @@ namespace CS2Retake.Entity
                 this.ReadSpawns();
             }
 
-            var spawnChoices = this.SpawnPoints.Where(x => x.Team == team && !x.SpawnIsInUse && x.BombSite == bombSite).ToList();
+            var spawnChoices = this.SpawnPoints.Where(x => x.Team == team && x.SpawnUsedBy == null && x.BombSite == bombSite).ToList();
 
             if(!spawnChoices.Any())
             {
@@ -91,7 +91,7 @@ namespace CS2Retake.Entity
 
         public void ResetSpawnInUse()
         {
-            this.SpawnPoints.ForEach(spawn => spawn.SpawnIsInUse = false);
+            this.SpawnPoints.ForEach(spawn => spawn.SpawnUsedBy = null);
         }
 
         private void Log(string message)

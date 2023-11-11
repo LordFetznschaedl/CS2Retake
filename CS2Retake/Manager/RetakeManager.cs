@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using CounterStrikeSharp.API.Modules.Utils;
 using System.Security.Cryptography;
 using CS2Retake.Entity;
+using CounterStrikeSharp.API.Modules.Entities;
 
 namespace CS2Retake.Manager
 {
@@ -18,7 +19,6 @@ namespace CS2Retake.Manager
         public string ModuleName { get; set; }
         public bool BombHasBeenAssigned { get; set; } = false;
 
-        public ulong SteamIdOfBombCarrier { get; set; } = ulong.MinValue;
 
         public static RetakeManager GetInstance()
         {
@@ -50,24 +50,63 @@ namespace CS2Retake.Manager
             }
         }
 
-        public void GiveBombToTerroristInBombZone(CCSPlayerController player)
-        {
-            if(player == null || !player.IsValid)
-            {
-                this.Log($"Player not valid");
-                return;
-            }
-            
-            if(player.SteamID != SteamIdOfBombCarrier)
-            {
-                return;
-            }
-
-            player.GiveNamedItem($"planted_c4");
-        }
 
         public void PlantBomb()
         {
+            var random = new Random();
+            var plantSpawn = MapManager.GetInstance().CurrentMap.SpawnPoints.Where(spawn => spawn.SpawnUsedBy != null && spawn.IsInBombZone).OrderBy(x => random.Next()).FirstOrDefault();
+
+            if(plantSpawn == null)
+            {
+                this.Log($"No valid plant spawn found!");
+                return;
+            }
+
+            var player = plantSpawn.SpawnUsedBy;
+
+            if(player == null)
+            {
+                this.Log($"Player that uses the valid plant spawn is null");
+                return;
+            }
+
+            player.GiveNamedItem("planted_c4");
+
+            var plantedBomb = this.FindPlantedBomb();
+
+            if(plantedBomb == null)
+            {
+                this.Log($"No planted bomb was found!");
+                return;
+            }
+
+            var playerPawn = player.PlayerPawn.Value;
+
+            if(playerPawn == null)
+            {
+                this.Log($"Player pawn is null");
+                return;
+            }
+            if(playerPawn.AbsRotation == null)
+            {
+                this.Log($"Player pawn rotation is null");
+                return;
+            }
+            if(playerPawn.AbsOrigin == null)
+            {
+                this.Log($"Player pawn position is null");
+                return;
+            }
+            
+
+            plantedBomb.Teleport(playerPawn.AbsOrigin, playerPawn.AbsRotation, new Vector(0f, 0f, 0f));
+
+            plantedBomb.BombTicking = true;
+
+            //var bombPlantedEventPtr = NativeAPI.CreateEvent("bomb_planted", true);
+            //NativeAPI.SetEventPlayerController(bombPlantedEventPtr, "userid", player.Handle);
+            //NativeAPI.SetEventInt(bombPlantedEventPtr, "site", plantedBomb.BombSite);
+            //NativeAPI.FireEvent(bombPlantedEventPtr, false);
             
         }
 
@@ -86,6 +125,19 @@ namespace CS2Retake.Manager
             }
 
             return playerList;
+        }
+
+        private CPlantedC4? FindPlantedBomb()
+        {
+            var plantedBombList = Utilities.FindAllEntitiesByDesignerName<CPlantedC4>("planted_c4");
+
+            if (!plantedBombList.Any())
+            {
+                this.Log("No planted bomb entities have been found!");
+                return null;
+            }
+
+            return plantedBombList.FirstOrDefault();
         }
 
         private void Log(string message)

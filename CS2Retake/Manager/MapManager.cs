@@ -41,7 +41,7 @@ namespace CS2Retake.Manager
 
         public void RandomBombSite()
         {
-            this.BombSite = (BombSiteEnum)new Random().NextInt64(0, 1);
+            this.BombSite = (BombSiteEnum)new Random().Next(0, 2);
         }
 
         public void AddSpawn(CCSPlayerController player, CsTeam team, BombSiteEnum bombSite)
@@ -78,13 +78,10 @@ namespace CS2Retake.Manager
             SpawnPointEntity? spawn;
             if (!spawnIndex.HasValue)
             {
-                this.Log($"HasToBeInBombZone: {this.HasToBeInBombZone}");
-
                 spawn = this.CurrentMap.GetRandomSpawn(team, bombSite, team == CsTeam.CounterTerrorist ? false : this.HasToBeInBombZone);
 
                 if (team == CsTeam.Terrorist && this.HasToBeInBombZone)
                 {
-                    RetakeManager.GetInstance().SteamIdOfBombCarrier = player.SteamID;
                     this.HasToBeInBombZone = false;
                 }
             }
@@ -104,7 +101,7 @@ namespace CS2Retake.Manager
                 return;
             }
 
-            spawn.SpawnIsInUse = true;
+            spawn.SpawnUsedBy = player;
             player.PrintToConsole($"[CS2Retake] Spawnpoint: {spawn.SpawnId}");
             player.PlayerPawn.Value.Teleport(spawn.Position, spawn.QAngle, new Vector(0f, 0f, 0f));
 
@@ -112,10 +109,14 @@ namespace CS2Retake.Manager
             
         }
 
-        public void ResetForNextRound()
+        public void ResetForNextRound(bool completeReset = true)
         {
-            this.RandomBombSite();
-            this.CurrentMap.ResetSpawnInUse();
+            if(completeReset)
+            {
+                this.RandomBombSite();
+                this.CurrentMap.ResetSpawnInUse();
+            }
+            
             this.HasToBeInBombZone = true;
         }
 

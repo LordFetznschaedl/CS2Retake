@@ -34,7 +34,7 @@ namespace CS2Retake.Entity
         public QAngle QAngle => new QAngle(this.QAngleX, this.QAngleY, this.QAngleZ);
 
         [JsonIgnore]
-        public bool SpawnIsInUse { get; set; } = false;
+        public CCSPlayerController? SpawnUsedBy { get; set; } = null;
 
         public SpawnPointEntity(Vector position, QAngle qAngle, BombSiteEnum bombSite, CsTeam team, bool isInBombZone = false)
         {
