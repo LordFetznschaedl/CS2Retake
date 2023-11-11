@@ -27,10 +27,6 @@ namespace CS2Retake
             RetakeManager.GetInstance().ModuleName= this.ModuleName;
             MapManager.GetInstance().ModuleName= this.ModuleName;
 
-            this.RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
-            this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
-            this.RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
-
             if (MapManager.GetInstance().CurrentMap == null)
             {
                 MapManager.GetInstance().CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
@@ -84,7 +80,7 @@ namespace CS2Retake
                 return;
             }
 
-            MapManager.GetInstance().CurrentMap.TeleportPlayerToSpawn(player, BombSiteEnum.Undefined ,spawnIndex);
+            MapManager.GetInstance().TeleportPlayerToSpawn(player, BombSiteEnum.Undefined ,spawnIndex);
         }
 
         [ConsoleCommand("css_retakewrite", "This command writes the spawns for the current map")]
@@ -100,11 +96,100 @@ namespace CS2Retake
             this.Log($"{MapManager.GetInstance().CurrentMap.SpawnPoints.Count} spawnpoints read");
         }
 
-
         [ConsoleCommand("css_retakescramble", "This command reads the spawns for the current map")]
         public void OnCommandScramble(CCSPlayerController? player, CommandInfo command)
         {
             RetakeManager.GetInstance().ScrambleTeams();
+        }
+
+        [ConsoleCommand("css_retaketeleport", "This command teleports the player to the given coordinates")]
+        public void OnCommandTeleport(CCSPlayerController? player, CommandInfo command)
+        {
+            if (player == null)
+            {
+                this.Log("Command has been called by the server.");
+                return;
+            }
+            if (!player.PlayerPawn.IsValid)
+            {
+                this.Log("PlayerPawn not valid");
+                return;
+            }
+
+            if (command.ArgCount != 4)
+            {
+                this.Log($"ArgCount: {command.ArgCount} - ArgString: {command.ArgString}");
+                command.ReplyToCommand($"Command format: !retaketeleport <position X float> <position Y float> <position Z float>");
+                return;
+            }
+
+            if (!float.TryParse(command.ArgByIndex(1), out float positionX))
+            {
+                this.Log("Argument position X not a valid float!");
+                return;
+            }
+
+            if (!float.TryParse(command.ArgByIndex(2), out float positionY))
+            {
+                this.Log("Argument position Y not a valid float!");
+                return;
+            }
+
+            if (!float.TryParse(command.ArgByIndex(3), out float positionZ))
+            {
+                this.Log("Argument position Z not a valid float!");
+                return;
+            }
+
+            player.PlayerPawn.Value.Teleport(new Vector(positionX, positionY, positionZ), new QAngle(0f,0f,0f), new Vector(0f, 0f, 0f));
+        }
+
+        [ConsoleCommand("css_retakeaddspawn", "This command adds a new spawn to the current map")]
+        public void OnCommandAdd(CCSPlayerController? player, CommandInfo command)
+        {
+            if (player == null)
+            {
+                this.Log("Command has been called by the server.");
+                return;
+            }
+            if (!player.PlayerPawn.IsValid)
+            {
+                this.Log("PlayerPawn not valid");
+                return;
+            }
+
+            if (command.ArgCount != 3)
+            {
+                this.Log($"ArgCount: {command.ArgCount} - ArgString: {command.ArgString}");
+                command.ReplyToCommand($"Command format: !retakeaddspawn <2/3 - 2 = T; 3 = CT> <0/1 - 0 = A; 1 = B>");
+                return;
+            }
+
+            if (!int.TryParse(command.ArgByIndex(1), out int team))
+            {
+                this.Log("Team could not be parsed!");
+                return;
+            }
+
+            if(team != 2 && team != 3) 
+            {
+                this.Log("Team index is not in 2 or 3");
+                return;
+            }
+
+            if (!int.TryParse(command.ArgByIndex(2), out int bombSite))
+            {
+                this.Log("Team could not be parsed!");
+                return;
+            }
+
+            if (bombSite != 0 && bombSite != 1)
+            {
+                this.Log("BombSite index is not in 0 or 1");
+                return;
+            }
+
+            MapManager.GetInstance().AddSpawn(player, (CsTeam)team, (BombSiteEnum)bombSite);
         }
 
         [GameEventHandler]
@@ -124,7 +209,7 @@ namespace CS2Retake
                 return HookResult.Continue;
             }
 
-            MapManager.GetInstance().CurrentMap.TeleportPlayerToSpawn(@event.Userid, MapManager.GetInstance().BombSite);
+            MapManager.GetInstance().TeleportPlayerToSpawn(@event.Userid, MapManager.GetInstance().BombSite);
 
             return HookResult.Continue;
         }
@@ -157,8 +242,7 @@ namespace CS2Retake
                 RetakeManager.GetInstance().ScrambleTeams();
             }
 
-            MapManager.GetInstance().RandomBombSite();
-            MapManager.GetInstance().CurrentMap.ResetSpawnInUse();
+            MapManager.GetInstance().ResetForNextRound();
 
             return HookResult.Continue;
         }

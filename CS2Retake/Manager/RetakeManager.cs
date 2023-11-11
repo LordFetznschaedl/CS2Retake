@@ -64,24 +64,8 @@ namespace CS2Retake.Manager
                 this.Log($"No terrorist players in bombzone found!");
                 return;
             }
-
-            bombCarrier.GiveNamedItem("weapon_c4");
-
-            var notPlantedBomb = this.GetNotPlantedBombs().FirstOrDefault();
-
-            if(notPlantedBomb == null)
-            {
-                this.Log($"No not planted bomb was found!");
-                return;
-            }
-
-            notPlantedBomb.IsPlantingViaUse = true;
         }
 
-        public void RemoveNotPlantedBombs()
-        {
-            this.GetNotPlantedBombs().ForEach(x => x.Remove());
-        }
 
         private List<CCSPlayerController> GetPlayerControllers() 
         {
@@ -93,18 +77,6 @@ namespace CS2Retake.Manager
             }
 
             return playerList;
-        }
-
-        private List<CC4> GetNotPlantedBombs()
-        {
-            var notPlantedBombList = Utilities.FindAllEntitiesByDesignerName<CC4>("weapon_c4").ToList();
-
-            if (!notPlantedBombList.Any())
-            {
-                this.Log($"No not planted bombs have been found!");
-            }
-
-            return notPlantedBombList;
         }
 
         private void Log(string message)
