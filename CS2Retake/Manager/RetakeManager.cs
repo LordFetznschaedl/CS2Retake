@@ -16,6 +16,7 @@ namespace CS2Retake.Manager
         private static RetakeManager _instance;
         public string ModuleName { get; set; }
 
+
         public static RetakeManager GetInstance()
         {
             if(_instance == null)
@@ -66,6 +67,10 @@ namespace CS2Retake.Manager
             }
         }
 
+        public void ConfigureForRetake()
+        {   
+            Server.ExecuteCommand($"execifexists cs2retake/retake.cfg");
+        }
 
         private List<CCSPlayerController> GetPlayerControllers() 
         {

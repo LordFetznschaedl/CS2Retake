@@ -21,7 +21,7 @@ namespace CS2Retake.Manager
         public MapEntity CurrentMap { get; set; }
 
         public BombSiteEnum BombSite { get; set; } = BombSiteEnum.Undefined;
-        public bool HasToBeInBombZone { get; set; } = false;
+        public bool HasToBeInBombZone { get; set; } = true;
 
         public int TerroristRoundWinStreak { get; set; } = 0;
 
@@ -75,12 +75,6 @@ namespace CS2Retake.Manager
             SpawnPointEntity? spawn;
             if (!spawnIndex.HasValue)
             {
-                if(player.PlayerPawn.Value.WeaponServices == null)
-                {
-                    this.Log($"WeaponServicxe of Player is null!");
-                    return;
-                }
-
                 var team = (CsTeam)player.TeamNum;
                 
                 if(team == CsTeam.Terrorist && this.HasToBeInBombZone) 
@@ -107,9 +101,7 @@ namespace CS2Retake.Manager
             }
 
             spawn.SpawnIsInUse = true;
-
             player.PrintToConsole($"[CS2Retake] Spawnpoint: {spawn.SpawnId}");
-
             player.PlayerPawn.Value.Teleport(spawn.Position, spawn.QAngle, new Vector(0f, 0f, 0f));
 
         }
