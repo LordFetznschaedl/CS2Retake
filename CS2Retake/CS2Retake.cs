@@ -14,10 +14,9 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin  
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "0.0.1";
+        public override string ModuleVersion => "1.0.0";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
-       
 
         public override void Load(bool hotReload)
         {
@@ -25,18 +24,16 @@ namespace CS2Retake
             this.Log(this.ModuleDescription);
 
             RetakeManager.GetInstance().ModuleName= this.ModuleName;
-            MapManager.GetInstance().ModuleName= this.ModuleName;
+
+            MapManager.GetInstance().ModuleName = this.ModuleName;
 
             if (MapManager.GetInstance().CurrentMap == null)
             {
-                MapManager.GetInstance().CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
+                this.OnMapStart(Server.MapName);
             }
 
-            this.RegisterListener<Listeners.OnMapStart>((mapName) =>
-            {
-                this.Log($"Map changed to {mapName}");
-                MapManager.GetInstance().CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
-            });
+            this.RegisterListener<Listeners.OnMapStart>(mapname => this.OnMapStart(mapname));
+
         }
 
 
@@ -191,11 +188,12 @@ namespace CS2Retake
 
             MapManager.GetInstance().AddSpawn(player, (CsTeam)team, (BombSiteEnum)bombSite);
         }
+        
 
         [GameEventHandler]
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
-            if(MapManager.GetInstance().BombSite == BombSiteEnum.Undefined) 
+            if (MapManager.GetInstance().BombSite == BombSiteEnum.Undefined) 
             { 
                 MapManager.GetInstance().RandomBombSite();
             }
@@ -245,6 +243,13 @@ namespace CS2Retake
             MapManager.GetInstance().ResetForNextRound();
 
             return HookResult.Continue;
+        }
+
+        public void OnMapStart(string mapName)
+        {
+            this.Log($"Map changed to {mapName}");
+            MapManager.GetInstance().CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
+            RetakeManager.GetInstance().ConfigureForRetake();
         }
 
         private string PluginInfo()
