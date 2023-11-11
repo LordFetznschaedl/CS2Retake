@@ -15,11 +15,11 @@ namespace CS2Retake.Entity
 {
     public class SpawnPointEntity
     {
-        public SpawnTypeEnum SpawnType { get; set; } = SpawnTypeEnum.Undefined;
-
+        public Guid SpawnId { get; set; } = Guid.Empty;
         public CsTeam Team { get; set; } = CsTeam.None;
         public BombSiteEnum BombSite { get; set; } = BombSiteEnum.Undefined;
-        
+        public bool IsInBombZone { get; set; } = false;
+
         public float PositionX { get; set; }
         public float PositionY { get; set; }
         public float PositionZ { get; set; }
@@ -36,8 +36,7 @@ namespace CS2Retake.Entity
         [JsonIgnore]
         public bool SpawnIsInUse { get; set; } = false;
 
-
-        public SpawnPointEntity(Vector position, QAngle qAngle, CsTeam team, BombSiteEnum bombSite, SpawnTypeEnum spawnType = SpawnTypeEnum.Normal) 
+        public SpawnPointEntity(Vector position, QAngle qAngle, BombSiteEnum bombSite, CsTeam team, bool isInBombZone = false)
         {
             this.PositionX = position.X;
             this.PositionY = position.Y;
@@ -49,25 +48,12 @@ namespace CS2Retake.Entity
 
             this.Team = team;
             this.BombSite = bombSite;
-            this.SpawnType = spawnType;
+            this.IsInBombZone = isInBombZone;
+
+            this.SpawnId= Guid.NewGuid();
         }
 
-        public SpawnPointEntity(Vector position, QAngle qAngle, BombSiteEnum bombSite, CsTeam team, SpawnTypeEnum spawnType = SpawnTypeEnum.Normal)
-        {
-            this.PositionX = position.X;
-            this.PositionY = position.Y;
-            this.PositionZ = position.Z;
-
-            this.QAngleX = qAngle.X;
-            this.QAngleY = qAngle.Y;
-            this.QAngleZ = qAngle.Z;
-
-            this.Team = team;
-            this.BombSite = bombSite;
-            this.SpawnType = spawnType;
-        }
-
-        public SpawnPointEntity(float positionX, float positionY, float positionZ, float qAngleX, float qAngleY, float qAngleZ, CsTeam team, BombSiteEnum bombSite, SpawnTypeEnum spawnType = SpawnTypeEnum.Normal)
+        public SpawnPointEntity(float positionX, float positionY, float positionZ, float qAngleX, float qAngleY, float qAngleZ, CsTeam team, BombSiteEnum bombSite)
         {
             this.PositionX = positionX;
             this.PositionY = positionY;
@@ -79,7 +65,6 @@ namespace CS2Retake.Entity
 
             this.Team = team;
             this.BombSite = bombSite;
-            this.SpawnType = spawnType;
         }
 
         public SpawnPointEntity()
