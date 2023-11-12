@@ -25,11 +25,11 @@ namespace CS2Retake
             this.Log(PluginInfo());
             this.Log(this.ModuleDescription);
 
-            RetakeManager.GetInstance().ModuleName= this.ModuleName;
+            RetakeManager.Instance.ModuleName= this.ModuleName;
+            MapManager.Instance.ModuleName = this.ModuleName;
+            WeaponManager.Instance.ModuleName = this.ModuleName;
 
-            MapManager.GetInstance().ModuleName = this.ModuleName;
-
-            if (MapManager.GetInstance().CurrentMap == null)
+            if (MapManager.Instance.CurrentMap == null)
             {
                 this.OnMapStart(Server.MapName);
             }
@@ -49,7 +49,7 @@ namespace CS2Retake
         }
 
         [ConsoleCommand("css_retakespawn", "This command teleports the player to a spawn with the given index in the args")]
-        [RequiresPermissions("@cs2retake/admin", "@cs2retake/editor")]
+        [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandSpawn(CCSPlayerController? player, CommandInfo command)
         {
             if (player == null)
@@ -76,33 +76,33 @@ namespace CS2Retake
                 return;
             }
 
-            MapManager.GetInstance().TeleportPlayerToSpawn(player, BombSiteEnum.Undefined ,spawnIndex);
+            MapManager.Instance.TeleportPlayerToSpawn(player, BombSiteEnum.Undefined ,spawnIndex);
         }
 
         [ConsoleCommand("css_retakewrite", "This command writes the spawns for the current map")]
-        [RequiresPermissions("@cs2retake/admin", "@cs2retake/editor")]
+        [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandWrite(CCSPlayerController? player, CommandInfo command)
         {
-            MapManager.GetInstance().CurrentMap.WriteSpawns();
+            MapManager.Instance.CurrentMap.WriteSpawns();
         }
 
         [ConsoleCommand("css_retakeread", "This command reads the spawns for the current map")]
-        [RequiresPermissions("@cs2retake/admin", "@cs2retake/editor")]
+        [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandRead(CCSPlayerController? player, CommandInfo command)
         {
-            MapManager.GetInstance().CurrentMap.ReadSpawns();
-            this.Log($"{MapManager.GetInstance().CurrentMap.SpawnPoints.Count} spawnpoints read");
+            MapManager.Instance.CurrentMap.ReadSpawns();
+            this.Log($"{MapManager.Instance.CurrentMap.SpawnPoints.Count} spawnpoints read");
         }
 
         [ConsoleCommand("css_retakescramble", "This command scrambles the teams")]
-        [RequiresPermissions("@css/generic", "@cs2retake/admin")]
+        [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandScramble(CCSPlayerController? player, CommandInfo command)
         {
-            RetakeManager.GetInstance().ScrambleTeams();
+            RetakeManager.Instance.ScrambleTeams();
         }
 
         [ConsoleCommand("css_retaketeleport", "This command teleports the player to the given coordinates")]
-        [RequiresPermissions("@cs2retake/admin", "@cs2retake/editor")]
+        [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandTeleport(CCSPlayerController? player, CommandInfo command)
         {
             if (player == null)
@@ -145,7 +145,7 @@ namespace CS2Retake
         }
 
         [ConsoleCommand("css_retakeaddspawn", "This command adds a new spawn to the current map")]
-        [RequiresPermissions("@cs2retake/admin", "@cs2retake/editor")]
+        [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandAdd(CCSPlayerController? player, CommandInfo command)
         {
             if (player == null)
@@ -190,15 +190,15 @@ namespace CS2Retake
                 return;
             }
 
-            MapManager.GetInstance().AddSpawn(player, (CsTeam)team, (BombSiteEnum)bombSite);
+            MapManager.Instance.AddSpawn(player, (CsTeam)team, (BombSiteEnum)bombSite);
         }
 
         [GameEventHandler]
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
-            if (MapManager.GetInstance().BombSite == BombSiteEnum.Undefined) 
+            if (MapManager.Instance.BombSite == BombSiteEnum.Undefined) 
             { 
-                MapManager.GetInstance().RandomBombSite();
+                MapManager.Instance.RandomBombSite();
             }
 
             if (@event == null)
@@ -210,7 +210,8 @@ namespace CS2Retake
                 return HookResult.Continue;
             }
 
-            MapManager.GetInstance().TeleportPlayerToSpawn(@event.Userid, MapManager.GetInstance().BombSite);
+            MapManager.Instance.TeleportPlayerToSpawn(@event.Userid, MapManager.Instance.BombSite);
+            WeaponManager.Instance.AssignWeapon(@event.Userid);
 
             return HookResult.Continue;
         }
@@ -218,7 +219,7 @@ namespace CS2Retake
         [GameEventHandler]
         private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
-            RetakeManager.GetInstance().PlantBomb();
+            RetakeManager.Instance.PlantBomb();
 
             return HookResult.Continue;
         }
@@ -226,7 +227,7 @@ namespace CS2Retake
         [GameEventHandler]
         private HookResult OnCsPreRestart(EventCsPreRestart @event, GameEventInfo info)
         {
-            MapManager.GetInstance().ResetForNextRound(false);
+            MapManager.Instance.ResetForNextRound(false);
 
             return HookResult.Continue;
         }
@@ -236,22 +237,22 @@ namespace CS2Retake
         {
             if (@event.Winner == (int)CsTeam.Terrorist)
             {
-                MapManager.GetInstance().TerroristRoundWinStreak++;
-                Server.PrintToChatAll($"[{ChatColors.Gold}CS2Retake{ChatColors.White}] The Terrorists have won {ChatColors.Red}{MapManager.GetInstance().TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
+                MapManager.Instance.TerroristRoundWinStreak++;
+                Server.PrintToChatAll($"[{ChatColors.Gold}CS2Retake{ChatColors.White}] The Terrorists have won {ChatColors.Red}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
             }
             else
             {
-                MapManager.GetInstance().TerroristRoundWinStreak = 0;
+                MapManager.Instance.TerroristRoundWinStreak = 0;
             }
 
-            if(MapManager.GetInstance().TerroristRoundWinStreak == 5)
+            if(MapManager.Instance.TerroristRoundWinStreak == 5)
             {
                 Server.PrintToChatAll($"[{ChatColors.Gold}CS2Retake{ChatColors.White}] Teams will be scrambled now!");
-                MapManager.GetInstance().TerroristRoundWinStreak = 0;
-                RetakeManager.GetInstance().ScrambleTeams();
+                MapManager.Instance.TerroristRoundWinStreak = 0;
+                RetakeManager.Instance.ScrambleTeams();
             }
 
-            MapManager.GetInstance().ResetForNextRound();
+            MapManager.Instance.ResetForNextRound();
 
             return HookResult.Continue;
         }
@@ -259,8 +260,8 @@ namespace CS2Retake
         public void OnMapStart(string mapName)
         {
             this.Log($"Map changed to {mapName}");
-            MapManager.GetInstance().CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
-            RetakeManager.GetInstance().ConfigureForRetake();
+            MapManager.Instance.CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
+            RetakeManager.Instance.ConfigureForRetake();
         }
 
         private string PluginInfo()

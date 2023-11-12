@@ -15,21 +15,24 @@ namespace CS2Retake.Manager
 {
     public class RetakeManager
     {
-        private static RetakeManager _instance;
+        private static RetakeManager? _instance = null;
         public string ModuleName { get; set; }
         public bool BombHasBeenAssigned { get; set; } = false;
 
 
-        public static RetakeManager GetInstance()
+        public static RetakeManager Instance
         {
-            if(_instance == null)
+            get
             {
-                _instance = new RetakeManager();
+                if (_instance == null)
+                {
+                    _instance = new RetakeManager();
+                }
+                return _instance;
             }
-            return _instance;
         }
 
-        private RetakeManager() {}
+        private RetakeManager() { }
 
         public void ScrambleTeams()
         {
@@ -54,7 +57,7 @@ namespace CS2Retake.Manager
         public void PlantBomb()
         {
             var random = new Random();
-            var plantSpawn = MapManager.GetInstance().CurrentMap.SpawnPoints.Where(spawn => spawn.SpawnUsedBy != null && spawn.IsInBombZone).OrderBy(x => random.Next()).FirstOrDefault();
+            var plantSpawn = MapManager.Instance.CurrentMap.SpawnPoints.Where(spawn => spawn.SpawnUsedBy != null && spawn.IsInBombZone).OrderBy(x => random.Next()).FirstOrDefault();
 
             if(plantSpawn == null)
             {
@@ -103,11 +106,11 @@ namespace CS2Retake.Manager
 
             plantedBomb.BombTicking = true;
 
-            //var bombPlantedEventPtr = NativeAPI.CreateEvent("bomb_planted", false);
-            //NativeAPI.SetEventPlayerController(bombPlantedEventPtr, "userid", player.Handle);
-            //NativeAPI.SetEventInt(bombPlantedEventPtr, "site", plantedBomb.BombSite);
+            var bombPlantedEventPtr = NativeAPI.CreateEvent("bomb_planted", false);
+            NativeAPI.SetEventPlayerController(bombPlantedEventPtr, "userid", player.Handle);
+            NativeAPI.SetEventInt(bombPlantedEventPtr, "site", plantedBomb.BombSite);
             //NativeAPI.SetEventEntity(bombPlantedEventPtr, "userid_pawn", player.PlayerPawn.Value.Handle);
-            //NativeAPI.FireEvent(bombPlantedEventPtr, false);
+            NativeAPI.FireEvent(bombPlantedEventPtr, false);
            
         }
 

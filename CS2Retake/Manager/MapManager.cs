@@ -16,7 +16,7 @@ namespace CS2Retake.Manager
 {
     public class MapManager
     {
-        private static MapManager _instance;
+        private static MapManager? _instance = null;
         public string ModuleName { get; set; }
         public MapEntity CurrentMap { get; set; }
 
@@ -27,13 +27,17 @@ namespace CS2Retake.Manager
 
         
 
-        public static MapManager GetInstance()
+        public static MapManager Instance
         {
-            if (_instance == null)
+            get
             {
-                _instance = new MapManager();
+                if (_instance == null)
+                {
+                    _instance = new MapManager();
+                }
+                return _instance;
             }
-            return _instance;
+            
         }
 
         private MapManager() { }
