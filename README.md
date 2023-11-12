@@ -8,11 +8,11 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 | Command         | Parameter                                  | Description                                                           | Permissions                         |
 |-----------------|--------------------------------------------|-----------------------------------------------------------------------|-------------------------------------|
 | !retakeninfo    |                                            | prints the plugin information                                         |                                     |
-| !retakespawn    | <index integer>                            | teleports the player to the given spawn index                         | @cs2retake/admin, @cs2retake/editor |
+| !retakespawn    | <index (integer)>                          | teleports the player to the given spawn index                         | @cs2retake/admin, @cs2retake/editor |
 | !retakewrite    |                                            | writes the spawns of the current map to the corresponding map config  | @cs2retake/admin, @cs2retake/editor |
 | !retakeread     |                                            | reads the spawns of the current map from the corresponding map config | @cs2retake/admin, @cs2retake/editor |
 | !retakescramble |                                            | scrambles the teams instantly                                         | @css/generic, @cs2retake/admin      |
-| !retaketeleport | <X float> <Y float> <Z float>              | teleports player to the given coordinates                             | @cs2retake/admin, @cs2retake/editor |
+| !retaketeleport | <X (float)> <Y (float)> <Z (float)>        | teleports player to the given coordinates                             | @cs2retake/admin, @cs2retake/editor |
 | !retakeaddspawn | <2/3 - 2 = T; 3 = CT> <0/1 - 0 = A; 1 = B> | creates a new spawn                                                   | @cs2retake/admin, @cs2retake/editor |
   
 ---
