@@ -25,9 +25,10 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [x] player spawn in spawnpoints 
 - [x] scramble teams
 - [x] basic autoplant 
-- [ ] assigning permissions for the commands
+- [x] assigning permissions for the commands
 - [ ] weapon assign system
-- [ ] auto assign teams
+- [ ] auto assign teams -> deny choosing team -> switch team automatically
+- [ ] on ct win -> switch cts to t and the ts to ct
 - [ ] spawn loading system -> verify loading
 
 ---
