@@ -8,6 +8,7 @@ using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Entity;
 using CS2Retake.Manager;
 using CS2Retake.Utils;
+using System.Security.Cryptography.X509Certificates;
 
 namespace CS2Retake
 {
@@ -34,8 +35,10 @@ namespace CS2Retake
 
             this.RegisterListener<Listeners.OnMapStart>(mapname => this.OnMapStart(mapname));
 
+            this.RegisterEventHandler<EventRoundFreezeEnd>(OnRoundFreezeEnd);
+            this.RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
+            this.RegisterEventHandler<EventCsPreRestart>(OnCsPreRestart);
         }
-
 
 
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
@@ -188,7 +191,6 @@ namespace CS2Retake
 
             MapManager.GetInstance().AddSpawn(player, (CsTeam)team, (BombSiteEnum)bombSite);
         }
-        
 
         [GameEventHandler]
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
@@ -213,9 +215,17 @@ namespace CS2Retake
         }
 
         [GameEventHandler]
-        private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
+        private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
             RetakeManager.GetInstance().PlantBomb();
+
+            return HookResult.Continue;
+        }
+
+        [GameEventHandler]
+        private HookResult OnCsPreRestart(EventCsPreRestart @event, GameEventInfo info)
+        {
+            MapManager.GetInstance().ResetForNextRound(false);
 
             return HookResult.Continue;
         }
