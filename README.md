@@ -26,13 +26,13 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [ ] assigning permissions for the commands
 - [ ] weapon assign system
 - [ ] auto assign teams
-- [ ] auto plant -> fire bomb_planted event (
 - [ ] spawn loading system -> verify loading
 
 ---
 # todo - future releases:  
 - [ ] config system
 - [ ] editor system for spawns
+- [ ] auto plant -> fire bomb_planted event
 
 
 
