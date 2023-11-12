@@ -37,6 +37,7 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [ ] editor system for spawns
 - [ ] auto plant -> fire bomb_planted event
 - [ ] modular weapon assign system
+- [ ] change scramble command to do the scramble after round ends and before round starts
 
 
 
