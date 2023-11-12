@@ -103,11 +103,12 @@ namespace CS2Retake.Manager
 
             plantedBomb.BombTicking = true;
 
-            //var bombPlantedEventPtr = NativeAPI.CreateEvent("bomb_planted", true);
+            //var bombPlantedEventPtr = NativeAPI.CreateEvent("bomb_planted", false);
             //NativeAPI.SetEventPlayerController(bombPlantedEventPtr, "userid", player.Handle);
             //NativeAPI.SetEventInt(bombPlantedEventPtr, "site", plantedBomb.BombSite);
+            //NativeAPI.SetEventEntity(bombPlantedEventPtr, "userid_pawn", player.PlayerPawn.Value.Handle);
             //NativeAPI.FireEvent(bombPlantedEventPtr, false);
-            
+           
         }
 
         public void ConfigureForRetake()
