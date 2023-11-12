@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
+using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
@@ -44,16 +45,11 @@ namespace CS2Retake
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
         public void OnCommandInfo(CCSPlayerController? player, CommandInfo command)
         {
-            if (player == null)
-            {
-                this.Log("Command has been called by the server.");
-                return;
-            }
-
             command.ReplyToCommand(PluginInfo());
         }
 
         [ConsoleCommand("css_retakespawn", "This command teleports the player to a spawn with the given index in the args")]
+        [RequiresPermissions("@cs2retake/admin", "@cs2retake/editor")]
         public void OnCommandSpawn(CCSPlayerController? player, CommandInfo command)
         {
             if (player == null)
@@ -84,25 +80,29 @@ namespace CS2Retake
         }
 
         [ConsoleCommand("css_retakewrite", "This command writes the spawns for the current map")]
+        [RequiresPermissions("@cs2retake/admin", "@cs2retake/editor")]
         public void OnCommandWrite(CCSPlayerController? player, CommandInfo command)
         {
             MapManager.GetInstance().CurrentMap.WriteSpawns();
         }
 
         [ConsoleCommand("css_retakeread", "This command reads the spawns for the current map")]
+        [RequiresPermissions("@cs2retake/admin", "@cs2retake/editor")]
         public void OnCommandRead(CCSPlayerController? player, CommandInfo command)
         {
             MapManager.GetInstance().CurrentMap.ReadSpawns();
             this.Log($"{MapManager.GetInstance().CurrentMap.SpawnPoints.Count} spawnpoints read");
         }
 
-        [ConsoleCommand("css_retakescramble", "This command reads the spawns for the current map")]
+        [ConsoleCommand("css_retakescramble", "This command scrambles the teams")]
+        [RequiresPermissions("@css/generic", "@cs2retake/admin")]
         public void OnCommandScramble(CCSPlayerController? player, CommandInfo command)
         {
             RetakeManager.GetInstance().ScrambleTeams();
         }
 
         [ConsoleCommand("css_retaketeleport", "This command teleports the player to the given coordinates")]
+        [RequiresPermissions("@cs2retake/admin", "@cs2retake/editor")]
         public void OnCommandTeleport(CCSPlayerController? player, CommandInfo command)
         {
             if (player == null)
@@ -145,6 +145,7 @@ namespace CS2Retake
         }
 
         [ConsoleCommand("css_retakeaddspawn", "This command adds a new spawn to the current map")]
+        [RequiresPermissions("@cs2retake/admin", "@cs2retake/editor")]
         public void OnCommandAdd(CCSPlayerController? player, CommandInfo command)
         {
             if (player == null)
