@@ -193,28 +193,6 @@ namespace CS2Retake
             MapManager.Instance.AddSpawn(player, (CsTeam)team, (BombSiteEnum)bombSite);
         }
 
-
-        [ConsoleCommand("css_retakebomb", "This command plants the bomb on a spawn with the given guid")]
-        [RequiresPermissions("@cs2retake/admin")]
-        public void OnCommandBomb(CCSPlayerController? player, CommandInfo command)
-        {
-           
-            if (command.ArgCount != 2)
-            {
-                this.Log($"ArgCount: {command.ArgCount} - ArgString: {command.ArgString}");
-                command.ReplyToCommand($"One argument with a valid spawn index is needed! Example: !retakebomb <spawn-id (guid)>");
-                return;
-            }
-
-            if (!Guid.TryParse(command.ArgByIndex(1), out Guid spawnId))
-            {
-                this.Log("Argument index not a valid guid!");
-                return;
-            }
-
-            RetakeManager.Instance.PlantBomb(spawnId);
-        }
-
         [GameEventHandler]
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
@@ -289,6 +267,21 @@ namespace CS2Retake
         private string PluginInfo()
         {
             return $"Plugin: {this.ModuleName} - Version: {this.ModuleVersion} by {this.ModuleAuthor}";
+        }
+
+        private void PrintToPlayerOrServer(string message, CCSPlayerController? player = null)
+        {
+            message = $"[{ChatColors.Gold}{this.ModuleName}{ChatColors.White}] " + message;
+
+            if (player != null)
+            {
+                player.PrintToConsole(message);
+                player.PrintToChat(message);
+            }
+            else
+            {
+                this.Log(message);
+            }
         }
 
         private void Log(string message)
