@@ -24,18 +24,18 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [x] creating, saving and reading spawns
 - [x] player spawn in spawnpoints 
 - [x] scramble teams
-- [x] basic autoplant 
+- [x] basic autoplant (fast plant, player needs to plant himself) 
 - [x] assigning permissions for the commands
 - [ ] weapon assign system
 - [ ] auto assign teams -> deny choosing team -> switch team automatically
 - [ ] on ct win -> switch cts to t and the ts to ct
-- [ ] spawn loading system -> verify loading
+- [x] spawn loading system -> verify loading
 
 ---
 # todo - future releases:  
 - [ ] config system
 - [ ] editor system for spawns
-- [ ] auto plant -> fire bomb_planted event
+- [ ] auto plant -> in a way that the bomb is defusable xD
 - [ ] modular weapon assign system
 - [ ] change scramble command to do the scramble after round ends and before round starts
 
