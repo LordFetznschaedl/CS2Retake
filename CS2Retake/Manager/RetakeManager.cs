@@ -55,6 +55,7 @@ namespace CS2Retake.Manager
             }
         }
 
+        public CCSPlayerController Player { get; set; }
 
         public void PlantBomb()
         {
@@ -77,27 +78,12 @@ namespace CS2Retake.Manager
                 return;
             }
 
-            //player.GiveNamedItem("weapon_c4");
+            this.Player = player;
 
-            //var c4list = Utilities.FindAllEntitiesByDesignerName<CC4>("weapon_c4");
+            player.GiveNamedItem("weapon_c4");
 
 
-            //if (!c4list.Any())
-            //{
-            //    return;
-            //}
-
-            //var c4 = c4list.FirstOrDefault();
-            //if (c4 == null)
-            //{ return; }
-
-            //c4.StartedArming = true;
-            //c4.IsPlantingViaUse = true;
-            //c4.ArmedTime = 0;
-            //c4.BombPlanted = true;
-
-            
-
+            //c4.BombPlacedAnimation = false;
 
 
 
@@ -153,6 +139,31 @@ namespace CS2Retake.Manager
             ////NativeAPI.SetEventEntity(bombPlantedEventPtr, "userid_pawn", player.PlayerPawn.Value.Handle);
             //NativeAPI.FireEvent(bombPlantedEventPtr, false);
 
+
+        }
+
+        public void PlantBombFinish()
+        {
+            var c4list = Utilities.FindAllEntitiesByDesignerName<CC4>("weapon_c4");
+
+
+            if (!c4list.Any())
+            {
+                return;
+            }
+
+            var c4 = c4list.FirstOrDefault();
+            if (c4 == null)
+            {
+                return;
+            }
+
+            c4.BombPlacedAnimation = false;
+            c4.ArmedTime = 0f;
+
+            //c4.IsPlantingViaUse = true;
+            //c4.StartedArming = true;
+            //c4.BombPlanted = true;
 
         }
 

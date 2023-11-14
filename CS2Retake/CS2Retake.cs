@@ -39,6 +39,7 @@ namespace CS2Retake
             this.RegisterEventHandler<EventRoundFreezeEnd>(OnRoundFreezeEnd);
             this.RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
             this.RegisterEventHandler<EventCsPreRestart>(OnCsPreRestart);
+            this.RegisterEventHandler<EventBombBeginplant>(OnBombBeginPlant);
         }
 
 
@@ -220,6 +221,14 @@ namespace CS2Retake
         private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
             RetakeManager.Instance.PlantBomb();
+
+            return HookResult.Continue;
+        }
+
+        [GameEventHandler]
+        private HookResult OnBombBeginPlant(EventBombBeginplant @event, GameEventInfo info)
+        {
+            RetakeManager.Instance.PlantBombFinish();
 
             return HookResult.Continue;
         }
