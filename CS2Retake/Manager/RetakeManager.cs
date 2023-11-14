@@ -10,6 +10,9 @@ using CounterStrikeSharp.API.Modules.Utils;
 using System.Security.Cryptography;
 using CS2Retake.Entity;
 using CounterStrikeSharp.API.Modules.Entities;
+using CounterStrikeSharp.API.Modules.Timers;
+using System.Timers;
+using CS2Retake.Utils;
 
 namespace CS2Retake.Manager
 {
@@ -17,7 +20,9 @@ namespace CS2Retake.Manager
     {
         private static RetakeManager? _instance = null;
         public string ModuleName { get; set; }
-        public bool BombHasBeenAssigned { get; set; } = false;
+        public bool BombHasBeenPlanted { get; set; } = false;
+
+        private CCSPlayerController _planterPlayerController;
 
         public CCSGameRules? GameRules { get; set; } = null;
 
@@ -55,9 +60,7 @@ namespace CS2Retake.Manager
             }
         }
 
-        public CCSPlayerController Player { get; set; }
-
-        public void PlantBomb()
+        public void GiveBombToPlayerRandomPlayerInBombZone()
         {
 
             var random = new Random();
@@ -70,19 +73,28 @@ namespace CS2Retake.Manager
                 return;
             }
 
-            var player = plantSpawn.SpawnUsedBy;
+            if(plantSpawn.SpawnUsedBy == null)
+            {
+                this.Log($"Spawn is not used by any player");
+                return;
+            }
 
-            if(player == null)
+            this._planterPlayerController = plantSpawn.SpawnUsedBy;
+
+            if(this._planterPlayerController == null)
             {
                 this.Log($"Player that uses the valid plant spawn is null");
                 return;
             }
 
-            this.Player = player;
+            var seconds = 7;
 
-            player.GiveNamedItem("weapon_c4");
+            this._planterPlayerController.GiveNamedItem("weapon_c4");
+
+            MessageUtils.PrintToPlayerOrServer($"YOU HAVE {ChatColors.Darkred}{seconds}{ChatColors.White} SECONDS TO PLANT THE BOMB!", this._planterPlayerController);
 
 
+            _  = new CounterStrikeSharp.API.Modules.Timers.Timer(seconds, this.HasBombBeenPlantedCallback);
             //c4.BombPlacedAnimation = false;
 
 
@@ -142,7 +154,7 @@ namespace CS2Retake.Manager
 
         }
 
-        public void PlantBombFinish()
+        public void FastPlantBomb()
         {
             var c4list = Utilities.FindAllEntitiesByDesignerName<CC4>("weapon_c4");
 
@@ -167,6 +179,18 @@ namespace CS2Retake.Manager
 
         }
 
+        private void HasBombBeenPlantedCallback()
+        {
+            if(!this.BombHasBeenPlanted)
+            {
+                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
+
+                var terroristPlayerList = this.GetPlayerControllers().Where(x => x.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
+                terroristPlayerList.ForEach(x => x.PlayerPawn.Value.CommitSuicide(true, true));
+            }
+        }
+        
+
         public void ConfigureForRetake()
         {   
             Server.ExecuteCommand($"execifexists cs2retake/retake.cfg");
@@ -179,7 +203,7 @@ namespace CS2Retake.Manager
                 
             }
 
-            this.ModifyGameRulesBombPlanted(false);
+            this.BombHasBeenPlanted = false;
         }
 
         private void ModifyGameRulesBombPlanted(bool bombPlanted)

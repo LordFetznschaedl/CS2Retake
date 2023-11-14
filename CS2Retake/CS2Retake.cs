@@ -1,15 +1,12 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
-using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
-using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Entity;
 using CS2Retake.Manager;
 using CS2Retake.Utils;
-using System.Security.Cryptography.X509Certificates;
 
 namespace CS2Retake
 {
@@ -25,6 +22,7 @@ namespace CS2Retake
             this.Log(PluginInfo());
             this.Log(this.ModuleDescription);
 
+            MessageUtils.ModuleName = this.ModuleName;
             RetakeManager.Instance.ModuleName= this.ModuleName;
             MapManager.Instance.ModuleName = this.ModuleName;
             WeaponManager.Instance.ModuleName = this.ModuleName;
@@ -34,12 +32,15 @@ namespace CS2Retake
                 this.OnMapStart(Server.MapName);
             }
 
+            _ = new CounterStrikeSharp.API.Modules.Timers.Timer(7 * 60, MessageUtils.ThankYouMessage, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
+
             this.RegisterListener<Listeners.OnMapStart>(mapname => this.OnMapStart(mapname));
 
             this.RegisterEventHandler<EventRoundFreezeEnd>(OnRoundFreezeEnd);
             this.RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
             this.RegisterEventHandler<EventCsPreRestart>(OnCsPreRestart);
             this.RegisterEventHandler<EventBombBeginplant>(OnBombBeginPlant);
+            this.RegisterEventHandler<EventBombPlanted>(OnBombPlanted);
         }
 
 
@@ -220,7 +221,7 @@ namespace CS2Retake
         [GameEventHandler]
         private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
-            RetakeManager.Instance.PlantBomb();
+            RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
 
             return HookResult.Continue;
         }
@@ -228,7 +229,15 @@ namespace CS2Retake
         [GameEventHandler]
         private HookResult OnBombBeginPlant(EventBombBeginplant @event, GameEventInfo info)
         {
-            RetakeManager.Instance.PlantBombFinish();
+            RetakeManager.Instance.FastPlantBomb();
+
+            return HookResult.Continue;
+        }
+
+        [GameEventHandler]
+        private HookResult OnBombPlanted(EventBombPlanted @event, GameEventInfo info)
+        {
+            RetakeManager.Instance.BombHasBeenPlanted = true;
 
             return HookResult.Continue;
         }
@@ -237,6 +246,7 @@ namespace CS2Retake
         private HookResult OnCsPreRestart(EventCsPreRestart @event, GameEventInfo info)
         {
             MapManager.Instance.ResetForNextRound(false);
+            RetakeManager.Instance.ResetForNextRound();
 
             return HookResult.Continue;
         }
@@ -244,6 +254,8 @@ namespace CS2Retake
         [GameEventHandler]
         private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
         {
+            this.Log("OnRoundEnd");
+
             if (@event.Winner == (int)CsTeam.Terrorist)
             {
                 MapManager.Instance.TerroristRoundWinStreak++;
@@ -276,21 +288,6 @@ namespace CS2Retake
         private string PluginInfo()
         {
             return $"Plugin: {this.ModuleName} - Version: {this.ModuleVersion} by {this.ModuleAuthor}";
-        }
-
-        private void PrintToPlayerOrServer(string message, CCSPlayerController? player = null)
-        {
-            message = $"[{ChatColors.Gold}{this.ModuleName}{ChatColors.White}] " + message;
-
-            if (player != null)
-            {
-                player.PrintToConsole(message);
-                player.PrintToChat(message);
-            }
-            else
-            {
-                this.Log(message);
-            }
         }
 
         private void Log(string message)
