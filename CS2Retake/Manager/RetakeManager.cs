@@ -19,7 +19,7 @@ namespace CS2Retake.Manager
         public string ModuleName { get; set; }
         public bool BombHasBeenAssigned { get; set; } = false;
 
-        public CCSGameRules GameRules { get; set; }
+        public CCSGameRules? GameRules { get; set; } = null;
 
 
         public static RetakeManager Instance
@@ -55,6 +55,7 @@ namespace CS2Retake.Manager
             }
         }
 
+        public CCSPlayerController Player { get; set; }
 
         public void PlantBomb()
         {
@@ -77,50 +78,92 @@ namespace CS2Retake.Manager
                 return;
             }
 
-            player.GiveNamedItem("planted_c4");
+            this.Player = player;
 
-            var plantedBomb = this.FindPlantedBomb();
+            player.GiveNamedItem("weapon_c4");
 
-            if(plantedBomb == null)
+
+            //c4.BombPlacedAnimation = false;
+
+
+
+            //var plantedBomb = this.FindPlantedBomb();
+
+            //if(plantedBomb == null)
+            //{
+            //    this.Log($"No planted bomb was found!");
+            //    return;
+            //}
+
+            //var playerPawn = player.PlayerPawn.Value;
+
+            //if(playerPawn == null)
+            //{
+            //    this.Log($"Player pawn is null");
+            //    return;
+            //}
+            //if(playerPawn.AbsRotation == null)
+            //{
+            //    this.Log($"Player pawn rotation is null");
+            //    return;
+            //}
+            //if(playerPawn.AbsOrigin == null)
+            //{
+            //    this.Log($"Player pawn position is null");
+            //    return;
+            //}
+
+
+            //plantedBomb.Teleport(playerPawn.AbsOrigin, playerPawn.AbsRotation, new Vector(0f, 0f, 0f));
+
+            //this.ModifyGameRulesBombPlanted(true);
+
+            //plantedBomb.BombTicking = true;
+            ////plantedBomb.BombSite = 168 + (int)MapManager.Instance.BombSite;
+
+
+            //var bombTarget = this.GetBombTarget();
+
+            //if (bombTarget == null)
+            //{
+            //    return;
+            //}
+
+            //bombTarget.BombPlantedHere = true;
+
+
+
+            //var bombPlantedEventPtr = NativeAPI.CreateEvent("bomb_planted", false);
+            //NativeAPI.SetEventPlayerController(bombPlantedEventPtr, "userid", player.Handle);
+            //NativeAPI.SetEventInt(bombPlantedEventPtr, "site", 0);
+            ////NativeAPI.SetEventEntity(bombPlantedEventPtr, "userid_pawn", player.PlayerPawn.Value.Handle);
+            //NativeAPI.FireEvent(bombPlantedEventPtr, false);
+
+
+        }
+
+        public void PlantBombFinish()
+        {
+            var c4list = Utilities.FindAllEntitiesByDesignerName<CC4>("weapon_c4");
+
+
+            if (!c4list.Any())
             {
-                this.Log($"No planted bomb was found!");
                 return;
             }
 
-            var playerPawn = player.PlayerPawn.Value;
-
-            if(playerPawn == null)
+            var c4 = c4list.FirstOrDefault();
+            if (c4 == null)
             {
-                this.Log($"Player pawn is null");
                 return;
             }
-            if(playerPawn.AbsRotation == null)
-            {
-                this.Log($"Player pawn rotation is null");
-                return;
-            }
-            if(playerPawn.AbsOrigin == null)
-            {
-                this.Log($"Player pawn position is null");
-                return;
-            }
-            
 
-            plantedBomb.Teleport(playerPawn.AbsOrigin, playerPawn.AbsRotation, new Vector(0f, 0f, 0f));
+            c4.BombPlacedAnimation = false;
+            c4.ArmedTime = 0f;
 
-            this.ModifyGameRulesBombPlanted(true);
-
-            plantedBomb.BombTicking = true;
-
-
-            
-
-            var bombPlantedEventPtr = NativeAPI.CreateEvent("bomb_planted", false);
-            NativeAPI.SetEventPlayerController(bombPlantedEventPtr, "userid", player.Handle);
-            NativeAPI.SetEventInt(bombPlantedEventPtr, "site", plantedBomb.BombSite);
-            //NativeAPI.SetEventEntity(bombPlantedEventPtr, "userid_pawn", player.PlayerPawn.Value.Handle);
-            NativeAPI.FireEvent(bombPlantedEventPtr, false);
-         
+            //c4.IsPlantingViaUse = true;
+            //c4.StartedArming = true;
+            //c4.BombPlanted = true;
 
         }
 
@@ -143,6 +186,8 @@ namespace CS2Retake.Manager
         {
             if (this.GameRules == null)
             {
+                this.Log($"GameRules is null. Fetching gamerule...");
+
                 var gameRuleProxyList = this.GetGameRulesProxies();
 
                 if (gameRuleProxyList.Count > 1)
@@ -180,6 +225,20 @@ namespace CS2Retake.Manager
             }
 
             return gameRulesProxyList;
+        }
+
+        private CBombTarget? GetBombTarget()
+        {
+            var bombTargetList = Utilities.FindAllEntitiesByDesignerName<CBombTarget>("func_bomb_target");
+
+            if (!bombTargetList.Any())
+            {
+                return null;
+            }
+
+            var isBombSiteB = MapManager.Instance.BombSite == Utils.BombSiteEnum.B;
+
+            return bombTargetList.FirstOrDefault(x => x.IsBombSiteB == isBombSiteB);
         }
 
         private List<CCSPlayerController> GetPlayerControllers() 

@@ -45,6 +45,7 @@ namespace CS2Retake.Manager
 
 
             player.GiveNamedItem("weapon_deagle");
+            player.GiveNamedItem("weapon_ak47");
 
         }
 
