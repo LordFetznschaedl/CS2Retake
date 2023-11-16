@@ -11,7 +11,7 @@ using System.Text;
 using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
-namespace CS2Retake.Entity
+namespace CS2Retake.Entities
 {
     public class SpawnPointEntity
     {

@@ -1,17 +1,25 @@
 ﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using CS2Retake.Allocators;
+using CS2Retake.Managers.Base;
+using CS2Retake.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CS2Retake.Manager
+namespace CS2Retake.Managers
 {
-    public class WeaponManager
+    public class WeaponManager : BaseManager
     {
         private static WeaponManager? _instance = null;
-        public string ModuleName { get; set; }
+
+        public string ModuleDirectory { get; set; }
+
+        private WeaponKitAllocator _weaponKitAllocator;
+
+        private RoundTypeEnum _roundType = RoundTypeEnum.Undefined;
 
         public static WeaponManager Instance
         {
@@ -43,18 +51,18 @@ namespace CS2Retake.Manager
                 return;
             }
 
+            if(this._weaponKitAllocator == null) 
+            {
+                this._weaponKitAllocator = new WeaponKitAllocator(this.ModuleDirectory);
+            }
 
-            player.GiveNamedItem("weapon_deagle");
-            player.GiveNamedItem("weapon_ak47");
+            this._weaponKitAllocator.Allocate(player);
 
         }
 
-        private void Log(string message)
+        public override void ResetForNextRound(bool completeReset = true)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"[{this.ModuleName}:{this.GetType().Name}] {message}");
-            Console.ResetColor();
+            
         }
-
     }
 }

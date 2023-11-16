@@ -48,6 +48,11 @@ namespace CS2Retake.Utils
             }
         }
 
+        public static void PrintToChatAll(string message)
+        {
+            Server.PrintToChatAll($"{MessageUtils.PluginPrefix} {message}");
+        }
+
         private static void Log(string message)
         {
             Console.ForegroundColor = ConsoleColor.Green;

@@ -4,8 +4,8 @@ using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Utils;
-using CS2Retake.Entity;
-using CS2Retake.Manager;
+using CS2Retake.Entities;
+using CS2Retake.Managers;
 using CS2Retake.Utils;
 
 namespace CS2Retake
@@ -23,9 +23,7 @@ namespace CS2Retake
             this.Log(this.ModuleDescription);
 
             MessageUtils.ModuleName = this.ModuleName;
-            RetakeManager.Instance.ModuleName= this.ModuleName;
-            MapManager.Instance.ModuleName = this.ModuleName;
-            WeaponManager.Instance.ModuleName = this.ModuleName;
+            WeaponManager.Instance.ModuleDirectory = this.ModuleDirectory;
 
             if (MapManager.Instance.CurrentMap == null)
             {
@@ -78,21 +76,21 @@ namespace CS2Retake
                 return;
             }
 
-            MapManager.Instance.TeleportPlayerToSpawn(player, BombSiteEnum.Undefined ,spawnIndex);
+            MapManager.Instance.TeleportPlayerToSpawn(player, spawnIndex);
         }
 
         [ConsoleCommand("css_retakewrite", "This command writes the spawns for the current map")]
         [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandWrite(CCSPlayerController? player, CommandInfo command)
         {
-            MapManager.Instance.CurrentMap.WriteSpawns();
+            MapManager.Instance.CurrentMap.SaveSpawns();
         }
 
         [ConsoleCommand("css_retakeread", "This command reads the spawns for the current map")]
         [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandRead(CCSPlayerController? player, CommandInfo command)
         {
-            MapManager.Instance.CurrentMap.ReadSpawns();
+            MapManager.Instance.CurrentMap.LoadSpawns();
             this.Log($"{MapManager.Instance.CurrentMap.SpawnPoints.Count} spawnpoints read");
         }
 
@@ -198,11 +196,6 @@ namespace CS2Retake
         [GameEventHandler]
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
-            if (MapManager.Instance.BombSite == BombSiteEnum.Undefined) 
-            { 
-                MapManager.Instance.RandomBombSite();
-            }
-
             if (@event == null)
             {
                 return HookResult.Continue;
@@ -212,7 +205,7 @@ namespace CS2Retake
                 return HookResult.Continue;
             }
 
-            MapManager.Instance.TeleportPlayerToSpawn(@event.Userid, MapManager.Instance.BombSite);
+            MapManager.Instance.TeleportPlayerToSpawn(@event.Userid);
             WeaponManager.Instance.AssignWeapon(@event.Userid);
 
             return HookResult.Continue;
@@ -281,7 +274,7 @@ namespace CS2Retake
         public void OnMapStart(string mapName)
         {
             this.Log($"Map changed to {mapName}");
-            MapManager.Instance.CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory, this.ModuleName);
+            MapManager.Instance.CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory);
             RetakeManager.Instance.ConfigureForRetake();
         }
 

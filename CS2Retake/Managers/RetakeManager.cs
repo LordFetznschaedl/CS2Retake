@@ -8,18 +8,18 @@ using System.Text;
 using System.Threading.Tasks;
 using CounterStrikeSharp.API.Modules.Utils;
 using System.Security.Cryptography;
-using CS2Retake.Entity;
+using CS2Retake.Entities;
 using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Timers;
 using System.Timers;
 using CS2Retake.Utils;
+using CS2Retake.Managers.Base;
 
-namespace CS2Retake.Manager
+namespace CS2Retake.Managers
 {
-    public class RetakeManager
+    public class RetakeManager : BaseManager
     {
         private static RetakeManager? _instance = null;
-        public string ModuleName { get; set; }
         public bool BombHasBeenPlanted { get; set; } = false;
 
         private CCSPlayerController _planterPlayerController;
@@ -196,15 +196,7 @@ namespace CS2Retake.Manager
             Server.ExecuteCommand($"execifexists cs2retake/retake.cfg");
         }
 
-        public void ResetForNextRound(bool completeReset = true)
-        {
-            if (completeReset)
-            {
-                
-            }
-
-            this.BombHasBeenPlanted = false;
-        }
+        
 
         private void ModifyGameRulesBombPlanted(bool bombPlanted)
         {
@@ -251,20 +243,6 @@ namespace CS2Retake.Manager
             return gameRulesProxyList;
         }
 
-        private CBombTarget? GetBombTarget()
-        {
-            var bombTargetList = Utilities.FindAllEntitiesByDesignerName<CBombTarget>("func_bomb_target");
-
-            if (!bombTargetList.Any())
-            {
-                return null;
-            }
-
-            var isBombSiteB = MapManager.Instance.BombSite == Utils.BombSiteEnum.B;
-
-            return bombTargetList.FirstOrDefault(x => x.IsBombSiteB == isBombSiteB);
-        }
-
         private List<CCSPlayerController> GetPlayerControllers() 
         {
             var playerList = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller").ToList();
@@ -290,12 +268,14 @@ namespace CS2Retake.Manager
             return plantedBombList.FirstOrDefault();
         }
 
-        private void Log(string message)
+        public override void ResetForNextRound(bool completeReset = true)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"[{this.ModuleName}:{this.GetType().Name}] {message}");
-            Console.ResetColor();
-        }
+            if (completeReset)
+            {
 
+            }
+
+            this.BombHasBeenPlanted = false;
+        }
     }
 }

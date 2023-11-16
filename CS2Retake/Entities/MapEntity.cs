@@ -10,7 +10,7 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using CounterStrikeSharp.API.Core;
 
-namespace CS2Retake.Entity
+namespace CS2Retake.Entities
 {
     public class MapEntity
     {
@@ -20,21 +20,19 @@ namespace CS2Retake.Entity
         public Queue<ulong> PlayerQueue { get; set; } = new Queue<ulong>();
 
         private string _moduleDirectory { get; set; }
-        private string _moduleName { get; set; }
 
 
-        public MapEntity(string mapName, string moduleDirectoy, string moduleName)
+        public MapEntity(string mapName, string moduleDirectoy)
         {
             this.MapName = mapName;
             this._moduleDirectory = moduleDirectoy;
-            this._moduleName = moduleName;
         }
 
         public SpawnPointEntity? GetRandomSpawn(CsTeam team, BombSiteEnum bombSite, bool hasToBeInBombZone)
         {
             if(!this.SpawnPoints.Any()) 
             {
-                this.ReadSpawns();
+                this.LoadSpawns();
             }
 
             var spawnChoices = this.SpawnPoints.Where(x => x.Team == team && x.SpawnUsedBy == null && x.BombSite == bombSite).ToList();
@@ -56,9 +54,16 @@ namespace CS2Retake.Entity
 
 
 
-        public void ReadSpawns()
+        public void LoadSpawns()
         {
-            var jsonSpawnPoints = File.ReadAllText(this.GetPath());
+            var path = this.GetPath();
+
+            if(!File.Exists(path)) 
+            {
+                return;
+            }
+
+            var jsonSpawnPoints = File.ReadAllText(path);
 
             if(string.IsNullOrEmpty(jsonSpawnPoints))
             {
@@ -68,7 +73,7 @@ namespace CS2Retake.Entity
             this.SpawnPoints = JsonSerializer.Deserialize<List<SpawnPointEntity>>(jsonSpawnPoints) ?? new List<SpawnPointEntity>();
         }
 
-        public void WriteSpawns() 
+        public void SaveSpawns() 
         {
             this.SpawnPoints.Where(spawnPoint => spawnPoint.SpawnId == Guid.Empty).ToList().ForEach(spawnPoint => spawnPoint.SpawnId = Guid.NewGuid());
 
@@ -97,7 +102,7 @@ namespace CS2Retake.Entity
         private void Log(string message)
         {
             Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"[{this._moduleName}:{this.GetType().Name}] {message}");
+            Console.WriteLine($"[{MessageUtils.ModuleName}:{this.GetType().Name}] {message}");
             Console.ResetColor();
         }
     }

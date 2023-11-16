@@ -2,7 +2,8 @@
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
-using CS2Retake.Entity;
+using CS2Retake.Entities;
+using CS2Retake.Managers.Base;
 using CS2Retake.Utils;
 using System;
 using System.Collections.Generic;
@@ -12,15 +13,14 @@ using System.Text;
 using System.Threading.Tasks;
 using System.Timers;
 
-namespace CS2Retake.Manager
+namespace CS2Retake.Managers
 {
-    public class MapManager
+    public class MapManager : BaseManager
     {
         private static MapManager? _instance = null;
-        public string ModuleName { get; set; }
         public MapEntity CurrentMap { get; set; }
 
-        public BombSiteEnum BombSite { get; set; } = BombSiteEnum.Undefined;
+        private BombSiteEnum _bombSite { get; set; } = BombSiteEnum.Undefined;
         public bool HasToBeInBombZone { get; set; } = true;
 
         public int TerroristRoundWinStreak { get; set; } = 0;
@@ -45,7 +45,7 @@ namespace CS2Retake.Manager
 
         public void RandomBombSite()
         {
-            this.BombSite = (BombSiteEnum)new Random().Next(0, 2);
+            this._bombSite = (BombSiteEnum)new Random().Next(0, 2);
         }
 
         public void AddSpawn(CCSPlayerController player, CsTeam team, BombSiteEnum bombSite)
@@ -76,13 +76,18 @@ namespace CS2Retake.Manager
             player.PrintToChat($"SpawnPoint added! BombSite: {bombSite} - Team: {team} - isInBombZone: {isInBombZone}");
         }
 
-        public void TeleportPlayerToSpawn(CCSPlayerController player, BombSiteEnum bombSite, int? spawnIndex = null)
+        public void TeleportPlayerToSpawn(CCSPlayerController player, int? spawnIndex = null)
         {
+            if(this._bombSite == BombSiteEnum.Undefined)
+            {
+                this.RandomBombSite();
+            }
+
             var team = (CsTeam)player.TeamNum;
             SpawnPointEntity? spawn;
             if (!spawnIndex.HasValue)
             {
-                spawn = this.CurrentMap.GetRandomSpawn(team, bombSite, team == CsTeam.CounterTerrorist ? false : this.HasToBeInBombZone);
+                spawn = this.CurrentMap.GetRandomSpawn(team, this._bombSite, team == CsTeam.CounterTerrorist ? false : this.HasToBeInBombZone);
 
                 if (team == CsTeam.Terrorist && this.HasToBeInBombZone)
                 {
@@ -113,7 +118,7 @@ namespace CS2Retake.Manager
             
         }
 
-        public void ResetForNextRound(bool completeReset = true)
+        public override void ResetForNextRound(bool completeReset = true)
         {
             if(completeReset)
             {
@@ -122,13 +127,6 @@ namespace CS2Retake.Manager
             }
             
             this.HasToBeInBombZone = true;
-        }
-
-        private void Log(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"[{this.ModuleName}:{this.GetType().Name}] {message}");
-            Console.ResetColor();
         }
     }
 }
