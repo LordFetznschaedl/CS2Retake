@@ -1,5 +1,6 @@
 ﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using CS2Retake.Allocators.Exceptions;
 using CS2Retake.Entities;
 using CS2Retake.Utils;
 using System;
@@ -23,11 +24,11 @@ namespace CS2Retake.Allocators
             this._moduleDirectory = moduleDirectoy;
         }
 
-        public bool Allocate(CCSPlayerController player)
+        public (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) Allocate(CCSPlayerController player)
         {
-            if(player == null) 
+            if(player == null || !player.IsValid) 
             {
-                return false;
+                throw new AllocatorException("Player is null");
             }
 
             if(!this._weaponKitEntityList.Any())
@@ -35,9 +36,22 @@ namespace CS2Retake.Allocators
                 this.LoadWeaponKits();
             }
 
-            var availableWeaponKitsForPlayer = this._weaponKitEntityList.Where(x => (x.Team == CsTeam.None || x.Team == (CsTeam)player.TeamNum));
+            var availableWeaponKitsForPlayer = this._weaponKitEntityList.Where(x => (x.Team == CsTeam.None || x.Team == (CsTeam)player.TeamNum) && !x.KitLimitReached);
 
-            return true;
+            if(!availableWeaponKitsForPlayer.Any())
+            {
+                throw new AllocatorException("No Available Weapon Kits");
+            }
+
+            var random = new Random();
+            var weaponKit = this._weaponKitEntityList.OrderBy(x => random.Next()).FirstOrDefault();
+
+            if(weaponKit == null) 
+            {
+                throw new AllocatorException("Assigned Weapon Kit is null");
+            }
+
+            return (weaponKit.PrimaryWeapon, weaponKit.SecondaryWeapon, weaponKit.Kevlar, weaponKit.DefuseKit && (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
         }
 
         private void LoadWeaponKits()

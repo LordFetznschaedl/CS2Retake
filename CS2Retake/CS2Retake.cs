@@ -206,6 +206,7 @@ namespace CS2Retake
             }
 
             MapManager.Instance.TeleportPlayerToSpawn(@event.Userid);
+            WeaponManager.Instance.RemoveWeapons(@event.Userid);
             WeaponManager.Instance.AssignWeapon(@event.Userid);
 
             return HookResult.Continue;
@@ -241,6 +242,8 @@ namespace CS2Retake
             MapManager.Instance.ResetForNextRound(false);
             RetakeManager.Instance.ResetForNextRound();
 
+            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.Red}{MapManager.Instance.BombSite}");
+
             return HookResult.Continue;
         }
 
@@ -252,21 +255,24 @@ namespace CS2Retake
             if (@event.Winner == (int)CsTeam.Terrorist)
             {
                 MapManager.Instance.TerroristRoundWinStreak++;
-                Server.PrintToChatAll($"[{ChatColors.Gold}CS2Retake{ChatColors.White}] The Terrorists have won {ChatColors.Red}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
+                MessageUtils.PrintToChatAll($"The Terrorists have won {ChatColors.Red}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
             }
             else
             {
+                MessageUtils.PrintToChatAll($"The Counter-Terrorists have won!");
                 MapManager.Instance.TerroristRoundWinStreak = 0;
+                RetakeManager.Instance.SwitchTeams();
             }
 
             if(MapManager.Instance.TerroristRoundWinStreak == 5)
             {
-                Server.PrintToChatAll($"[{ChatColors.Gold}CS2Retake{ChatColors.White}] Teams will be scrambled now!");
+                MessageUtils.PrintToChatAll($"Teams will be scrambled now!");
                 MapManager.Instance.TerroristRoundWinStreak = 0;
                 RetakeManager.Instance.ScrambleTeams();
             }
 
             MapManager.Instance.ResetForNextRound();
+            WeaponManager.Instance.ResetForNextRound();
 
             return HookResult.Continue;
         }

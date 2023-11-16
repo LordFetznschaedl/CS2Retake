@@ -60,6 +60,11 @@ namespace CS2Retake.Managers
             }
         }
 
+        public void SwitchTeams()
+        {
+
+        }
+
         public void GiveBombToPlayerRandomPlayerInBombZone()
         {
 

@@ -20,7 +20,7 @@ namespace CS2Retake.Managers
         private static MapManager? _instance = null;
         public MapEntity CurrentMap { get; set; }
 
-        private BombSiteEnum _bombSite { get; set; } = BombSiteEnum.Undefined;
+        public BombSiteEnum BombSite { get; private set; } = BombSiteEnum.Undefined;
         public bool HasToBeInBombZone { get; set; } = true;
 
         public int TerroristRoundWinStreak { get; set; } = 0;
@@ -45,7 +45,7 @@ namespace CS2Retake.Managers
 
         public void RandomBombSite()
         {
-            this._bombSite = (BombSiteEnum)new Random().Next(0, 2);
+            this.BombSite = (BombSiteEnum)new Random().Next(0, 2);
         }
 
         public void AddSpawn(CCSPlayerController player, CsTeam team, BombSiteEnum bombSite)
@@ -78,7 +78,7 @@ namespace CS2Retake.Managers
 
         public void TeleportPlayerToSpawn(CCSPlayerController player, int? spawnIndex = null)
         {
-            if(this._bombSite == BombSiteEnum.Undefined)
+            if(this.BombSite == BombSiteEnum.Undefined)
             {
                 this.RandomBombSite();
             }
@@ -87,7 +87,7 @@ namespace CS2Retake.Managers
             SpawnPointEntity? spawn;
             if (!spawnIndex.HasValue)
             {
-                spawn = this.CurrentMap.GetRandomSpawn(team, this._bombSite, team == CsTeam.CounterTerrorist ? false : this.HasToBeInBombZone);
+                spawn = this.CurrentMap.GetRandomSpawn(team, this.BombSite, team == CsTeam.CounterTerrorist ? false : this.HasToBeInBombZone);
 
                 if (team == CsTeam.Terrorist && this.HasToBeInBombZone)
                 {

@@ -6,11 +6,10 @@ using System.Threading.Tasks;
 
 namespace CS2Retake.Utils
 {
-    public enum RoundTypeEnum
+    public enum KevlarEnum
     {
-        Undefined = -1,
-        Pistol = 0,
-        Mid = 1,
-        FullBuy = 2,
+        None = 0,
+        Kevlar = 1,
+        KevlarHelmet = 2,
     }
 }
