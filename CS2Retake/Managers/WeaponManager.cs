@@ -60,7 +60,7 @@ namespace CS2Retake.Managers
             (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) allocationData;
             try
             {
-                allocationData = this._weaponKitAllocator.Allocate(player);
+                allocationData = this._weaponKitAllocator.Allocate(player, this.RoundType);
             }
             catch(AllocatorException ex)
             {

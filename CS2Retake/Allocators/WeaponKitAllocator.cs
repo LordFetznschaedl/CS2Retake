@@ -1,4 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Allocators.Exceptions;
 using CS2Retake.Entities;
@@ -24,7 +25,7 @@ namespace CS2Retake.Allocators
             this._moduleDirectory = moduleDirectoy;
         }
 
-        public (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) Allocate(CCSPlayerController player)
+        public (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) Allocate(CCSPlayerController player, RoundTypeEnum roundType = RoundTypeEnum.Undefined)
         {
             if(player == null || !player.IsValid) 
             {
@@ -36,7 +37,12 @@ namespace CS2Retake.Allocators
                 this.LoadWeaponKits();
             }
 
-            var availableWeaponKitsForPlayer = this._weaponKitEntityList.Where(x => (x.Team == CsTeam.None || x.Team == (CsTeam)player.TeamNum) && !x.KitLimitReached);
+            var availableWeaponKitsForPlayer = this.GetWeaponKitEntities((CsTeam)player.TeamNum, roundType);
+
+            if(!availableWeaponKitsForPlayer.Any())
+            {
+                availableWeaponKitsForPlayer = this.GetWeaponKitEntities((CsTeam)player.TeamNum, RoundTypeEnum.Undefined);
+            }
 
             if(!availableWeaponKitsForPlayer.Any())
             {
@@ -50,6 +56,8 @@ namespace CS2Retake.Allocators
             {
                 throw new AllocatorException("Assigned Weapon Kit is null");
             }
+
+            weaponKit.KitUsedAmount++;
 
             return (weaponKit.PrimaryWeapon, weaponKit.SecondaryWeapon, weaponKit.Kevlar, weaponKit.DefuseKit && (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
         }
@@ -110,8 +118,9 @@ namespace CS2Retake.Allocators
             }
 
             path = Path.Join(path, $"weaponKits.json");
-
             return path;
         }
+
+        private List<WeaponKitEntity> GetWeaponKitEntities(CsTeam team, RoundTypeEnum roundType) => this._weaponKitEntityList.Where(x => (x.Team == CsTeam.None || x.Team == team) && !x.KitLimitReached && roundType == x.RoundType).ToList();
     }
 }
