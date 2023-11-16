@@ -200,10 +200,19 @@ namespace CS2Retake
             {
                 return HookResult.Continue;
             }
-            if(!@event.Userid.IsValid)
+            if(@event.Userid == null || !@event.Userid.IsValid)
             {
                 return HookResult.Continue;
             }
+            if(@event.Userid.PlayerPawn == null || !@event.Userid.PlayerPawn.IsValid)
+            {
+                return HookResult.Continue;
+            }
+            if (@event.Userid.PlayerPawn.Value == null || !@event.Userid.PlayerPawn.Value.IsValid)
+            {
+                return HookResult.Continue;
+            }
+
 
             MapManager.Instance.TeleportPlayerToSpawn(@event.Userid);
             WeaponManager.Instance.RemoveWeapons(@event.Userid);

@@ -59,7 +59,13 @@ namespace CS2Retake.Allocators
 
             weaponKit.KitUsedAmount++;
 
+
             return (weaponKit.PrimaryWeapon, weaponKit.SecondaryWeapon, weaponKit.Kevlar, weaponKit.DefuseKit && (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
+        }
+
+        public void ResetForNextRound()
+        {
+            this._weaponKitEntityList.ForEach(x => x.KitUsedAmount = 0);
         }
 
         private void LoadWeaponKits()
@@ -86,6 +92,7 @@ namespace CS2Retake.Allocators
                     PrimaryWeapon = "weapon_m4a1",
                     SecondaryWeapon = "weapon_hkp2000",
                     Team = CsTeam.CounterTerrorist,
+                    Kevlar = KevlarEnum.Kevlar,
                 });
 
                 this._weaponKitEntityList.Add(new WeaponKitEntity()

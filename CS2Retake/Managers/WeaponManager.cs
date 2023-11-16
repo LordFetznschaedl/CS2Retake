@@ -121,6 +121,7 @@ namespace CS2Retake.Managers
             }
 
             this.RandomRoundType();
+            this._weaponKitAllocator.ResetForNextRound();
         }
     }
 }

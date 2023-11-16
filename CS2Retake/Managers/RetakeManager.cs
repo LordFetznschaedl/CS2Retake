@@ -92,7 +92,7 @@ namespace CS2Retake.Managers
                 return;
             }
 
-            var seconds = 7;
+            var seconds = 5;
 
             this._planterPlayerController.GiveNamedItem("weapon_c4");
 
