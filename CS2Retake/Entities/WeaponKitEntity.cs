@@ -24,6 +24,6 @@ namespace CS2Retake.Entities
         public int KitUsedAmount { get; set; } = 0;
 
         [JsonIgnore]
-        public bool KitLimitReached => this.KitLimit == 0 || this.KitLimit == this.KitUsedAmount;
+        public bool KitLimitReached => this.KitLimit == 0 || this.KitLimit <= this.KitUsedAmount;
     }
 }
