@@ -37,11 +37,19 @@ namespace CS2Retake.Allocators
                 this.LoadWeaponKits();
             }
 
-            var availableWeaponKitsForPlayer = this.GetWeaponKitEntities((CsTeam)player.TeamNum, roundType);
+            var team = (CsTeam)player.TeamNum;
 
-            if(!availableWeaponKitsForPlayer.Any())
+            MessageUtils.PrintToPlayerOrServer($"Team: {team}");
+
+            var availableWeaponKitsForPlayer = this.GetWeaponKitEntities(team, roundType);
+
+            MessageUtils.PrintToPlayerOrServer($"availableWeaponKitsForPlayer: {availableWeaponKitsForPlayer.Count}");
+
+            if (!availableWeaponKitsForPlayer.Any())
             {
-                availableWeaponKitsForPlayer = this.GetWeaponKitEntities((CsTeam)player.TeamNum, RoundTypeEnum.Undefined);
+                availableWeaponKitsForPlayer = this.GetWeaponKitEntities(team, RoundTypeEnum.Undefined);
+
+                MessageUtils.PrintToPlayerOrServer($"availableWeaponKitsForPlayer: {availableWeaponKitsForPlayer.Count}");
             }
 
             if(!availableWeaponKitsForPlayer.Any())
@@ -52,15 +60,18 @@ namespace CS2Retake.Allocators
             var random = new Random();
             var weaponKit = this._weaponKitEntityList.OrderBy(x => random.Next()).FirstOrDefault();
 
-            if(weaponKit == null) 
+            
+
+            if (weaponKit == null) 
             {
                 throw new AllocatorException("Assigned Weapon Kit is null");
             }
+            MessageUtils.PrintToPlayerOrServer($"weaponKit: {weaponKit.KitName}");
 
             weaponKit.KitUsedAmount++;
 
 
-            return (weaponKit.PrimaryWeapon, weaponKit.SecondaryWeapon, weaponKit.Kevlar, weaponKit.DefuseKit && (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
+            return (weaponKit.PrimaryWeapon, weaponKit.SecondaryWeapon, weaponKit.Kevlar, weaponKit.DefuseKit && team == CsTeam.CounterTerrorist);
         }
 
         public void ResetForNextRound()
@@ -128,6 +139,16 @@ namespace CS2Retake.Allocators
             return path;
         }
 
-        private List<WeaponKitEntity> GetWeaponKitEntities(CsTeam team, RoundTypeEnum roundType) => this._weaponKitEntityList.Where(x => (x.Team == CsTeam.None || x.Team == team) && !x.KitLimitReached && roundType == x.RoundType).ToList();
+        private List<WeaponKitEntity> GetWeaponKitEntities(CsTeam team, RoundTypeEnum roundType)
+        {
+            var teamKits = this._weaponKitEntityList.Where(x => x.Team == CsTeam.None || x.Team == team).ToList();
+            MessageUtils.PrintToPlayerOrServer($"teamKits: {teamKits.Count}");
+            teamKits = teamKits.Where(x => !x.KitLimitReached).ToList();
+            MessageUtils.PrintToPlayerOrServer($"teamKits: {teamKits.Count}");
+            teamKits = teamKits.Where(x => roundType == x.RoundType).ToList();
+            MessageUtils.PrintToPlayerOrServer($"teamKits: {teamKits.Count}");
+
+            return teamKits;
+        }
     }
 }
