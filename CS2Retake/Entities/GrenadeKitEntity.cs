@@ -9,22 +9,18 @@ using System.Threading.Tasks;
 
 namespace CS2Retake.Entities
 {
-    public class WeaponKitEntity
+    public class GrenadeKitEntity
     {
         public string KitName { get; set; }
-        public string PrimaryWeapon { get; set; }
-        public string SecondaryWeapon { get; set; }
-        public bool DefuseKit { get; set; } = true;
-        public KevlarEnum Kevlar { get; set; } = KevlarEnum.KevlarHelmet;
+
+        public List<GrenadeEnum> GrenadeList { get; set; } = new List<GrenadeEnum>();
 
         //CsTeam.None = Both Teams
         public CsTeam Team { get; set; } = CsTeam.None;
 
-
         public RoundTypeEnum RoundType { get; set; } = RoundTypeEnum.Undefined;
-
-
         public int KitLimit { get; set; } = -1;
+
 
         [JsonIgnore]
         public int KitUsedAmount { get; set; } = 0;

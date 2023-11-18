@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace CS2Retake.Allocators
 {
-    public class WeaponKitAllocator : IAllocator
+    public class WeaponKitAllocator : IWeaponAllocator
     {
         private List<WeaponKitEntity> _weaponKitEntityList = new List<WeaponKitEntity>();
 
@@ -49,7 +49,7 @@ namespace CS2Retake.Allocators
 
             if(!availableWeaponKitsForPlayer.Any())
             {
-                throw new AllocatorException("No Available Weapon Kits");
+                throw new AllocatorException($"No Available Weapon Kits [PlayerTeam: {team}]");
             }
 
             var random = new Random();

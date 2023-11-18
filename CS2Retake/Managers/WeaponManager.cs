@@ -2,11 +2,14 @@
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Allocators;
 using CS2Retake.Allocators.Exceptions;
+using CS2Retake.Allocators.Interfaces;
 using CS2Retake.Managers.Base;
 using CS2Retake.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.Serialization;
+using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -18,7 +21,9 @@ namespace CS2Retake.Managers
 
         public string ModuleDirectory { get; set; }
 
-        private WeaponKitAllocator _weaponKitAllocator;
+        private IAllocator _allocator;
+        private IWeaponAllocator _weaponKitAllocator;
+        private IGrenadeAllocator _grenadeKitAllocator;
 
         public RoundTypeEnum RoundType { get; private set; } = RoundTypeEnum.Undefined;
 
@@ -56,35 +61,57 @@ namespace CS2Retake.Managers
             {
                 this._weaponKitAllocator = new WeaponKitAllocator(this.ModuleDirectory);
             }
+            if(this._grenadeKitAllocator == null)
+            {
+                this._grenadeKitAllocator = new GrenadeKitAllocator(this.ModuleDirectory);
+            }
 
-            (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) allocationData;
+            (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) weaponAllocationData = (string.Empty, string.Empty, KevlarEnum.None, false);
+            List<GrenadeEnum> grenadeAllocationList = new List<GrenadeEnum>();
             try
             {
-                allocationData = this._weaponKitAllocator.Allocate(player, this.RoundType);
+                if (this._allocator != null)
+                {
+                    var allocationData = this._allocator.Allocate(player, this.RoundType);
+                    weaponAllocationData = (allocationData.primaryWeapon, allocationData.secondaryWeapon, allocationData.kevlar, allocationData.kit);
+                    grenadeAllocationList = allocationData.grenades;
+                }
+                else
+                {
+                    if (this._weaponKitAllocator != null)
+                    {
+                        weaponAllocationData = this._weaponKitAllocator.Allocate(player, this.RoundType);
+                    }
+                    if (this._grenadeKitAllocator != null)
+                    {
+                        grenadeAllocationList = this._grenadeKitAllocator.Allocate(player, this.RoundType);
+                    }
+                }
+
             }
             catch(AllocatorException ex)
             {
                 this.Log($"An error happened while assigning the weapons. Message: {ex.Message}");
                 MessageUtils.PrintToPlayerOrServer($"An error occurred while assigning your weapons. Using fallback weapons!");
 
-                allocationData = ("weapon_ssg08", "weapon_p250", KevlarEnum.KevlarHelmet, (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
+                weaponAllocationData = ("weapon_ssg08", "weapon_p250", KevlarEnum.KevlarHelmet, (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
             }
 
-            if(!string.IsNullOrWhiteSpace(allocationData.primaryWeapon))
+            if(!string.IsNullOrWhiteSpace(weaponAllocationData.primaryWeapon))
             {
-                player.GiveNamedItem(allocationData.primaryWeapon);
+                player.GiveNamedItem(weaponAllocationData.primaryWeapon);
             }
-            if (!string.IsNullOrWhiteSpace(allocationData.secondaryWeapon))
+            if (!string.IsNullOrWhiteSpace(weaponAllocationData.secondaryWeapon))
             {
-                player.GiveNamedItem(allocationData.secondaryWeapon);
+                player.GiveNamedItem(weaponAllocationData.secondaryWeapon);
             }
 
-            if (allocationData.kit)
+            if (weaponAllocationData.kit)
             {
                 player.GiveNamedItem("item_cutters");
             }
 
-            switch (allocationData.kevlar)
+            switch (weaponAllocationData.kevlar)
             {
                 case KevlarEnum.Kevlar:
                     player.GiveNamedItem("item_kevlar");
@@ -92,6 +119,17 @@ namespace CS2Retake.Managers
                 case KevlarEnum.KevlarHelmet:
                     player.GiveNamedItem("item_assaultsuit");
                     break;
+            }
+
+            foreach(var grenade in grenadeAllocationList)
+            {
+                var enumMemberValue = EnumUtils.GetEnumMemberAttributeValue(grenade);
+
+                if(!string.IsNullOrWhiteSpace(enumMemberValue))
+                {
+                    player.GiveNamedItem(enumMemberValue);
+                }
+             
             }
         }
 
@@ -126,7 +164,9 @@ namespace CS2Retake.Managers
             }
 
             this.RandomRoundType();
+            this._allocator?.ResetForNextRound();
             this._weaponKitAllocator?.ResetForNextRound();
+            this._grenadeKitAllocator?.ResetForNextRound();
         }
     }
 }

@@ -250,7 +250,7 @@ namespace CS2Retake
             MapManager.Instance.ResetForNextRound(false);
             RetakeManager.Instance.ResetForNextRound();
 
-            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.Red}{MapManager.Instance.BombSite}");
+            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.Darkred}{MapManager.Instance.BombSite}{ChatColors.White} - Roundtype: {ChatColors.Darkred}{WeaponManager.Instance.RoundType}{ChatColors.White}");
 
             return HookResult.Continue;
         }
@@ -263,7 +263,7 @@ namespace CS2Retake
             if (@event.Winner == (int)CsTeam.Terrorist)
             {
                 MapManager.Instance.TerroristRoundWinStreak++;
-                MessageUtils.PrintToChatAll($"The Terrorists have won {ChatColors.Red}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
+                MessageUtils.PrintToChatAll($"The Terrorists have won {ChatColors.Darkred}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
             }
             else
             {
