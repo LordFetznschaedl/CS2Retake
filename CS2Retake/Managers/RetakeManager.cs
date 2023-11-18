@@ -26,6 +26,7 @@ namespace CS2Retake.Managers
 
         public CCSGameRules? GameRules { get; set; } = null;
 
+        public List<CCSPlayerController> PlayerJoinQueue = new List<CCSPlayerController>();
 
         public static RetakeManager Instance
         {
@@ -67,11 +68,25 @@ namespace CS2Retake.Managers
             var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
             var counterTerroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).ToList();
 
-            var random = new Random();
-            var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(terroristPlayers.Count).ToList();
+            var playersInQueue = this.PlayerJoinQueue.Count();
 
-            terroristPlayers.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
+            var activePlayerCount = playersInQueue + terroristPlayers.Count + counterTerroristPlayers.Count;
+
+            var playersNeededInCT = (int)Math.Ceiling((decimal)activePlayerCount / 2);
+
+            var random = new Random();
+            
+            this.PlayerJoinQueue.ForEach(player => player.SwitchTeam(CsTeam.CounterTerrorist));
+
+            playersNeededInCT = playersNeededInCT - this.PlayerJoinQueue.Count();
+
+            var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(terroristPlayers.Count).ToList();
+            var terroristsToSwitch = terroristPlayers.OrderBy(x => random.Next()).Take(playersNeededInCT).ToList();
+
+            terroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
             counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
+
+            this.PlayerJoinQueue.Clear();
         }
 
         public void GiveBombToPlayerRandomPlayerInBombZone()
@@ -195,7 +210,9 @@ namespace CS2Retake.Managers
 
         private void HasBombBeenPlantedCallback()
         {
-            if(!this.BombHasBeenPlanted)
+            var plantedBomb = this.FindPlantedBomb();
+
+            if (plantedBomb == null)
             {
                 Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
 

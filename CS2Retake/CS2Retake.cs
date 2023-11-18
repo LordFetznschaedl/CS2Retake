@@ -3,6 +3,7 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
+using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Entities;
 using CS2Retake.Managers;
@@ -17,6 +18,8 @@ namespace CS2Retake
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 
+        private CounterStrikeSharp.API.Modules.Timers.Timer? _thankYouTimer;
+
         public override void Load(bool hotReload)
         {
             this.Log(PluginInfo());
@@ -30,17 +33,27 @@ namespace CS2Retake
                 this.OnMapStart(Server.MapName);
             }
 
-            _ = new CounterStrikeSharp.API.Modules.Timers.Timer(7 * 60, MessageUtils.ThankYouMessage, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
+            this._thankYouTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(7 * 60, MessageUtils.ThankYouMessage, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
 
             this.RegisterListener<Listeners.OnMapStart>(mapname => this.OnMapStart(mapname));
 
+            this.RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
             this.RegisterEventHandler<EventRoundFreezeEnd>(OnRoundFreezeEnd);
             this.RegisterEventHandler<EventRoundEnd>(OnRoundEnd);
             this.RegisterEventHandler<EventCsPreRestart>(OnCsPreRestart);
             this.RegisterEventHandler<EventBombBeginplant>(OnBombBeginPlant);
-            this.RegisterEventHandler<EventBombPlanted>(OnBombPlanted);
+            this.RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam, HookMode.Pre);
+            this.RegisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch);
+
+            this.AddCommandListener("jointeam", OnCommandJoinTeam);
         }
 
+        public override void Unload(bool hotReload)
+        {
+            this._thankYouTimer?.Kill();
+
+            base.Unload(hotReload);
+        }
 
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
         public void OnCommandInfo(CCSPlayerController? player, CommandInfo command)
@@ -193,7 +206,55 @@ namespace CS2Retake
             MapManager.Instance.AddSpawn(player, (CsTeam)team, (BombSiteEnum)bombSite);
         }
 
-        [GameEventHandler]
+
+        private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
+        {
+            if (player == null || !player.IsValid)
+            {
+                return HookResult.Handled;
+            }
+
+            var oldTeam = (CsTeam)player.TeamNum;
+
+            if (commandInfo.ArgCount < 2)
+            {
+                return HookResult.Handled;
+            }
+
+            if(!Enum.TryParse(commandInfo.GetArg(1), out CsTeam newTeam))
+            {
+                return HookResult.Handled;
+            }
+
+            if(oldTeam == newTeam && oldTeam != CsTeam.None) 
+            {
+                return HookResult.Continue;
+            }
+
+            if((oldTeam == CsTeam.CounterTerrorist && newTeam == CsTeam.Terrorist) || (oldTeam == CsTeam.Terrorist && newTeam == CsTeam.CounterTerrorist))
+            {
+                return HookResult.Continue;
+            }
+            else if(newTeam == CsTeam.Spectator)
+            {
+                MessageUtils.PrintToPlayerOrServer($"You have been removed from the queue.");
+                RetakeManager.Instance.PlayerJoinQueue.RemoveAll(x => x.SteamID == player.SteamID);
+
+                return HookResult.Handled;
+            }
+            else
+            {
+                if(!RetakeManager.Instance.PlayerJoinQueue.Any(x => x.SteamID == player.SteamID))
+                {
+                    MessageUtils.PrintToPlayerOrServer($"You have been placed into the queue. Please wait for the next round to start.");
+                    RetakeManager.Instance.PlayerJoinQueue.Add(player);
+                }
+                return HookResult.Handled;
+            }
+
+            
+        }
+
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
         {
             if (@event == null)
@@ -220,7 +281,7 @@ namespace CS2Retake
             return HookResult.Continue;
         }
 
-        [GameEventHandler]
+
         private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
             RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
@@ -228,7 +289,7 @@ namespace CS2Retake
             return HookResult.Continue;
         }
 
-        [GameEventHandler]
+
         private HookResult OnBombBeginPlant(EventBombBeginplant @event, GameEventInfo info)
         {
             RetakeManager.Instance.FastPlantBomb();
@@ -236,15 +297,7 @@ namespace CS2Retake
             return HookResult.Continue;
         }
 
-        [GameEventHandler]
-        private HookResult OnBombPlanted(EventBombPlanted @event, GameEventInfo info)
-        {
-            RetakeManager.Instance.BombHasBeenPlanted = true;
 
-            return HookResult.Continue;
-        }
-
-        [GameEventHandler]
         private HookResult OnCsPreRestart(EventCsPreRestart @event, GameEventInfo info)
         {
             MapManager.Instance.ResetForNextRound(false);
@@ -255,7 +308,7 @@ namespace CS2Retake
             return HookResult.Continue;
         }
 
-        [GameEventHandler]
+
         private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
         {
             if (@event.Winner == (int)CsTeam.Terrorist)
@@ -269,7 +322,7 @@ namespace CS2Retake
                 MapManager.Instance.TerroristRoundWinStreak = 0;
                 RetakeManager.Instance.SwitchTeams();
             }
-
+             
             if(MapManager.Instance.TerroristRoundWinStreak == 5)
             {
                 MessageUtils.PrintToChatAll($"Teams will be scrambled now!");
@@ -279,6 +332,25 @@ namespace CS2Retake
 
             MapManager.Instance.ResetForNextRound();
             WeaponManager.Instance.ResetForNextRound();
+
+            return HookResult.Continue;
+        }
+
+        private HookResult OnPlayerTeam(EventPlayerTeam @event, GameEventInfo info)
+        {
+            if (@event == null)
+            {
+                return HookResult.Continue;
+            }
+
+            @event.Silent = true;
+
+            return HookResult.Continue;
+        }
+
+        private HookResult OnBeginNewMatch(EventBeginNewMatch @event, GameEventInfo info)
+        {
+            RetakeManager.Instance.ScrambleTeams();
 
             return HookResult.Continue;
         }

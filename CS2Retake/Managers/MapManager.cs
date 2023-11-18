@@ -111,7 +111,7 @@ namespace CS2Retake.Managers
             }
 
             spawn.SpawnUsedBy = player;
-            player.PrintToConsole($"[CS2Retake] Spawnpoint: {spawn.SpawnId}");
+            player.PrintToConsole($"Spawnpoint: {spawn.SpawnId}");
             player.PlayerPawn.Value.Teleport(spawn.Position, spawn.QAngle, new Vector(0f, 0f, 0f));
 
             

@@ -153,7 +153,7 @@ namespace CS2Retake.Managers
 
         public void RandomRoundType()
         {
-            this.RoundType = (RoundTypeEnum)new Random().Next(0, Enum.GetNames(typeof(RoundTypeEnum)).Length);
+            this.RoundType = (RoundTypeEnum)new Random().Next(0, Enum.GetNames(typeof(RoundTypeEnum)).Length-1);
         }
 
         public override void ResetForNextRound(bool completeReset = true)
