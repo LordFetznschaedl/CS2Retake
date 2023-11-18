@@ -61,7 +61,7 @@ namespace CS2Retake.Allocators
             }
 
             weaponKit.KitUsedAmount++;
-
+            player.PrintToConsole($"WeaponKit: {weaponKit.KitName}");
 
             return (weaponKit.PrimaryWeapon, weaponKit.SecondaryWeapon, weaponKit.Kevlar, weaponKit.DefuseKit && team == CsTeam.CounterTerrorist);
         }

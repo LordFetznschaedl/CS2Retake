@@ -3,15 +3,14 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.Serialization;
 using System.Text;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 
 namespace CS2Retake.Utils
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum GrenadeEnum
     {
-        [EnumMember(Value = "none")]
-        None = -1,
-
         [EnumMember(Value = "weapon_smokegrenade")]
         Smoke = 0,
 

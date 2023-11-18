@@ -59,7 +59,7 @@ namespace CS2Retake.Allocators
             }
 
             grenadeKit.KitUsedAmount++;
-
+            player.PrintToConsole($"GrenadeKit: {grenadeKit.KitName}");
 
             return grenadeKit.GrenadeList;
         }
