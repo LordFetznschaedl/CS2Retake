@@ -106,9 +106,17 @@ namespace CS2Retake.Managers
                 player.GiveNamedItem(weaponAllocationData.secondaryWeapon);
             }
 
+            if (player.PlayerPawn.Value.ItemServices == null)
+            {
+                this.Log($"Player has no item service");
+                return;
+            }
+
+            var itemService = new CCSPlayer_ItemServices(player.PlayerPawn.Value.ItemServices.Handle);
+
             if (weaponAllocationData.kit)
             {
-                player.GiveNamedItem("item_cutters");
+                itemService.HasDefuser = true;
             }
 
             switch (weaponAllocationData.kevlar)
@@ -118,6 +126,7 @@ namespace CS2Retake.Managers
                     break;
                 case KevlarEnum.KevlarHelmet:
                     player.GiveNamedItem("item_assaultsuit");
+                    itemService.HasHelmet = true;
                     break;
             }
 

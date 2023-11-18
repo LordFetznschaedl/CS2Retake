@@ -18,7 +18,7 @@ namespace CS2Retake.Utils
 
         private static List<string> _thankYouMessages = new List<string>() 
         {
-            $"Thank you for using {ChatColors.Gold}CS2Retake{ChatColors.BlueGrey} :)", 
+            $"Thank you for using {ChatColors.Gold}CS2Retake :)", 
             $"If you notice any bugs please report them here:",
             $"https://github.com/LordFetznschaedl/CS2Retake/issues",
             $"If you want to support the development of this Retake Plugin",
@@ -29,7 +29,7 @@ namespace CS2Retake.Utils
         {
             foreach(var message in _thankYouMessages)
             {
-                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} {ChatColors.BlueGrey}{message}");
+                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} {message}");
             }
         }
 

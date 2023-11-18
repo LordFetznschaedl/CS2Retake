@@ -43,7 +43,7 @@ namespace CS2Retake
             this.RegisterEventHandler<EventCsPreRestart>(OnCsPreRestart);
             this.RegisterEventHandler<EventBombBeginplant>(OnBombBeginPlant);
             this.RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam, HookMode.Pre);
-            this.RegisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch);
+            //this.RegisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch);
 
             this.AddCommandListener("jointeam", OnCommandJoinTeam);
         }
@@ -209,8 +209,11 @@ namespace CS2Retake
 
         private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
         {
+            this.Log("OnCommandJoinTeam");
+
             if (player == null || !player.IsValid)
             {
+                this.Log("Player null or not valid");
                 return HookResult.Handled;
             }
 
@@ -218,21 +221,25 @@ namespace CS2Retake
 
             if (commandInfo.ArgCount < 2)
             {
+                this.Log("Not enough args");
                 return HookResult.Handled;
             }
 
             if(!Enum.TryParse(commandInfo.GetArg(1), out CsTeam newTeam))
             {
+                this.Log("Parsing new team failed");
                 return HookResult.Handled;
             }
 
             if(oldTeam == newTeam && oldTeam != CsTeam.None) 
             {
+                this.Log("Old Team is new team");
                 return HookResult.Continue;
             }
 
             if((oldTeam == CsTeam.CounterTerrorist && newTeam == CsTeam.Terrorist) || (oldTeam == CsTeam.Terrorist && newTeam == CsTeam.CounterTerrorist))
             {
+                this.Log("team switch");
                 return HookResult.Continue;
             }
             else if(newTeam == CsTeam.Spectator)
@@ -315,6 +322,7 @@ namespace CS2Retake
             {
                 MapManager.Instance.TerroristRoundWinStreak++;
                 MessageUtils.PrintToChatAll($"The Terrorists have won {ChatColors.Darkred}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
+                RetakeManager.Instance.AddQueuedPlayers();
             }
             else
             {

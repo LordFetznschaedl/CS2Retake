@@ -46,7 +46,7 @@ namespace CS2Retake.Managers
         {
             var nonSpectatingValidPlayers = this.GetPlayerControllers().Where(x => x.IsValid && (x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist)).ToList();
 
-            if(!nonSpectatingValidPlayers.Any()) 
+            if (!nonSpectatingValidPlayers.Any())
             {
                 this.Log($"No valid non spectating players have been found!");
                 return;
@@ -55,7 +55,7 @@ namespace CS2Retake.Managers
             var random = new Random();
             nonSpectatingValidPlayers = nonSpectatingValidPlayers.OrderBy(x => random.Next()).ToList();
 
-            for(int i = 0; i < nonSpectatingValidPlayers.Count; i++) 
+            for (int i = 0; i < nonSpectatingValidPlayers.Count; i++)
             {
                 nonSpectatingValidPlayers[i].SwitchTeam(i % 2 == 0 ? CsTeam.CounterTerrorist : CsTeam.Terrorist);
             }
@@ -75,7 +75,7 @@ namespace CS2Retake.Managers
             var playersNeededInCT = (int)Math.Ceiling((decimal)activePlayerCount / 2);
 
             var random = new Random();
-            
+
             this.PlayerJoinQueue.ForEach(player => player.SwitchTeam(CsTeam.CounterTerrorist));
 
             playersNeededInCT = playersNeededInCT - this.PlayerJoinQueue.Count();
@@ -87,6 +87,31 @@ namespace CS2Retake.Managers
             counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
 
             this.PlayerJoinQueue.Clear();
+        }
+
+        public void AddQueuedPlayers()
+        {
+            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid).ToList();
+
+            var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
+            var counterTerroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).ToList();
+
+            var playersInQueue = this.PlayerJoinQueue.Count();
+
+            var activePlayerCount = playersInQueue + terroristPlayers.Count + counterTerroristPlayers.Count;
+
+            var playersNeededInCT = (int)Math.Ceiling((decimal)activePlayerCount / 2);
+
+            var random = new Random();
+
+            this.PlayerJoinQueue.ForEach(player => player.SwitchTeam(CsTeam.CounterTerrorist));
+
+            var ctCount = counterTerroristPlayers.Count() + playersInQueue;
+
+            var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(ctCount - playersNeededInCT).ToList();
+
+            counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
+
         }
 
         public void GiveBombToPlayerRandomPlayerInBombZone()
