@@ -27,11 +27,11 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [x] basic autoplant (fast plant, player needs to plant himself) 
 - [x] assigning permissions for the commands
 - [x] spawn loading system
-- [ ] weapon allocator system (kit based) -> verify functionality
+- [x] weapon allocator system (kit based) -> verify functionality
 - [ ] nade allocator system (kit based)
 - [ ] auto assign teams -> deny choosing team -> switch team automatically
 - [ ] on ct win -> switch cts to t and the ts to ct
-- [ ] analyse why server crashes when player reconnects to the server -> crash at onPlayerSpawn
+- [ ] analyse why server crashes when player reconnects to the server -> crash at onPlayerSpawn (NOT HAPPENING CURRENTLY)
 
 
 ---

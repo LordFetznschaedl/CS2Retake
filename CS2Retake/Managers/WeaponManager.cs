@@ -70,9 +70,14 @@ namespace CS2Retake.Managers
                 allocationData = ("weapon_ssg08", "weapon_p250", KevlarEnum.KevlarHelmet, (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
             }
 
-            player.GiveNamedItem("weapon_knife");
-            player.GiveNamedItem(allocationData.primaryWeapon);
-            player.GiveNamedItem(allocationData.secondaryWeapon);
+            if(!string.IsNullOrWhiteSpace(allocationData.primaryWeapon))
+            {
+                player.GiveNamedItem(allocationData.primaryWeapon);
+            }
+            if (!string.IsNullOrWhiteSpace(allocationData.secondaryWeapon))
+            {
+                player.GiveNamedItem(allocationData.secondaryWeapon);
+            }
 
             if (allocationData.kit)
             {
@@ -105,7 +110,7 @@ namespace CS2Retake.Managers
                 return;
             }
 
-            weaponService.MyWeapons.Where(weapon => weapon.IsValid && weapon.Value.IsValid).ToList().ForEach(weapon => weapon.Value.Remove());
+            weaponService.MyWeapons.Where(weapon => weapon.IsValid && weapon.Value.IsValid && !weapon.Value.DesignerName.Contains("knife")).ToList().ForEach(weapon => weapon.Value.Remove());
         }
 
         public void RandomRoundType()
