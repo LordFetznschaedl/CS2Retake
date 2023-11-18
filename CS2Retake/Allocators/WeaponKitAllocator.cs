@@ -2,6 +2,7 @@
 using CounterStrikeSharp.API.Modules.Entities;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Allocators.Exceptions;
+using CS2Retake.Allocators.Interfaces;
 using CS2Retake.Entities;
 using CS2Retake.Utils;
 using System;
@@ -14,7 +15,7 @@ using System.Threading.Tasks;
 
 namespace CS2Retake.Allocators
 {
-    public class WeaponKitAllocator
+    public class WeaponKitAllocator : IAllocator
     {
         private List<WeaponKitEntity> _weaponKitEntityList = new List<WeaponKitEntity>();
 
