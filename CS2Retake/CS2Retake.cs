@@ -258,8 +258,6 @@ namespace CS2Retake
         [GameEventHandler]
         private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
         {
-            this.Log("OnRoundEnd");
-
             if (@event.Winner == (int)CsTeam.Terrorist)
             {
                 MapManager.Instance.TerroristRoundWinStreak++;

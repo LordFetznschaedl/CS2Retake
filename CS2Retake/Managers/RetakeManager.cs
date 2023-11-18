@@ -62,7 +62,16 @@ namespace CS2Retake.Managers
 
         public void SwitchTeams()
         {
+            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid).ToList();
 
+            var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
+            var counterTerroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).ToList();
+
+            var random = new Random();
+            var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(terroristPlayers.Count).ToList();
+
+            terroristPlayers.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
+            counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
         }
 
         public void GiveBombToPlayerRandomPlayerInBombZone()
