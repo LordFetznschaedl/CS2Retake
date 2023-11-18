@@ -123,7 +123,7 @@ namespace CS2Retake.Managers
             if(completeReset)
             {
                 this.RandomBombSite();
-                this.CurrentMap.ResetSpawnInUse();
+                this.CurrentMap?.ResetSpawnInUse();
             }
             
             this.HasToBeInBombZone = true;

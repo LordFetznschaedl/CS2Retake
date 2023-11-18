@@ -37,11 +37,13 @@ namespace CS2Retake.Allocators
                 this.LoadWeaponKits();
             }
 
-            var availableWeaponKitsForPlayer = this.GetWeaponKitEntities((CsTeam)player.TeamNum, roundType);
+            var team = (CsTeam)player.TeamNum;
 
-            if(!availableWeaponKitsForPlayer.Any())
+            var availableWeaponKitsForPlayer = this.GetWeaponKitEntities(team, roundType);
+
+            if (!availableWeaponKitsForPlayer.Any())
             {
-                availableWeaponKitsForPlayer = this.GetWeaponKitEntities((CsTeam)player.TeamNum, RoundTypeEnum.Undefined);
+                availableWeaponKitsForPlayer = this.GetWeaponKitEntities(team, RoundTypeEnum.Undefined);
             }
 
             if(!availableWeaponKitsForPlayer.Any())
@@ -50,9 +52,9 @@ namespace CS2Retake.Allocators
             }
 
             var random = new Random();
-            var weaponKit = this._weaponKitEntityList.OrderBy(x => random.Next()).FirstOrDefault();
+            var weaponKit = availableWeaponKitsForPlayer.OrderBy(x => random.Next()).FirstOrDefault();
 
-            if(weaponKit == null) 
+            if (weaponKit == null) 
             {
                 throw new AllocatorException("Assigned Weapon Kit is null");
             }
@@ -60,7 +62,7 @@ namespace CS2Retake.Allocators
             weaponKit.KitUsedAmount++;
 
 
-            return (weaponKit.PrimaryWeapon, weaponKit.SecondaryWeapon, weaponKit.Kevlar, weaponKit.DefuseKit && (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
+            return (weaponKit.PrimaryWeapon, weaponKit.SecondaryWeapon, weaponKit.Kevlar, weaponKit.DefuseKit && team == CsTeam.CounterTerrorist);
         }
 
         public void ResetForNextRound()
@@ -101,6 +103,7 @@ namespace CS2Retake.Allocators
                     PrimaryWeapon = "weapon_ak47",
                     SecondaryWeapon = "weapon_glock",
                     Team = CsTeam.Terrorist,
+                    DefuseKit = false,
                 });
             }
 

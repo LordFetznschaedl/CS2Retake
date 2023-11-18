@@ -213,7 +213,6 @@ namespace CS2Retake
                 return HookResult.Continue;
             }
 
-
             MapManager.Instance.TeleportPlayerToSpawn(@event.Userid);
             WeaponManager.Instance.RemoveWeapons(@event.Userid);
             WeaponManager.Instance.AssignWeapon(@event.Userid);
