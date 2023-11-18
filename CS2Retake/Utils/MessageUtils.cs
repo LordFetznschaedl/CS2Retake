@@ -35,10 +35,10 @@ namespace CS2Retake.Utils
 
         public static void PrintToPlayerOrServer(string message, CCSPlayerController? player = null)
         {
-            message = $"{MessageUtils.PluginPrefix} {message}";
-
             if (player != null)
             {
+                message = $"{MessageUtils.PluginPrefix} {message}";
+
                 player.PrintToConsole(message);
                 player.PrintToChat(message);
             }
