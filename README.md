@@ -29,11 +29,11 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [x] spawn loading system
 - [x] weapon allocator system (kit based)
 - [x] nade allocator system (kit based)
-- [ ] auto assign teams -> deny choosing team -> switch team automatically
-- [ ] on ct win -> switch cts to t and the ts to ct
+- [x] on ct win -> switch cts to t and the ts to ct
 
 ---
 # todo - future releases:  
+- [ ] auto assign teams -> deny choosing team -> switch team automatically
 - [ ] config system
 - [ ] editor system for spawns
 - [ ] auto plant -> in a way that the bomb is defusable xD
