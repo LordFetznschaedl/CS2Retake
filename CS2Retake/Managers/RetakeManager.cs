@@ -14,6 +14,7 @@ using CounterStrikeSharp.API.Modules.Timers;
 using System.Timers;
 using CS2Retake.Utils;
 using CS2Retake.Managers.Base;
+using System.Numerics;
 
 namespace CS2Retake.Managers
 {
@@ -141,14 +142,49 @@ namespace CS2Retake.Managers
                 return;
             }
 
-            var seconds = 5;
+            var playerPawn = this._planterPlayerController.PlayerPawn.Value;
 
-            this._planterPlayerController.GiveNamedItem("weapon_c4");
+            if (playerPawn == null)
+            {
+                this.Log($"Player pawn is null");
+                return;
+            }
+            if (playerPawn.AbsRotation == null)
+            {
+                this.Log($"Player pawn rotation is null");
+                return;
+            }
+            if (playerPawn.AbsOrigin == null)
+            {
+                this.Log($"Player pawn position is null");
+                return;
+            }
 
-            MessageUtils.PrintToPlayerOrServer($"YOU HAVE {ChatColors.Darkred}{seconds}{ChatColors.White} SECONDS TO PLANT THE BOMB!", this._planterPlayerController);
 
+            CPlantedC4? plantedC4 = Utilities.CreateEntityByName<CPlantedC4>("planted_c4");
 
-            _  = new CounterStrikeSharp.API.Modules.Timers.Timer(seconds, this.HasBombBeenPlantedCallback);
+            if (plantedC4 == null)
+            {
+                this.Log($"No planted bomb was found!");
+                return;
+            }
+
+            this.ModifyGameRulesBombPlanted(true);
+
+            plantedC4.BombTicking= true;
+
+            var bombPlantedEventPtr = NativeAPI.CreateEvent("bomb_planted", false);
+            NativeAPI.SetEventPlayerController(bombPlantedEventPtr, "userid", _planterPlayerController.Handle);
+            NativeAPI.SetEventInt(bombPlantedEventPtr, "site", (int)plantSpawn.BombSite);
+            //NativeAPI.SetEventEntity(bombPlantedEventPtr, "userid_pawn", player.PlayerPawn.Value.Handle);
+            NativeAPI.FireEvent(bombPlantedEventPtr, false);
+
+            plantedC4.Teleport(playerPawn.AbsOrigin, playerPawn.AbsRotation, new CounterStrikeSharp.API.Modules.Utils.Vector(0f, 0f, 0f));
+
+            plantedC4.DispatchSpawn();
+
+            
+
             //c4.BombPlacedAnimation = false;
 
 
@@ -180,9 +216,9 @@ namespace CS2Retake.Managers
             //}
 
 
-            //plantedBomb.Teleport(playerPawn.AbsOrigin, playerPawn.AbsRotation, new Vector(0f, 0f, 0f));
 
-            //this.ModifyGameRulesBombPlanted(true);
+
+
 
             //plantedBomb.BombTicking = true;
             ////plantedBomb.BombSite = 168 + (int)MapManager.Instance.BombSite;
@@ -250,6 +286,7 @@ namespace CS2Retake.Managers
         public void ConfigureForRetake()
         {   
             Server.ExecuteCommand($"execifexists cs2retake/retake.cfg");
+            this.GameRules = null;
         }
 
         
@@ -258,30 +295,7 @@ namespace CS2Retake.Managers
         {
             if (this.GameRules == null)
             {
-                this.Log($"GameRules is null. Fetching gamerule...");
-
-                var gameRuleProxyList = this.GetGameRulesProxies();
-
-                if (gameRuleProxyList.Count > 1)
-                {
-                    this.Log($"Multiple GameRuleProxies found. Using firstOrDefault");
-                }
-
-                var gameRuleProxy = gameRuleProxyList.FirstOrDefault();
-
-                if (gameRuleProxy == null)
-                {
-                    this.Log($"GameRuleProxy is null");
-                    return;
-                }
-
-                if (gameRuleProxy.GameRules == null)
-                {
-                    this.Log($"GameRules is null");
-                    return;
-                }
-
-                this.GameRules = gameRuleProxy.GameRules;
+                this.GameRules = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").First().GameRules!;
             }
 
             this.GameRules.BombPlanted = bombPlanted;
@@ -332,6 +346,7 @@ namespace CS2Retake.Managers
             }
 
             this.BombHasBeenPlanted = false;
+            this.ModifyGameRulesBombPlanted(false);
         }
     }
 }
