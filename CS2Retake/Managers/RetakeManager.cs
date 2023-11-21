@@ -28,6 +28,7 @@ namespace CS2Retake.Managers
 
         public List<CCSPlayerController> PlayerJoinQueue = new List<CCSPlayerController>();
 
+
         public static RetakeManager Instance
         {
             get
@@ -145,8 +146,7 @@ namespace CS2Retake.Managers
 
             this._planterPlayerController.GiveNamedItem("weapon_c4");
 
-            MessageUtils.PrintToPlayerOrServer($"YOU HAVE {ChatColors.Darkred}{seconds}{ChatColors.White} SECONDS TO PLANT THE BOMB!", this._planterPlayerController);
-
+            this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{seconds}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
 
             _  = new CounterStrikeSharp.API.Modules.Timers.Timer(seconds, this.HasBombBeenPlantedCallback);
             //c4.BombPlacedAnimation = false;

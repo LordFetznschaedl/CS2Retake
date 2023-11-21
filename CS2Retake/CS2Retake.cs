@@ -231,6 +231,8 @@ namespace CS2Retake
                 return HookResult.Handled;
             }
 
+            this.Log($"From {oldTeam} To {newTeam}");
+
             if(oldTeam == newTeam && oldTeam != CsTeam.None) 
             {
                 this.Log("Old Team is new team");
@@ -311,6 +313,7 @@ namespace CS2Retake
             RetakeManager.Instance.ResetForNextRound();
 
             MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.Darkred}{MapManager.Instance.BombSite}{ChatColors.White} - Roundtype: {ChatColors.Darkred}{WeaponManager.Instance.RoundType}{ChatColors.White}");
+            
 
             return HookResult.Continue;
         }
