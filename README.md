@@ -20,7 +20,7 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 Extract the `addons` folder to the `/csgo/` directory of the dedicated server.  
 
 ---
-# todo - release 1.0.0:  
+# release 1.0.1-alpha:  
 - [x] creating, saving and reading spawns
 - [x] player spawn in spawnpoints 
 - [x] scramble teams
@@ -30,15 +30,23 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [x] weapon allocator system (kit based)
 - [x] nade allocator system (kit based)
 - [x] on ct win -> switch cts to t and the ts to ct
+- [x] auto assign teams -> deny choosing team -> switch team automatically
 
 ---
-# todo - future releases:  
-- [ ] auto assign teams -> deny choosing team -> switch team automatically
+# future releases:  
 - [ ] config system
 - [ ] editor system for spawns
 - [ ] auto plant -> in a way that the bomb is defusable xD
 - [ ] modular weapon allocator system
 - [ ] change scramble command to do the scramble after round ends and before round starts
 
+---
+# special thanks:  
+Discord:
+- @gorwok for creating spawns on de_mirage
+- @cowhitface for creating spawns on de_overpass, de_inferno, de_vertigo, de_nuke, de_anubis & de_ancient
+
+Twitter:
+- @t1ckrate for helping moderate the issues on this repo 
 
 
