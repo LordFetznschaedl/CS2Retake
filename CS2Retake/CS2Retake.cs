@@ -1,5 +1,6 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
 using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
@@ -11,10 +12,11 @@ using CS2Retake.Utils;
 
 namespace CS2Retake
 {
+    [MinimumApiVersion(66)]
     public class CS2Retake : BasePlugin  
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.0.0";
+        public override string ModuleVersion => "1.0.1-alpha";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 
@@ -35,7 +37,8 @@ namespace CS2Retake
 
             this._thankYouTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(7 * 60, MessageUtils.ThankYouMessage, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
 
-            this.RegisterListener<Listeners.OnMapStart>(mapname => this.OnMapStart(mapname));
+            this.RegisterListener<Listeners.OnMapStart>(mapName => this.OnMapStart(mapName));
+
 
             this.RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
             this.RegisterEventHandler<EventRoundFreezeEnd>(OnRoundFreezeEnd);
@@ -43,10 +46,13 @@ namespace CS2Retake
             this.RegisterEventHandler<EventCsPreRestart>(OnCsPreRestart);
             this.RegisterEventHandler<EventBombBeginplant>(OnBombBeginPlant);
             this.RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam, HookMode.Pre);
-            //this.RegisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch);
+            this.RegisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch, HookMode.Pre);
+            this.RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
 
             this.AddCommandListener("jointeam", OnCommandJoinTeam);
         }
+
+
 
         public override void Unload(bool hotReload)
         {
@@ -209,11 +215,13 @@ namespace CS2Retake
 
         private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
         {
-            this.Log("OnCommandJoinTeam");
+            if (RetakeManager.Instance.IgnoreQueue)
+            {
+                return HookResult.Continue;
+            }
 
             if (player == null || !player.IsValid)
             {
-                this.Log("Player null or not valid");
                 return HookResult.Handled;
             }
 
@@ -221,7 +229,6 @@ namespace CS2Retake
 
             if (commandInfo.ArgCount < 2)
             {
-                this.Log("Not enough args");
                 return HookResult.Handled;
             }
 
@@ -361,7 +368,18 @@ namespace CS2Retake
 
         private HookResult OnBeginNewMatch(EventBeginNewMatch @event, GameEventInfo info)
         {
-            RetakeManager.Instance.ScrambleTeams();
+            RetakeManager.Instance.IgnoreQueue = false;
+
+            //RetakeManager.Instance.ScrambleTeams();
+
+            return HookResult.Continue;
+        }
+
+        private HookResult OnCsIntermission(EventCsIntermission @event, GameEventInfo info)
+        {
+            this.Log($"OnCsIntermission");
+
+            RetakeManager.Instance.IgnoreQueue = true;
 
             return HookResult.Continue;
         }

@@ -28,6 +28,7 @@ namespace CS2Retake.Managers
 
         public List<CCSPlayerController> PlayerJoinQueue = new List<CCSPlayerController>();
 
+        public bool IgnoreQueue { get; set; } = false;
 
         public static RetakeManager Instance
         {
@@ -149,6 +150,7 @@ namespace CS2Retake.Managers
             this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{seconds}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
 
             _  = new CounterStrikeSharp.API.Modules.Timers.Timer(seconds, this.HasBombBeenPlantedCallback);
+
             //c4.BombPlacedAnimation = false;
 
 
@@ -250,6 +252,8 @@ namespace CS2Retake.Managers
         public void ConfigureForRetake()
         {   
             Server.ExecuteCommand($"execifexists cs2retake/retake.cfg");
+
+            this.IgnoreQueue = true;
         }
 
         
