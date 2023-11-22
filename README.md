@@ -1,4 +1,4 @@
-# CS2Retake  NOT YET RELEASED - STILL WIP
+# CS2Retake is now in ALPHA
   
 WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp  
 <https://docs.cssharp.dev/>  
