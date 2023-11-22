@@ -94,17 +94,10 @@ namespace CS2Retake.Managers
                 this.Log($"An error happened while assigning the weapons. Message: {ex.Message}");
                 MessageUtils.PrintToPlayerOrServer($"An error occurred while assigning your weapons. Using fallback weapons!");
 
-                weaponAllocationData = ("weapon_ssg08", "weapon_p250", KevlarEnum.KevlarHelmet, (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
+                weaponAllocationData = (string.Empty, "weapon_deagle", KevlarEnum.KevlarHelmet, (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
             }
 
-            if(!string.IsNullOrWhiteSpace(weaponAllocationData.primaryWeapon))
-            {
-                player.GiveNamedItem(weaponAllocationData.primaryWeapon);
-            }
-            if (!string.IsNullOrWhiteSpace(weaponAllocationData.secondaryWeapon))
-            {
-                player.GiveNamedItem(weaponAllocationData.secondaryWeapon);
-            }
+            
 
             if (player.PlayerPawn.Value.ItemServices == null)
             {
@@ -113,6 +106,26 @@ namespace CS2Retake.Managers
             }
 
             var itemService = new CCSPlayer_ItemServices(player.PlayerPawn.Value.ItemServices.Handle);
+
+            foreach (var grenade in grenadeAllocationList)
+            {
+                var enumMemberValue = EnumUtils.GetEnumMemberAttributeValue(grenade);
+
+                if (!string.IsNullOrWhiteSpace(enumMemberValue))
+                {
+                    player.GiveNamedItem(enumMemberValue);
+                }
+
+            }
+
+            if (!string.IsNullOrWhiteSpace(weaponAllocationData.primaryWeapon))
+            {
+                player.GiveNamedItem(weaponAllocationData.primaryWeapon);
+            }
+            if (!string.IsNullOrWhiteSpace(weaponAllocationData.secondaryWeapon))
+            {
+                player.GiveNamedItem(weaponAllocationData.secondaryWeapon);
+            }
 
             if (weaponAllocationData.kit)
             {
@@ -130,16 +143,7 @@ namespace CS2Retake.Managers
                     break;
             }
 
-            foreach(var grenade in grenadeAllocationList)
-            {
-                var enumMemberValue = EnumUtils.GetEnumMemberAttributeValue(grenade);
-
-                if(!string.IsNullOrWhiteSpace(enumMemberValue))
-                {
-                    player.GiveNamedItem(enumMemberValue);
-                }
-             
-            }
+            
         }
 
         public void RemoveWeapons(CCSPlayerController player)
