@@ -125,7 +125,7 @@ namespace CS2Retake.Managers
 
             if(plantSpawn == null)
             {
-                this.Log($"No valid plant spawn found!");
+                this.Log($"No valid plant spawn found! This might be because no player is on terrorist team.");
                 return;
             }
 
