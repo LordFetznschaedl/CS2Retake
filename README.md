@@ -4,6 +4,11 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 <https://docs.cssharp.dev/>  
   
 ---
+# reuirements:  
+- min. CounterStrikeSharp API Version: 66  
+- GameType: Competitive
+  
+---
 # usage:  
 | Command         | Parameter                                  | Description                                                           | Permissions      |
 |-----------------|--------------------------------------------|-----------------------------------------------------------------------|------------------|
