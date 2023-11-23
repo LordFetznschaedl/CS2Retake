@@ -5,10 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
   </PropertyGroup>
-
+  
   <ItemGroup>
     <Reference Include="CounterStrikeSharp.API">
-      <HintPath>C:/Source/CS2Plugins/lib/counterstrikesharp-with-runtime/addons/counterstrikesharp/api/CounterStrikeSharp.API.dll</HintPath>
+      <HintPath Condition=" '$(OS)' == 'Windows_NT' ">C:/Source/CS2Plugins/lib/counterstrikesharp-with-runtime/addons/counterstrikesharp/api/CounterStrikeSharp.API.dll</HintPath>
+      <HintPath Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">/Users/robert/Source/CS2Plugins/lib/counterstrikesharp-with-runtime/addons/counterstrikesharp/api/CounterStrikeSharp.API.dll</HintPath>
     </Reference>
   </ItemGroup>
   
