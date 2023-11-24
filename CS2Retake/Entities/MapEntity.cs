@@ -39,17 +39,23 @@ namespace CS2Retake.Entities
 
             if(!spawnChoices.Any())
             {
+                this.Log($"No spawn choices found.");
                 return null;
             }
 
             if(team == CsTeam.Terrorist && hasToBeInBombZone)
             {
                 spawnChoices = spawnChoices.Where(x => x.IsInBombZone).ToList();
+
+                if (!spawnChoices.Any())
+                {
+                    this.Log($"hasToBeInBombZone has not found any spawns.");
+                    return null;
+                }
             }
 
             var random = new Random();
-
-            return spawnChoices.ElementAt(random.Next(spawnChoices.Count - 1));
+            return spawnChoices.OrderBy(x => random.Next()).FirstOrDefault();
         }
 
 

@@ -4,10 +4,15 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 <https://docs.cssharp.dev/>  
   
 ---
+# reuirements:  
+- min. CounterStrikeSharp API Version: 66  
+- GameType: Competitive
+  
+---
 # usage:  
 | Command         | Parameter                                  | Description                                                           | Permissions      |
 |-----------------|--------------------------------------------|-----------------------------------------------------------------------|------------------|
-| !retakeninfo    |                                            | prints the plugin information                                         |                  |
+| !retakeinfo     |                                            | prints the plugin information                                         |                  |
 | !retakespawn    | <index (integer)>                          | teleports the player to the given spawn index                         | @cs2retake/admin |
 | !retakewrite    |                                            | writes the spawns of the current map to the corresponding map config  | @cs2retake/admin |
 | !retakeread     |                                            | reads the spawns of the current map from the corresponding map config | @cs2retake/admin |
