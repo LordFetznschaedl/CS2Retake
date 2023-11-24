@@ -240,3 +240,8 @@ ModelManifest.xml
 
 # FAKE - F# Make
 .fake/
+
+# JetBrains
+.idea*
+.DS_Store
+
