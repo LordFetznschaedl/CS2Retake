@@ -7,10 +7,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <Reference Include="CounterStrikeSharp.API">
-      <HintPath Condition=" '$(OS)' == 'Windows_NT' ">C:/Source/CS2Plugins/lib/counterstrikesharp-with-runtime/addons/counterstrikesharp/api/CounterStrikeSharp.API.dll</HintPath>
-      <HintPath Condition=" '$([System.Runtime.InteropServices.RuntimeInformation]::IsOSPlatform($([System.Runtime.InteropServices.OSPlatform]::OSX)))' ">/var/lib/counterstrikesharp-with-runtime/addons/counterstrikesharp/api/CounterStrikeSharp.API.dll</HintPath>
-    </Reference>
+    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.66" />
   </ItemGroup>
   
 </Project>
