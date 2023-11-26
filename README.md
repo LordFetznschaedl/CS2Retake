@@ -25,7 +25,7 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 Extract the `addons` folder to the `/csgo/` directory of the dedicated server.  
 
 ---
-# release 1.0.1-alpha:  
+# release 1.0.2-alpha:  
 - [x] creating, saving and reading spawns
 - [x] player spawn in spawnpoints 
 - [x] scramble teams
@@ -36,6 +36,11 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [x] nade allocator system (kit based)
 - [x] on ct win -> switch cts to t and the ts to ct
 - [x] auto assign teams -> deny choosing team -> switch team automatically
+
+---
+# known bugs:  
+- [ ] KevlarHelmet being only given as Kevlar without Helmet
+- [ ] Queue System when joining into a running retake match
 
 ---
 # future releases:  
