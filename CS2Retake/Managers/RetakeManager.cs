@@ -46,6 +46,8 @@ namespace CS2Retake.Managers
 
         public void ScrambleTeams()
         {
+            this.Log($"ScrambleTeams");
+
             var nonSpectatingValidPlayers = this.GetPlayerControllers().Where(x => x.IsValid && (x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist)).ToList();
 
             if (!nonSpectatingValidPlayers.Any())
@@ -65,6 +67,8 @@ namespace CS2Retake.Managers
 
         public void SwitchTeams()
         {
+            this.Log($"SwitchTeams");
+
             var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid).ToList();
 
             var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
@@ -85,6 +89,15 @@ namespace CS2Retake.Managers
             var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(terroristPlayers.Count).ToList();
             var terroristsToSwitch = terroristPlayers.OrderBy(x => random.Next()).Take(playersNeededInCT).ToList();
 
+            this.Log($"playersOnServer: {playersOnServer.Count}");
+            this.Log($"T: {terroristPlayers.Count}");
+            this.Log($"CT: {counterTerroristPlayers.Count}");
+            this.Log($"Queue: {playersInQueue}");
+            this.Log($"activePlayerCount: {activePlayerCount}");
+            this.Log($"playersNeededInCT: {playersNeededInCT}");
+            this.Log($"T to switch: {terroristsToSwitch.Count}");
+            this.Log($"CT to switch: {counterTerroristsToSwitch.Count}");
+
             terroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
             counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
 
@@ -93,6 +106,13 @@ namespace CS2Retake.Managers
 
         public void AddQueuedPlayers()
         {
+            this.Log($"AddQueuedPlayers");
+
+            if(!this.PlayerJoinQueue.Any())
+            {
+                return;
+            }
+
             var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid).ToList();
 
             var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
@@ -112,8 +132,18 @@ namespace CS2Retake.Managers
 
             var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(ctCount - playersNeededInCT).ToList();
 
+            this.Log($"playersOnServer: {playersOnServer.Count}");
+            this.Log($"T: {terroristPlayers.Count}");
+            this.Log($"CT: {counterTerroristPlayers.Count}");
+            this.Log($"Queue: {playersInQueue}");
+            this.Log($"activePlayerCount: {activePlayerCount}");
+            this.Log($"playersNeededInCT: {playersNeededInCT}");
+            this.Log($"CT + Q: {ctCount}");
+            this.Log($"CTs to switch to T: {ctCount - playersNeededInCT}");
+
             counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
 
+            this.PlayerJoinQueue.Clear();
         }
 
         public void GiveBombToPlayerRandomPlayerInBombZone()
