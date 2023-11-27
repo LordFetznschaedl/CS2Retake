@@ -44,6 +44,18 @@ namespace CS2Retake.Managers
 
         private RetakeManager() { }
 
+        /*
+         * TODO:
+         * 
+         * ScrambleTeams, SwitchTeams & AddQueuePlayers has an issue with reconnecting players because the server still thinks they are on the server
+         * Thus leading to issues with the algorithm. (Scrambling and team switching algorithm seems to be working if no player disconnects and reconnects).
+         * 
+         * Possible solutions: 
+         *      - solve the issue by implementing a check if the user is a active player
+         *      - implement a list with a player status (connecting, queue, playing, spectator, disconnected, ...)
+         *
+         */
+
         public void ScrambleTeams()
         {
             this.Log($"ScrambleTeams");
