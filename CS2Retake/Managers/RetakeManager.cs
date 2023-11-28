@@ -60,7 +60,7 @@ namespace CS2Retake.Managers
         {
             this.Log($"ScrambleTeams");
 
-            var nonSpectatingValidPlayers = this.GetPlayerControllers().Where(x => x.IsValid && (x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist)).ToList();
+            var nonSpectatingValidPlayers = this.GetPlayerControllers().Where(x => x.IsValid && x.PlayerPawn.IsValid && x.PlayerPawn.Value.IsValid && (x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist)).ToList();
 
             if (!nonSpectatingValidPlayers.Any())
             {
@@ -81,7 +81,7 @@ namespace CS2Retake.Managers
         {
             this.Log($"SwitchTeams");
 
-            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid).ToList();
+            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid && x.PlayerPawn.IsValid && x.PlayerPawn.Value.IsValid).ToList();
 
             var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
             var counterTerroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).ToList();
@@ -125,7 +125,7 @@ namespace CS2Retake.Managers
                 return;
             }
 
-            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid).ToList();
+            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid && x.PlayerPawn.IsValid && x.PlayerPawn.Value.IsValid).ToList();
 
             var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
             var counterTerroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).ToList();

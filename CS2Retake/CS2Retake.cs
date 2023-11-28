@@ -256,7 +256,7 @@ namespace CS2Retake
                 MessageUtils.PrintToPlayerOrServer($"You have been removed from the queue.");
                 RetakeManager.Instance.PlayerJoinQueue.RemoveAll(x => x.SteamID == player.SteamID);
 
-                return HookResult.Handled;
+                return HookResult.Continue;
             }
             else
             {

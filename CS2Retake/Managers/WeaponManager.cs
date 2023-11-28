@@ -1,4 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Allocators;
 using CS2Retake.Allocators.Exceptions;
@@ -135,10 +136,10 @@ namespace CS2Retake.Managers
             switch (weaponAllocationData.kevlar)
             {
                 case KevlarEnum.Kevlar:
-                    player.GiveNamedItem("item_kevlar");
+                    player.GiveNamedItem(CsItem.Kevlar);
                     break;
                 case KevlarEnum.KevlarHelmet:
-                    player.GiveNamedItem("item_assaultsuit");
+                    player.GiveNamedItem(CsItem.AssaultSuit);
                     itemService.HasHelmet = true;
                     break;
             }
