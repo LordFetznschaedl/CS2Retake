@@ -48,11 +48,12 @@ namespace CS2Retake
             this.RegisterEventHandler<EventPlayerTeam>(OnPlayerTeam, HookMode.Pre);
             this.RegisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch, HookMode.Pre);
             this.RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
+            this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
 
             this.AddCommandListener("jointeam", OnCommandJoinTeam);
         }
 
-
+       
 
         public override void Unload(bool hotReload)
         {
@@ -325,6 +326,12 @@ namespace CS2Retake
             return HookResult.Continue;
         }
 
+        private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
+        {
+            RetakeManager.Instance.PlaySpotSound();
+
+            return HookResult.Continue;
+        }
 
         private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
         {

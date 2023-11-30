@@ -286,10 +286,19 @@ namespace CS2Retake.Managers
                 Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
 
                 var terroristPlayerList = this.GetPlayerControllers().Where(x => x.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
-                terroristPlayerList.ForEach(x => x.PlayerPawn.Value.CommitSuicide(true, true));
+                terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
             }
         }
         
+        public void PlaySpotSound()
+        {
+            var bombsite = MapManager.Instance.BombSite;
+
+            foreach(var player in this.GetPlayerControllers().FindAll(x => x.TeamNum == (int)CsTeam.CounterTerrorist))
+            {
+                player.ExecuteClientCommand($"play sounds/vo/agents/seal_epic/loc_{bombsite.ToString().ToLower()}_01");
+            }
+        }
 
         public void ConfigureForRetake()
         {   
