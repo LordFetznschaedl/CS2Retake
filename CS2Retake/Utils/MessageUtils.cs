@@ -1,9 +1,11 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Runtime.CompilerServices;
 using System.Runtime.ConstrainedExecution;
 using System.Text;
 using System.Threading.Tasks;
@@ -13,6 +15,7 @@ namespace CS2Retake.Utils
     public static class MessageUtils
     {
         public static string ModuleName { get; set; } = string.Empty;
+        public static ILogger? Logger { get; set; }
 
         public static string PluginPrefix => $"[{ChatColors.Gold}{MessageUtils.ModuleName}{ChatColors.White}]";
 
@@ -44,7 +47,7 @@ namespace CS2Retake.Utils
             }
             else
             {
-                MessageUtils.Log(message);
+                MessageUtils.Log(LogLevel.Information, message);
             }
         }
 
@@ -53,11 +56,9 @@ namespace CS2Retake.Utils
             Server.PrintToChatAll($"{MessageUtils.PluginPrefix} {message}");
         }
 
-        private static void Log(string message)
+        private static void Log(LogLevel level, string? message, params object?[] args)
         {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"[{MessageUtils.ModuleName}] {message}");
-            Console.ResetColor();
+            Logger?.Log(level, message, args);
         }
     }
 }

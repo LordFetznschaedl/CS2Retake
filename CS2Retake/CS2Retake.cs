@@ -21,14 +21,13 @@ namespace CS2Retake
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 
-        private CounterStrikeSharp.API.Modules.Timers.Timer? _thankYouTimer;
-
         public override void Load(bool hotReload)
         {
             this.Logger?.LogInformation(this.PluginInfo());
             this.Logger?.LogInformation(this.ModuleDescription);
 
             MessageUtils.ModuleName = this.ModuleName;
+            MessageUtils.Logger = this.Logger;
             WeaponManager.Instance.ModuleDirectory = this.ModuleDirectory;
 
             if (MapManager.Instance.CurrentMap == null)
@@ -36,10 +35,9 @@ namespace CS2Retake
                 this.OnMapStart(Server.MapName);
             }
 
-            this._thankYouTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(7 * 60, MessageUtils.ThankYouMessage, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
+            this.AddTimer(7 * 60, MessageUtils.ThankYouMessage, TimerFlags.REPEAT);
 
             this.RegisterListener<Listeners.OnMapStart>(mapName => this.OnMapStart(mapName));
-
 
             this.RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
             this.RegisterEventHandler<EventRoundFreezeEnd>(OnRoundFreezeEnd);
@@ -51,15 +49,6 @@ namespace CS2Retake
             this.RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
 
             this.AddCommandListener("jointeam", OnCommandJoinTeam);
-        }
-
-
-
-        public override void Unload(bool hotReload)
-        {
-            this._thankYouTimer?.Kill();
-
-            base.Unload(hotReload);
         }
 
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
