@@ -14,6 +14,7 @@ using CounterStrikeSharp.API.Modules.Timers;
 using System.Timers;
 using CS2Retake.Utils;
 using CS2Retake.Managers.Base;
+using Microsoft.Extensions.Logging;
 
 namespace CS2Retake.Managers
 {
@@ -58,13 +59,13 @@ namespace CS2Retake.Managers
 
         public void ScrambleTeams()
         {
-            this.Log($"ScrambleTeams");
+            MessageUtils.Log(LogLevel.Debug,$"ScrambleTeams");
 
             var nonSpectatingValidPlayers = this.GetPlayerControllers().Where(x => x.IsValid && (x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist)).ToList();
 
             if (!nonSpectatingValidPlayers.Any())
             {
-                this.Log($"No valid non spectating players have been found!");
+                MessageUtils.Log(LogLevel.Error,$"No valid non spectating players have been found!");
                 return;
             }
 
@@ -79,7 +80,7 @@ namespace CS2Retake.Managers
 
         public void SwitchTeams()
         {
-            this.Log($"SwitchTeams");
+            MessageUtils.Log(LogLevel.Debug, $"SwitchTeams");
 
             var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid).ToList();
 
@@ -101,14 +102,14 @@ namespace CS2Retake.Managers
             var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(terroristPlayers.Count).ToList();
             var terroristsToSwitch = terroristPlayers.OrderBy(x => random.Next()).Take(playersNeededInCT).ToList();
 
-            this.Log($"playersOnServer: {playersOnServer.Count}");
-            this.Log($"T: {terroristPlayers.Count}");
-            this.Log($"CT: {counterTerroristPlayers.Count}");
-            this.Log($"Queue: {playersInQueue}");
-            this.Log($"activePlayerCount: {activePlayerCount}");
-            this.Log($"playersNeededInCT: {playersNeededInCT}");
-            this.Log($"T to switch: {terroristsToSwitch.Count}");
-            this.Log($"CT to switch: {counterTerroristsToSwitch.Count}");
+            MessageUtils.Log(LogLevel.Debug, $"playersOnServer: {playersOnServer.Count}");
+            MessageUtils.Log(LogLevel.Debug, $"T: {terroristPlayers.Count}");
+            MessageUtils.Log(LogLevel.Debug, $"CT: {counterTerroristPlayers.Count}");
+            MessageUtils.Log(LogLevel.Debug, $"Queue: {playersInQueue}");
+            MessageUtils.Log(LogLevel.Debug, $"activePlayerCount: {activePlayerCount}");
+            MessageUtils.Log(LogLevel.Debug, $"playersNeededInCT: {playersNeededInCT}");
+            MessageUtils.Log(LogLevel.Debug, $"T to switch: {terroristsToSwitch.Count}");
+            MessageUtils.Log(LogLevel.Debug, $"CT to switch: {counterTerroristsToSwitch.Count}");
 
             terroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
             counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
@@ -118,7 +119,7 @@ namespace CS2Retake.Managers
 
         public void AddQueuedPlayers()
         {
-            this.Log($"AddQueuedPlayers");
+            MessageUtils.Log(LogLevel.Debug, $"AddQueuedPlayers");
 
             if(!this.PlayerJoinQueue.Any())
             {
@@ -144,14 +145,14 @@ namespace CS2Retake.Managers
 
             var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(ctCount - playersNeededInCT).ToList();
 
-            this.Log($"playersOnServer: {playersOnServer.Count}");
-            this.Log($"T: {terroristPlayers.Count}");
-            this.Log($"CT: {counterTerroristPlayers.Count}");
-            this.Log($"Queue: {playersInQueue}");
-            this.Log($"activePlayerCount: {activePlayerCount}");
-            this.Log($"playersNeededInCT: {playersNeededInCT}");
-            this.Log($"CT + Q: {ctCount}");
-            this.Log($"CTs to switch to T: {ctCount - playersNeededInCT}");
+            MessageUtils.Log(LogLevel.Debug, $"playersOnServer: {playersOnServer.Count}");
+            MessageUtils.Log(LogLevel.Debug, $"T: {terroristPlayers.Count}");
+            MessageUtils.Log(LogLevel.Debug, $"CT: {counterTerroristPlayers.Count}");
+            MessageUtils.Log(LogLevel.Debug, $"Queue: {playersInQueue}");
+            MessageUtils.Log(LogLevel.Debug, $"activePlayerCount: {activePlayerCount}");
+            MessageUtils.Log(LogLevel.Debug, $"playersNeededInCT: {playersNeededInCT}");
+            MessageUtils.Log(LogLevel.Debug, $"CT + Q: {ctCount}");
+            MessageUtils.Log(LogLevel.Debug, $"CTs to switch to T: {ctCount - playersNeededInCT}");
 
             counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
 
@@ -167,13 +168,13 @@ namespace CS2Retake.Managers
 
             if(plantSpawn == null)
             {
-                this.Log($"No valid plant spawn found! This might be because no player is on terrorist team.");
+                MessageUtils.Log(LogLevel.Warning,$"No valid plant spawn found! This might be because no player is on terrorist team.");
                 return;
             }
 
             if(plantSpawn.SpawnUsedBy == null)
             {
-                this.Log($"Spawn is not used by any player");
+                MessageUtils.Log(LogLevel.Error, $"Spawn is not used by any player");
                 return;
             }
 
@@ -181,7 +182,7 @@ namespace CS2Retake.Managers
 
             if(this._planterPlayerController == null)
             {
-                this.Log($"Player that uses the valid plant spawn is null");
+                MessageUtils.Log(LogLevel.Error, $"Player that uses the valid plant spawn is null");
                 return;
             }
 
@@ -201,7 +202,7 @@ namespace CS2Retake.Managers
 
             //if(plantedBomb == null)
             //{
-            //    this.Log($"No planted bomb was found!");
+            //    MessageUtils.Log(LogLevel.Warning,$"No planted bomb was found!");
             //    return;
             //}
 
@@ -209,17 +210,17 @@ namespace CS2Retake.Managers
 
             //if(playerPawn == null)
             //{
-            //    this.Log($"Player pawn is null");
+            //    MessageUtils.Log(LogLevel.Warning,$"Player pawn is null");
             //    return;
             //}
             //if(playerPawn.AbsRotation == null)
             //{
-            //    this.Log($"Player pawn rotation is null");
+            //    MessageUtils.Log(LogLevel.Warning,$"Player pawn rotation is null");
             //    return;
             //}
             //if(playerPawn.AbsOrigin == null)
             //{
-            //    this.Log($"Player pawn position is null");
+            //    MessageUtils.Log(LogLevel.Warning,$"Player pawn position is null");
             //    return;
             //}
 
@@ -286,7 +287,7 @@ namespace CS2Retake.Managers
                 Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
 
                 var terroristPlayerList = this.GetPlayerControllers().Where(x => x.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
-                terroristPlayerList.ForEach(x => x.PlayerPawn.Value.CommitSuicide(true, true));
+                terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
             }
         }
         
@@ -304,26 +305,26 @@ namespace CS2Retake.Managers
         {
             if (this.GameRules == null)
             {
-                this.Log($"GameRules is null. Fetching gamerule...");
+                MessageUtils.Log(LogLevel.Information,$"GameRules is null. Fetching gamerule...");
 
                 var gameRuleProxyList = this.GetGameRulesProxies();
 
                 if (gameRuleProxyList.Count > 1)
                 {
-                    this.Log($"Multiple GameRuleProxies found. Using firstOrDefault");
+                    MessageUtils.Log(LogLevel.Error, $"Multiple GameRuleProxies found. Using firstOrDefault");
                 }
 
                 var gameRuleProxy = gameRuleProxyList.FirstOrDefault();
 
                 if (gameRuleProxy == null)
                 {
-                    this.Log($"GameRuleProxy is null");
+                    MessageUtils.Log(LogLevel.Error, $"GameRuleProxy is null");
                     return;
                 }
 
                 if (gameRuleProxy.GameRules == null)
                 {
-                    this.Log($"GameRules is null");
+                    MessageUtils.Log(LogLevel.Error, $"GameRules is null");
                     return;
                 }
 
@@ -339,7 +340,7 @@ namespace CS2Retake.Managers
 
             if(!gameRulesProxyList.Any())
             {
-                this.Log($"No gameRuleProxy found!");
+                MessageUtils.Log(LogLevel.Error, $"No gameRuleProxy found!");
             }
 
             return gameRulesProxyList;
@@ -351,7 +352,7 @@ namespace CS2Retake.Managers
 
             if (!playerList.Any())
             {
-                this.Log($"No Players have been found!");
+                MessageUtils.Log(LogLevel.Error, $"No Players have been found!");
             }
 
             return playerList;
@@ -363,7 +364,7 @@ namespace CS2Retake.Managers
 
             if (!plantedBombList.Any())
             {
-                this.Log("No planted bomb entities have been found!");
+                MessageUtils.Log(LogLevel.Error, "No planted bomb entities have been found!");
                 return null;
             }
 
