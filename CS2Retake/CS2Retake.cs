@@ -54,7 +54,7 @@ namespace CS2Retake
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
         public void OnCommandInfo(CCSPlayerController? player, CommandInfo command)
         {
-            command.ReplyToCommand(PluginInfo());
+            command.ReplyToCommand($"{ MessageUtils.PluginPrefix} {PluginInfo()}");
         }
 
         [ConsoleCommand("css_retakespawn", "This command teleports the player to a spawn with the given index in the args")]
@@ -63,25 +63,25 @@ namespace CS2Retake
         {
             if (player == null)
             {
-                this.Logger?.LogWarning("Command has been called by the server.");
+                this.Logger?.LogError("Command has been called by the server.");
                 return;
             }
             if(!player.PlayerPawn.IsValid)
             {
-                this.Logger?.LogWarning("PlayerPawn not valid");
+                this.Logger?.LogError("PlayerPawn not valid");
                 return;
             }
 
             if (command.ArgCount != 2)
             {
-                this.Logger?.LogWarning($"ArgCount: {command.ArgCount} - ArgString: {command.ArgString}");
-                command.ReplyToCommand($"One argument with a valid spawn index is needed! Example: !retakespawn <index (int)>");
+                this.Logger?.LogError($"ArgCount: {command.ArgCount} - ArgString: {command.ArgString}");
+                command.ReplyToCommand($"{MessageUtils.PluginPrefix} One argument with a valid spawn index is needed! Example: !retakespawn <index (int)>");
                 return;
             }
 
             if(!int.TryParse(command.ArgByIndex(1), out int spawnIndex))
             {
-                this.Logger?.LogWarning("Argument index not a valid integer!");
+                this.Logger?.LogError("Argument index not a valid integer!");
                 return;
             }
 
@@ -93,6 +93,7 @@ namespace CS2Retake
         public void OnCommandWrite(CCSPlayerController? player, CommandInfo command)
         {
             MapManager.Instance.CurrentMap.SaveSpawns();
+            this.Logger?.LogInformation($"{MapManager.Instance.CurrentMap.SpawnPoints.Count} spawnpoints saved");
         }
 
         [ConsoleCommand("css_retakeread", "This command reads the spawns for the current map")]
@@ -116,37 +117,37 @@ namespace CS2Retake
         {
             if (player == null)
             {
-                this.Logger?.LogWarning("Command has been called by the server.");
+                this.Logger?.LogError("Command has been called by the server.");
                 return;
             }
             if (!player.PlayerPawn.IsValid)
             {
-                this.Logger?.LogWarning("PlayerPawn not valid");
+                this.Logger?.LogError("PlayerPawn not valid");
                 return;
             }
 
             if (command.ArgCount != 4)
             {
-                this.Logger?.LogWarning($"ArgCount: {command.ArgCount} - ArgString: {command.ArgString}");
-                command.ReplyToCommand($"Command format: !retaketeleport <position X float> <position Y float> <position Z float>");
+                this.Logger?.LogError($"ArgCount: {command.ArgCount} - ArgString: {command.ArgString}");
+                command.ReplyToCommand($"{MessageUtils.PluginPrefix} Command format: !retaketeleport <position X float> <position Y float> <position Z float>");
                 return;
             }
 
             if (!float.TryParse(command.ArgByIndex(1), out float positionX))
             {
-                this.Logger?.LogWarning("Argument position X not a valid float!");
+                this.Logger?.LogError("Argument position X not a valid float!");
                 return;
             }
 
             if (!float.TryParse(command.ArgByIndex(2), out float positionY))
             {
-                this.Logger?.LogWarning("Argument position Y not a valid float!");
+                this.Logger?.LogError("Argument position Y not a valid float!");
                 return;
             }
 
             if (!float.TryParse(command.ArgByIndex(3), out float positionZ))
             {
-                this.Logger?.LogWarning("Argument position Z not a valid float!");
+                this.Logger?.LogError("Argument position Z not a valid float!");
                 return;
             }
 
@@ -159,43 +160,43 @@ namespace CS2Retake
         {
             if (player == null)
             {
-                this.Logger?.LogWarning("Command has been called by the server.");
+                this.Logger?.LogError("Command has been called by the server.");
                 return;
             }
             if (!player.PlayerPawn.IsValid)
             {
-                this.Logger?.LogWarning("PlayerPawn not valid");
+                this.Logger?.LogError("PlayerPawn not valid");
                 return;
             }
 
             if (command.ArgCount != 3)
             {
-                this.Logger?.LogWarning($"ArgCount: {command.ArgCount} - ArgString: {command.ArgString}");
-                command.ReplyToCommand($"Command format: !retakeaddspawn <2/3 - 2 = T; 3 = CT> <0/1 - 0 = A; 1 = B>");
+                this.Logger?.LogError($"ArgCount: {command.ArgCount} - ArgString: {command.ArgString}");
+                command.ReplyToCommand($"{MessageUtils.PluginPrefix} Command format: !retakeaddspawn <2/3 - 2 = T; 3 = CT> <0/1 - 0 = A; 1 = B>");
                 return;
             }
 
             if (!int.TryParse(command.ArgByIndex(1), out int team))
             {
-                this.Logger?.LogWarning("Team could not be parsed!");
+                this.Logger?.LogError("Team could not be parsed!");
                 return;
             }
 
             if(team != 2 && team != 3) 
             {
-                this.Logger?.LogWarning("Team index is not in 2 or 3");
+                this.Logger?.LogError("Team index is not in 2 or 3");
                 return;
             }
 
             if (!int.TryParse(command.ArgByIndex(2), out int bombSite))
             {
-                this.Logger?.LogWarning("Team could not be parsed!");
+                this.Logger?.LogError("Team could not be parsed!");
                 return;
             }
 
             if (bombSite != 0 && bombSite != 1)
             {
-                this.Logger?.LogWarning("BombSite index is not in 0 or 1");
+                this.Logger?.LogError("BombSite index is not in 0 or 1");
                 return;
             }
 
@@ -212,6 +213,7 @@ namespace CS2Retake
 
             if (player == null || !player.IsValid)
             {
+                this.Logger?.LogError("Player is null or not valid");
                 return HookResult.Handled;
             }
 
@@ -219,12 +221,13 @@ namespace CS2Retake
 
             if (commandInfo.ArgCount < 2)
             {
+                this.Logger?.LogError("Wrong amount of arguments for JoinTeam");
                 return HookResult.Handled;
             }
 
             if(!Enum.TryParse(commandInfo.GetArg(1), out CsTeam newTeam))
             {
-                this.Logger?.LogWarning("Parsing new team failed");
+                this.Logger?.LogError("Parsing new team failed");
                 return HookResult.Handled;
             }
 
@@ -232,13 +235,13 @@ namespace CS2Retake
 
             if(oldTeam == newTeam && oldTeam != CsTeam.None) 
             {
-                this.Logger?.LogWarning("Old Team is new team");
+                this.Logger?.LogDebug("Old Team is new team");
                 return HookResult.Continue;
             }
 
             if((oldTeam == CsTeam.CounterTerrorist && newTeam == CsTeam.Terrorist) || (oldTeam == CsTeam.Terrorist && newTeam == CsTeam.CounterTerrorist))
             {
-                this.Logger?.LogWarning("team switch");
+                this.Logger?.LogDebug("team switch");
                 return HookResult.Continue;
             }
             else if(newTeam == CsTeam.Spectator)

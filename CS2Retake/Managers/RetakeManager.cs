@@ -65,7 +65,7 @@ namespace CS2Retake.Managers
 
             if (!nonSpectatingValidPlayers.Any())
             {
-                MessageUtils.Log(LogLevel.Warning,$"No valid non spectating players have been found!");
+                MessageUtils.Log(LogLevel.Error,$"No valid non spectating players have been found!");
                 return;
             }
 
@@ -174,7 +174,7 @@ namespace CS2Retake.Managers
 
             if(plantSpawn.SpawnUsedBy == null)
             {
-                MessageUtils.Log(LogLevel.Warning,$"Spawn is not used by any player");
+                MessageUtils.Log(LogLevel.Error, $"Spawn is not used by any player");
                 return;
             }
 
@@ -182,7 +182,7 @@ namespace CS2Retake.Managers
 
             if(this._planterPlayerController == null)
             {
-                MessageUtils.Log(LogLevel.Warning,$"Player that uses the valid plant spawn is null");
+                MessageUtils.Log(LogLevel.Error, $"Player that uses the valid plant spawn is null");
                 return;
             }
 
@@ -287,7 +287,7 @@ namespace CS2Retake.Managers
                 Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
 
                 var terroristPlayerList = this.GetPlayerControllers().Where(x => x.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
-                terroristPlayerList.ForEach(x => x.PlayerPawn.Value.CommitSuicide(true, true));
+                terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
             }
         }
         
@@ -311,20 +311,20 @@ namespace CS2Retake.Managers
 
                 if (gameRuleProxyList.Count > 1)
                 {
-                    MessageUtils.Log(LogLevel.Warning,$"Multiple GameRuleProxies found. Using firstOrDefault");
+                    MessageUtils.Log(LogLevel.Error, $"Multiple GameRuleProxies found. Using firstOrDefault");
                 }
 
                 var gameRuleProxy = gameRuleProxyList.FirstOrDefault();
 
                 if (gameRuleProxy == null)
                 {
-                    MessageUtils.Log(LogLevel.Warning,$"GameRuleProxy is null");
+                    MessageUtils.Log(LogLevel.Error, $"GameRuleProxy is null");
                     return;
                 }
 
                 if (gameRuleProxy.GameRules == null)
                 {
-                    MessageUtils.Log(LogLevel.Warning,$"GameRules is null");
+                    MessageUtils.Log(LogLevel.Error, $"GameRules is null");
                     return;
                 }
 
@@ -340,7 +340,7 @@ namespace CS2Retake.Managers
 
             if(!gameRulesProxyList.Any())
             {
-                MessageUtils.Log(LogLevel.Warning,$"No gameRuleProxy found!");
+                MessageUtils.Log(LogLevel.Error, $"No gameRuleProxy found!");
             }
 
             return gameRulesProxyList;
@@ -352,7 +352,7 @@ namespace CS2Retake.Managers
 
             if (!playerList.Any())
             {
-                MessageUtils.Log(LogLevel.Warning,$"No Players have been found!");
+                MessageUtils.Log(LogLevel.Error, $"No Players have been found!");
             }
 
             return playerList;
@@ -364,7 +364,7 @@ namespace CS2Retake.Managers
 
             if (!plantedBombList.Any())
             {
-                MessageUtils.Log(LogLevel.Warning,"No planted bomb entities have been found!");
+                MessageUtils.Log(LogLevel.Error, "No planted bomb entities have been found!");
                 return null;
             }
 

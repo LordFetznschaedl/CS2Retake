@@ -47,14 +47,14 @@ namespace CS2Retake.Managers
         {
             if(player == null || !player.IsValid) 
             {
-                MessageUtils.Log(LogLevel.Warning,$"Player is null or not valid");
+                MessageUtils.Log(LogLevel.Error, $"Player is null or not valid");
                 return;
             }
 
             var team = (CsTeam)player.TeamNum;
             if (team != CsTeam.Terrorist && team != CsTeam.CounterTerrorist)
             {
-                MessageUtils.Log(LogLevel.Warning,$"Player not in Terrorist or CounterTerrorist Team");
+                MessageUtils.Log(LogLevel.Error, $"Player not in Terrorist or CounterTerrorist Team");
                 return;
             }
 
@@ -100,9 +100,9 @@ namespace CS2Retake.Managers
 
             
 
-            if (player.PlayerPawn.Value.ItemServices == null)
+            if (player?.PlayerPawn?.Value?.ItemServices == null)
             {
-                MessageUtils.Log(LogLevel.Warning,$"Player has no item service");
+                MessageUtils.Log(LogLevel.Error,$"Player has no item service");
                 return;
             }
 
@@ -151,14 +151,14 @@ namespace CS2Retake.Managers
         {
             if (player == null || !player.IsValid)
             {
-                MessageUtils.Log(LogLevel.Warning,$"Player is null or not valid");
+                MessageUtils.Log(LogLevel.Error, $"Player is null or not valid");
                 return;
             }
 
-            var weaponService = player.PlayerPawn.Value.WeaponServices;
+            var weaponService = player?.PlayerPawn?.Value?.WeaponServices;
             if (weaponService == null)
             {
-                MessageUtils.Log(LogLevel.Warning,$"WeaponService of player is null");
+                MessageUtils.Log(LogLevel.Error, $"WeaponService of player is null");
                 return;
             }
 
@@ -166,6 +166,35 @@ namespace CS2Retake.Managers
         }
 
         public void RandomRoundType()
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
         {
             this.RoundType = (RoundTypeEnum)new Random().Next(0, Enum.GetNames(typeof(RoundTypeEnum)).Length-1);
         }
