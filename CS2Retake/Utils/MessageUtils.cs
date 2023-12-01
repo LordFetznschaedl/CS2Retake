@@ -56,7 +56,7 @@ namespace CS2Retake.Utils
             Server.PrintToChatAll($"{MessageUtils.PluginPrefix} {message}");
         }
 
-        private static void Log(LogLevel level, string? message, params object?[] args)
+        public static void Log(LogLevel level, string? message, params object?[] args)
         {
             Logger?.Log(level, message, args);
         }

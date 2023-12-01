@@ -5,6 +5,7 @@ using CS2Retake.Allocators.Exceptions;
 using CS2Retake.Allocators.Interfaces;
 using CS2Retake.Managers.Base;
 using CS2Retake.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -46,14 +47,14 @@ namespace CS2Retake.Managers
         {
             if(player == null || !player.IsValid) 
             {
-                this.Log($"Player is null or not valid");
+                MessageUtils.Log(LogLevel.Warning,$"Player is null or not valid");
                 return;
             }
 
             var team = (CsTeam)player.TeamNum;
             if (team != CsTeam.Terrorist && team != CsTeam.CounterTerrorist)
             {
-                this.Log($"Player not in Terrorist or CounterTerrorist Team");
+                MessageUtils.Log(LogLevel.Warning,$"Player not in Terrorist or CounterTerrorist Team");
                 return;
             }
 
@@ -91,7 +92,7 @@ namespace CS2Retake.Managers
             }
             catch(AllocatorException ex)
             {
-                this.Log($"An error happened while assigning the weapons. Message: {ex.Message}");
+                MessageUtils.Log(LogLevel.Error,$"An error happened while assigning the weapons. Message: {ex.Message}");
                 MessageUtils.PrintToPlayerOrServer($"An error occurred while assigning your weapons. Using fallback weapons!");
 
                 weaponAllocationData = (string.Empty, "weapon_deagle", KevlarEnum.KevlarHelmet, (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
@@ -101,7 +102,7 @@ namespace CS2Retake.Managers
 
             if (player.PlayerPawn.Value.ItemServices == null)
             {
-                this.Log($"Player has no item service");
+                MessageUtils.Log(LogLevel.Warning,$"Player has no item service");
                 return;
             }
 
@@ -150,14 +151,14 @@ namespace CS2Retake.Managers
         {
             if (player == null || !player.IsValid)
             {
-                this.Log($"Player is null or not valid");
+                MessageUtils.Log(LogLevel.Warning,$"Player is null or not valid");
                 return;
             }
 
             var weaponService = player.PlayerPawn.Value.WeaponServices;
             if (weaponService == null)
             {
-                this.Log($"WeaponService of player is null");
+                MessageUtils.Log(LogLevel.Warning,$"WeaponService of player is null");
                 return;
             }
 

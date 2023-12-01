@@ -17,7 +17,7 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin  
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.0.2-alpha";
+        public override string ModuleVersion => "1.0.3-alpha";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 

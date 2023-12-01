@@ -5,6 +5,7 @@ using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Entities;
 using CS2Retake.Managers.Base;
 using CS2Retake.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -55,17 +56,17 @@ namespace CS2Retake.Managers
 
             if(playerPawn == null) 
             {
-                this.Log($"playerPawn is null");
+                MessageUtils.Log(LogLevel.Warning,$"playerPawn is null");
                 return;
             }
             if (playerPawn.AbsOrigin == null)
             {
-                this.Log($"playerPawn position is null");
+                MessageUtils.Log(LogLevel.Warning,$"playerPawn position is null");
                 return;
             }
             if (playerPawn.AbsRotation == null)
             {
-                this.Log($"playerPawn rotation is null");
+                MessageUtils.Log(LogLevel.Warning,$"playerPawn rotation is null");
                 return;
             }
 
@@ -105,7 +106,7 @@ namespace CS2Retake.Managers
 
             if (spawn == null)
             {
-                this.Log($"Spawn is null. Moving player to Spectator");
+                MessageUtils.Log(LogLevel.Warning,$"Spawn is null. Moving player to Spectator");
                 player.SwitchTeam(CsTeam.Spectator);
                 return;
             }
