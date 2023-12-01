@@ -5,6 +5,7 @@ using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Entities;
 using CS2Retake.Managers.Base;
 using CS2Retake.Utils;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -50,30 +51,41 @@ namespace CS2Retake.Managers
 
         public void AddSpawn(CCSPlayerController player, CsTeam team, BombSiteEnum bombSite)
         {
-            var isInBombZone = player.PlayerPawn.Value.InBombZone;
-            var playerPawn = player.PlayerPawn.Value;
+            if(player == null) 
+            {
+                MessageUtils.Log(LogLevel.Error, $"player is null");
+                return;
+            }
+
+            var isInBombZone = player?.PlayerPawn?.Value?.InBombZone;
+            var playerPawn = player?.PlayerPawn.Value;
 
             if(playerPawn == null) 
             {
-                this.Log($"playerPawn is null");
+                MessageUtils.Log(LogLevel.Error, $"playerPawn is null");
                 return;
             }
             if (playerPawn.AbsOrigin == null)
             {
-                this.Log($"playerPawn position is null");
+                MessageUtils.Log(LogLevel.Error, $"playerPawn position is null");
                 return;
             }
             if (playerPawn.AbsRotation == null)
             {
-                this.Log($"playerPawn rotation is null");
+                MessageUtils.Log(LogLevel.Error, $"playerPawn rotation is null");
+                return;
+            }
+            if (isInBombZone == null || !isInBombZone.HasValue)
+            {
+                MessageUtils.Log(LogLevel.Error, $"isInBombZone is null");
                 return;
             }
 
-            var newSpawnPoint = new SpawnPointEntity(playerPawn.AbsOrigin, playerPawn.AbsRotation, bombSite, team, isInBombZone);
+            var newSpawnPoint = new SpawnPointEntity(playerPawn.AbsOrigin, playerPawn.AbsRotation, bombSite, team, isInBombZone.Value);
 
             this.CurrentMap.SpawnPoints.Add(newSpawnPoint);
 
-            player.PrintToChat($"SpawnPoint added! BombSite: {bombSite} - Team: {team} - isInBombZone: {isInBombZone}");
+            player?.PrintToChat($"SpawnPoint added! BombSite: {bombSite} - Team: {team} - isInBombZone: {isInBombZone}");
         }
 
         public void TeleportPlayerToSpawn(CCSPlayerController player, int? spawnIndex = null)
@@ -105,14 +117,14 @@ namespace CS2Retake.Managers
 
             if (spawn == null)
             {
-                this.Log($"Spawn is null. Moving player to Spectator");
+                MessageUtils.Log(LogLevel.Error,$"Spawn is null. Moving player to Spectator");
                 player.SwitchTeam(CsTeam.Spectator);
                 return;
             }
 
             spawn.SpawnUsedBy = player;
             player.PrintToConsole($"Spawnpoint: {spawn.SpawnId}");
-            player.PlayerPawn.Value.Teleport(spawn.Position, spawn.QAngle, new Vector(0f, 0f, 0f));
+            player?.PlayerPawn?.Value?.Teleport(spawn.Position, spawn.QAngle, new Vector(0f, 0f, 0f));
 
             
             
