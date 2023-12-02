@@ -11,5 +11,7 @@ namespace CS2Retake.Configs
     {
         public override int Version { get; set; } = 1;
         public bool SpotAnnouncerEnabled { get; set; } = true;
+
+        public CS2RetakeConfig() {}
     }
 }
