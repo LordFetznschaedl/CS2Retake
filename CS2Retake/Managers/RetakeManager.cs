@@ -291,7 +291,7 @@ namespace CS2Retake.Managers
             }
         }
         
-        public void PlaySpotSound()
+        public void PlaySpotAnnouncer()
         {
             var bombsite = MapManager.Instance.BombSite;
 

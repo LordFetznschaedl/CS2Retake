@@ -6,6 +6,7 @@ using CounterStrikeSharp.API.Modules.Admin;
 using CounterStrikeSharp.API.Modules.Commands;
 using CounterStrikeSharp.API.Modules.Timers;
 using CounterStrikeSharp.API.Modules.Utils;
+using CS2Retake.Configs;
 using CS2Retake.Entities;
 using CS2Retake.Managers;
 using CS2Retake.Utils;
@@ -14,12 +15,23 @@ using Microsoft.Extensions.Logging;
 namespace CS2Retake
 {
     [MinimumApiVersion(86)]
-    public class CS2Retake : BasePlugin  
+    public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
         public override string ModuleVersion => "1.0.3-alpha";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
+
+        public CS2RetakeConfig Config { get; set; } = new CS2RetakeConfig();
+
+        public void OnConfigParsed(CS2RetakeConfig config)
+        {
+            if(config.Version < this.Config.Version) 
+            {
+                this.Logger?.LogWarning($"The plugin configuration is out of date. Consider updating the config. [Current Version: {config.Version} - Plugin Version: {this.Config.Version}]");
+            }
+            this.Config = config;
+        }
 
         public override void Load(bool hotReload)
         {
@@ -321,7 +333,10 @@ namespace CS2Retake
 
         private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
         {
-            RetakeManager.Instance.PlaySpotSound();
+            if(this.Config.SpotAnnouncerEnabled)
+            {
+                RetakeManager.Instance.PlaySpotAnnouncer();
+            }
 
             return HookResult.Continue;
         }
