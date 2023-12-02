@@ -61,7 +61,7 @@ namespace CS2Retake.Managers
         {
             MessageUtils.Log(LogLevel.Debug,$"ScrambleTeams");
 
-            var nonSpectatingValidPlayers = this.GetPlayerControllers().Where(x => x.IsValid && (x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist)).ToList();
+            var nonSpectatingValidPlayers = this.GetPlayerControllers().Where(x => x.IsValid && x.PlayerPawn.IsValid && x.PlayerPawn.Value.IsValid && (x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist)).ToList();
 
             if (!nonSpectatingValidPlayers.Any())
             {
@@ -82,7 +82,7 @@ namespace CS2Retake.Managers
         {
             MessageUtils.Log(LogLevel.Debug, $"SwitchTeams");
 
-            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid).ToList();
+            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid && x.PlayerPawn.IsValid && x.PlayerPawn.Value.IsValid).ToList();
 
             var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
             var counterTerroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).ToList();
@@ -126,7 +126,7 @@ namespace CS2Retake.Managers
                 return;
             }
 
-            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid).ToList();
+            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid && x.PlayerPawn.IsValid && x.PlayerPawn.Value.IsValid).ToList();
 
             var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
             var counterTerroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).ToList();
@@ -291,6 +291,15 @@ namespace CS2Retake.Managers
             }
         }
         
+        public void PlaySpotSound()
+        {
+            var bombsite = MapManager.Instance.BombSite;
+
+            foreach(var player in this.GetPlayerControllers().FindAll(x => x.TeamNum == (int)CsTeam.CounterTerrorist))
+            {
+                player.ExecuteClientCommand($"play sounds/vo/agents/seal_epic/loc_{bombsite.ToString().ToLower()}_01");
+            }
+        }
 
         public void ConfigureForRetake()
         {   
