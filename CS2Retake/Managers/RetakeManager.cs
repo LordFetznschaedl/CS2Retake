@@ -117,7 +117,7 @@ namespace CS2Retake.Managers
             this.PlayerJoinQueue.Clear();
         }
 
-        public void AddQueuedPlayers()
+        public void AddQueuedPlayersAndRebalance()
         {
             MessageUtils.Log(LogLevel.Debug, $"AddQueuedPlayers");
 
@@ -156,6 +156,11 @@ namespace CS2Retake.Managers
 
             counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
 
+            if(terroristPlayers.Count > ctCount)
+            {
+               //REBALANCE IF TERRORISTS HAS MORE PLAYERS THEN COUNTER TERRORISTS
+            }
+
             this.PlayerJoinQueue.Clear();
         }
 
@@ -192,7 +197,7 @@ namespace CS2Retake.Managers
 
             this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{seconds}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
 
-            _  = new CounterStrikeSharp.API.Modules.Timers.Timer(seconds, this.HasBombBeenPlantedCallback);
+            //_ = new CounterStrikeSharp.API.Modules.Timers.Timer(seconds, this.HasBombBeenPlantedCallback);
 
             //c4.BombPlacedAnimation = false;
 
@@ -278,7 +283,7 @@ namespace CS2Retake.Managers
 
         }
 
-        private void HasBombBeenPlantedCallback()
+        public void HasBombBeenPlantedCallback()
         {
             var plantedBomb = this.FindPlantedBomb();
 

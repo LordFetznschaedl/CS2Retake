@@ -1,4 +1,5 @@
-﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Allocators;
@@ -43,6 +44,10 @@ namespace CS2Retake.Managers
 
         private WeaponManager() { }
 
+        public void AssignWeapons()
+        {
+            Utilities.GetPlayers().FindAll(x => x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist).ForEach(x => this.AssignWeapon(x));
+        }
 
         public void AssignWeapon(CCSPlayerController player)
         {
@@ -99,7 +104,6 @@ namespace CS2Retake.Managers
                 weaponAllocationData = (string.Empty, "weapon_deagle", KevlarEnum.KevlarHelmet, (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
             }
 
-            
 
             if (player?.PlayerPawn?.Value?.ItemServices == null)
             {

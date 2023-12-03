@@ -298,7 +298,7 @@ namespace CS2Retake
 
             MapManager.Instance.TeleportPlayerToSpawn(@event.Userid);
             WeaponManager.Instance.RemoveWeapons(@event.Userid);
-            WeaponManager.Instance.AssignWeapon(@event.Userid);
+            //WeaponManager.Instance.AssignWeapon(@event.Userid);
 
             return HookResult.Continue;
         }
@@ -306,7 +306,8 @@ namespace CS2Retake
 
         private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
-            RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
+            //RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
+            _ = new CounterStrikeSharp.API.Modules.Timers.Timer(5, RetakeManager.Instance.HasBombBeenPlantedCallback);
 
             return HookResult.Continue;
         }
@@ -333,7 +334,10 @@ namespace CS2Retake
 
         private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
         {
-            if(this.Config.SpotAnnouncerEnabled)
+            WeaponManager.Instance.AssignWeapons();
+            RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
+
+            if (this.Config.SpotAnnouncerEnabled)
             {
                 RetakeManager.Instance.PlaySpotAnnouncer();
             }
@@ -347,7 +351,7 @@ namespace CS2Retake
             {
                 MapManager.Instance.TerroristRoundWinStreak++;
                 MessageUtils.PrintToChatAll($"The Terrorists have won {ChatColors.Darkred}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
-                RetakeManager.Instance.AddQueuedPlayers();
+                RetakeManager.Instance.AddQueuedPlayersAndRebalance();
             }
             else
             {
