@@ -297,7 +297,7 @@ namespace CS2Retake
             }
 
             MapManager.Instance.TeleportPlayerToSpawn(@event.Userid);
-            WeaponManager.Instance.RemoveWeapons(@event.Userid);
+            //WeaponManager.Instance.RemoveWeapons(@event.Userid);
             //WeaponManager.Instance.AssignWeapon(@event.Userid);
 
             return HookResult.Continue;
@@ -308,6 +308,7 @@ namespace CS2Retake
         {
             //RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
             _ = new CounterStrikeSharp.API.Modules.Timers.Timer(5, RetakeManager.Instance.HasBombBeenPlantedCallback);
+            
 
             return HookResult.Continue;
         }

@@ -46,7 +46,10 @@ namespace CS2Retake.Managers
 
         public void AssignWeapons()
         {
-            Utilities.GetPlayers().FindAll(x => x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist).ForEach(x => this.AssignWeapon(x));
+            Utilities.GetPlayers().FindAll(x => x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist).ForEach(x => {
+                this.RemoveWeapons(x);
+                this.AssignWeapon(x);
+                });
         }
 
         public void AssignWeapon(CCSPlayerController player)
@@ -124,14 +127,15 @@ namespace CS2Retake.Managers
 
             }
 
-            if (!string.IsNullOrWhiteSpace(weaponAllocationData.primaryWeapon))
-            {
-                player.GiveNamedItem(weaponAllocationData.primaryWeapon);
-            }
             if (!string.IsNullOrWhiteSpace(weaponAllocationData.secondaryWeapon))
             {
                 player.GiveNamedItem(weaponAllocationData.secondaryWeapon);
             }
+            if (!string.IsNullOrWhiteSpace(weaponAllocationData.primaryWeapon))
+            {
+                player.GiveNamedItem(weaponAllocationData.primaryWeapon);
+            }
+           
 
             if (weaponAllocationData.kit)
             {
