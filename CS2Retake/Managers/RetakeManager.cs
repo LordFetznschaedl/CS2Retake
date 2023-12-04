@@ -24,12 +24,13 @@ namespace CS2Retake.Managers
         public bool BombHasBeenPlanted { get; set; } = false;
 
         private CCSPlayerController _planterPlayerController;
-
         public CCSGameRules? GameRules { get; set; } = null;
 
         public List<CCSPlayerController> PlayerJoinQueue = new List<CCSPlayerController>();
+        public bool IsWarmup { get; set; } = false;
+        public float SecondsUntilBombPlantedCheck { get; set; } = 5.0f;
 
-        public bool IgnoreQueue { get; set; } = false;
+        public CounterStrikeSharp.API.Modules.Timers.Timer? HasBombBeenPlantedTimer = null;
 
         public static RetakeManager Instance
         {
@@ -191,11 +192,13 @@ namespace CS2Retake.Managers
                 return;
             }
 
-            var seconds = 5;
-
             this._planterPlayerController.GiveNamedItem("weapon_c4");
 
-            this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{seconds}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
+            if(this.SecondsUntilBombPlantedCheck > 0)
+            {
+                this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{this.SecondsUntilBombPlantedCheck}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
+            }
+            
 
             //_ = new CounterStrikeSharp.API.Modules.Timers.Timer(seconds, this.HasBombBeenPlantedCallback);
 
@@ -289,7 +292,7 @@ namespace CS2Retake.Managers
 
             if (plantedBomb == null)
             {
-                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
+                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName ?? "NOBODY"}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
 
                 var terroristPlayerList = this.GetPlayerControllers().Where(x => x.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
                 terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
@@ -310,7 +313,7 @@ namespace CS2Retake.Managers
         {   
             Server.ExecuteCommand($"execifexists cs2retake/retake.cfg");
 
-            this.IgnoreQueue = true;
+            this.IsWarmup = true;
         }
 
         
@@ -378,7 +381,7 @@ namespace CS2Retake.Managers
 
             if (!plantedBombList.Any())
             {
-                MessageUtils.Log(LogLevel.Error, "No planted bomb entities have been found!");
+                MessageUtils.Log(LogLevel.Warning, "No planted bomb entities have been found! This might be because no bomb was planted.");
                 return null;
             }
 
@@ -389,7 +392,10 @@ namespace CS2Retake.Managers
         {
             if (completeReset)
             {
-
+                if(this.HasBombBeenPlantedTimer != null)
+                {
+                    this.HasBombBeenPlantedTimer?.Kill();
+                }
             }
 
             this.BombHasBeenPlanted = false;

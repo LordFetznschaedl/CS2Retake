@@ -41,6 +41,7 @@ namespace CS2Retake
             MessageUtils.ModuleName = this.ModuleName;
             MessageUtils.Logger = this.Logger;
             WeaponManager.Instance.ModuleDirectory = this.ModuleDirectory;
+            RetakeManager.Instance.SecondsUntilBombPlantedCheck = this.Config.SecondsUntilBombPlantedCheck;
 
             if (MapManager.Instance.CurrentMap == null)
             {
@@ -219,7 +220,7 @@ namespace CS2Retake
 
         private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
         {
-            if (RetakeManager.Instance.IgnoreQueue)
+            if (RetakeManager.Instance.IsWarmup)
             {
                 return HookResult.Continue;
             }
@@ -307,8 +308,10 @@ namespace CS2Retake
         private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
             //RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
-            _ = new CounterStrikeSharp.API.Modules.Timers.Timer(5, RetakeManager.Instance.HasBombBeenPlantedCallback);
-            
+            if (this.Config.SecondsUntilBombPlantedCheck > 0 && !RetakeManager.Instance.IsWarmup)
+            {
+                RetakeManager.Instance.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(this.Config.SecondsUntilBombPlantedCheck, RetakeManager.Instance.HasBombBeenPlantedCallback);
+            }
 
             return HookResult.Continue;
         }
@@ -370,6 +373,7 @@ namespace CS2Retake
 
             MapManager.Instance.ResetForNextRound();
             WeaponManager.Instance.ResetForNextRound();
+            RetakeManager.Instance.ResetForNextRound();
 
             return HookResult.Continue;
         }
@@ -388,7 +392,7 @@ namespace CS2Retake
 
         private HookResult OnBeginNewMatch(EventBeginNewMatch @event, GameEventInfo info)
         {
-            RetakeManager.Instance.IgnoreQueue = false;
+            RetakeManager.Instance.IsWarmup = false;
 
             //RetakeManager.Instance.ScrambleTeams();
 
@@ -399,7 +403,7 @@ namespace CS2Retake
         {
             this.Logger?.LogDebug($"OnCsIntermission");
 
-            RetakeManager.Instance.IgnoreQueue = true;
+            RetakeManager.Instance.IsWarmup = true;
 
             return HookResult.Continue;
         }
