@@ -18,7 +18,7 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.0.3-alpha";
+        public override string ModuleVersion => "1.0.4-alpha";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 
@@ -298,8 +298,6 @@ namespace CS2Retake
             }
 
             MapManager.Instance.TeleportPlayerToSpawn(@event.Userid);
-            //WeaponManager.Instance.RemoveWeapons(@event.Userid);
-            //WeaponManager.Instance.AssignWeapon(@event.Userid);
 
             return HookResult.Continue;
         }
@@ -307,7 +305,6 @@ namespace CS2Retake
 
         private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
-            //RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
             if (this.Config.SecondsUntilBombPlantedCheck > 0 && !RetakeManager.Instance.IsWarmup)
             {
                 RetakeManager.Instance.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(this.Config.SecondsUntilBombPlantedCheck, RetakeManager.Instance.HasBombBeenPlantedCallback);
@@ -394,7 +391,7 @@ namespace CS2Retake
         {
             RetakeManager.Instance.IsWarmup = false;
 
-            //RetakeManager.Instance.ScrambleTeams();
+            //SCRAMBLE AT START OF MATCH
 
             return HookResult.Continue;
         }
