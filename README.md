@@ -5,7 +5,7 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
   
 ---
 # reuirements:  
-- min. CounterStrikeSharp API Version: 66  
+- min. CounterStrikeSharp API Version: 86  
 - GameType: Competitive
   
 ---
