@@ -25,7 +25,7 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 Extract the `addons` folder to the `/csgo/` directory of the dedicated server.  
 
 ---
-# release 1.0.3-alpha:  
+# release 1.0.4-alpha:  
 - [x] creating, saving and reading spawns
 - [x] player spawn in spawnpoints 
 - [x] scramble teams
