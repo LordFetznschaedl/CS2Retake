@@ -6,19 +6,13 @@ using CS2Retake.Allocators;
 using CS2Retake.Allocators.Exceptions;
 using CS2Retake.Allocators.Interfaces;
 using CS2Retake.Managers.Base;
+using CS2Retake.Managers.Interfaces;
 using CS2Retake.Utils;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.Serialization;
-using System.Security.Cryptography.X509Certificates;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CS2Retake.Managers
 {
-    public class WeaponManager : BaseManager
+    public class WeaponManager : BaseManager, IWeaponManager
     {
         private static WeaponManager? _instance = null;
 

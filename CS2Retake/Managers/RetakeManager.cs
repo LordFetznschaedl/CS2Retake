@@ -1,24 +1,14 @@
 ﻿using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
 using CounterStrikeSharp.API.Modules.Utils;
-using System.Security.Cryptography;
-using CS2Retake.Entities;
-using CounterStrikeSharp.API.Modules.Entities;
-using CounterStrikeSharp.API.Modules.Timers;
-using System.Timers;
 using CS2Retake.Utils;
 using CS2Retake.Managers.Base;
 using Microsoft.Extensions.Logging;
+using CS2Retake.Managers.Interfaces;
 
 namespace CS2Retake.Managers
 {
-    public class RetakeManager : BaseManager
+    public class RetakeManager : BaseManager, IRetakeManager
     {
         private static RetakeManager? _instance = null;
         public bool BombHasBeenPlanted { get; set; } = false;
@@ -284,6 +274,14 @@ namespace CS2Retake.Managers
             //c4.StartedArming = true;
             //c4.BombPlanted = true;
 
+        }
+
+        public void HasBombBeenPlanted()
+        {
+            if (this.SecondsUntilBombPlantedCheck > 0 && !RetakeManager.Instance.IsWarmup)
+            {
+                this.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(this.SecondsUntilBombPlantedCheck, this.HasBombBeenPlantedCallback);
+            }
         }
 
         public void HasBombBeenPlantedCallback()

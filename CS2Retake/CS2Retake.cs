@@ -14,7 +14,7 @@ using Microsoft.Extensions.Logging;
 
 namespace CS2Retake
 {
-    [MinimumApiVersion(86)]
+    [MinimumApiVersion(129)]
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
@@ -305,10 +305,7 @@ namespace CS2Retake
 
         private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
-            if (this.Config.SecondsUntilBombPlantedCheck > 0 && !RetakeManager.Instance.IsWarmup)
-            {
-                RetakeManager.Instance.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(this.Config.SecondsUntilBombPlantedCheck, RetakeManager.Instance.HasBombBeenPlantedCallback);
-            }
+            RetakeManager.Instance.HasBombBeenPlanted();
 
             return HookResult.Continue;
         }
