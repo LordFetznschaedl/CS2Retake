@@ -158,14 +158,57 @@ namespace CS2Retake.Managers
                 return;
             }
 
+            if(player.PlayerPawn == null || !player.PlayerPawn.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Error, $"PlayerPawn is null or not valid");
+                return;
+            }
+
             var weaponService = player?.PlayerPawn?.Value?.WeaponServices;
+
             if (weaponService == null)
             {
                 MessageUtils.Log(LogLevel.Error, $"WeaponService of player is null");
                 return;
             }
 
-            weaponService.MyWeapons.Where(weapon => weapon.IsValid && weapon.Value.IsValid && !weapon.Value.DesignerName.Contains("knife")).ToList().ForEach(weapon => weapon.Value.Remove());
+            var playerWeaponService = new CCSPlayer_WeaponServices(weaponService.Handle);
+
+            if (playerWeaponService == null)
+            {
+                MessageUtils.Log(LogLevel.Error, $"PlayerWeaponService is null");
+                return;
+            }
+
+            playerWeaponService.MyWeapons.Where(weapon => weapon != null && weapon.IsValid && weapon.Value != null && weapon.Value.IsValid && !weapon.Value.DesignerName.Contains("knife")).ToList().ForEach(weapon => weapon.Value?.Remove());
+
+            var playerPawn = player?.PlayerPawn?.Value;
+
+            if(playerPawn == null || !playerPawn.IsValid) 
+            {
+                MessageUtils.Log(LogLevel.Error, $"PlayerPawn is null or not valid");
+                return;
+            }
+
+            playerPawn.ArmorValue = 0;
+
+            var itemService = player?.PlayerPawn?.Value?.ItemServices;
+
+            if(itemService == null)
+            {
+                MessageUtils.Log(LogLevel.Error, $"Player has no item service");
+                return;
+            }
+
+            var playerItemService = new CCSPlayer_ItemServices(itemService.Handle);
+            
+            if(playerItemService == null)
+            {
+                MessageUtils.Log(LogLevel.Error, $"PlayerItemService is null");
+                return;
+            }
+
+            playerItemService.HasHelmet = false;
         }
 
         public void RandomRoundType()

@@ -18,12 +18,12 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.0.4-alpha";
+        public override string ModuleVersion => "1.0.5-alpha";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 
         public CS2RetakeConfig Config { get; set; } = new CS2RetakeConfig();
-
+ 
         public void OnConfigParsed(CS2RetakeConfig config)
         {
             if(config.Version < this.Config.Version) 
@@ -302,14 +302,12 @@ namespace CS2Retake
             return HookResult.Continue;
         }
 
-
         private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
             RetakeManager.Instance.HasBombBeenPlanted();
 
             return HookResult.Continue;
         }
-
 
         private HookResult OnBombBeginPlant(EventBombBeginplant @event, GameEventInfo info)
         {

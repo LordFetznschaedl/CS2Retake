@@ -276,12 +276,30 @@ namespace CS2Retake.Managers
 
         }
 
+        //FIX: Add check if bomb even exists
         public void HasBombBeenPlanted()
         {
-            if (this.SecondsUntilBombPlantedCheck > 0 && !RetakeManager.Instance.IsWarmup)
+            if (this.SecondsUntilBombPlantedCheck <= 0 && RetakeManager.Instance.IsWarmup)
             {
-                this.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(this.SecondsUntilBombPlantedCheck, this.HasBombBeenPlantedCallback);
+                return;
             }
+
+            //Finding planted_c4 or weapon_c4
+            var bombList = Utilities.FindAllEntitiesByDesignerName<CCSWeaponBase>("c4");
+
+            bombList.ToList().ForEach(x => MessageUtils.PrintToChatAll(x.DesignerName));
+
+            if (!bombList.Any())
+            {
+                MessageUtils.PrintToChatAll($"No bomb was found in any players inventory resetting.");
+                this.ScrambleTeams();
+                this.GetPlayerControllers().ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(false, true));
+                return;
+            }
+
+            this.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(this.SecondsUntilBombPlantedCheck, this.HasBombBeenPlantedCallback);
+            
+
         }
 
         public void HasBombBeenPlantedCallback()
