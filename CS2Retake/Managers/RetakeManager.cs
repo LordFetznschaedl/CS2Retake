@@ -93,15 +93,6 @@ namespace CS2Retake.Managers
             var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(terroristPlayers.Count).ToList();
             var terroristsToSwitch = terroristPlayers.OrderBy(x => random.Next()).Take(playersNeededInCT).ToList();
 
-            MessageUtils.Log(LogLevel.Debug, $"playersOnServer: {playersOnServer.Count}");
-            MessageUtils.Log(LogLevel.Debug, $"T: {terroristPlayers.Count}");
-            MessageUtils.Log(LogLevel.Debug, $"CT: {counterTerroristPlayers.Count}");
-            MessageUtils.Log(LogLevel.Debug, $"Queue: {playersInQueue}");
-            MessageUtils.Log(LogLevel.Debug, $"activePlayerCount: {activePlayerCount}");
-            MessageUtils.Log(LogLevel.Debug, $"playersNeededInCT: {playersNeededInCT}");
-            MessageUtils.Log(LogLevel.Debug, $"T to switch: {terroristsToSwitch.Count}");
-            MessageUtils.Log(LogLevel.Debug, $"CT to switch: {counterTerroristsToSwitch.Count}");
-
             terroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
             counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
 
@@ -135,15 +126,6 @@ namespace CS2Retake.Managers
             var ctCount = counterTerroristPlayers.Count() + playersInQueue;
 
             var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(ctCount - playersNeededInCT).ToList();
-
-            MessageUtils.Log(LogLevel.Debug, $"playersOnServer: {playersOnServer.Count}");
-            MessageUtils.Log(LogLevel.Debug, $"T: {terroristPlayers.Count}");
-            MessageUtils.Log(LogLevel.Debug, $"CT: {counterTerroristPlayers.Count}");
-            MessageUtils.Log(LogLevel.Debug, $"Queue: {playersInQueue}");
-            MessageUtils.Log(LogLevel.Debug, $"activePlayerCount: {activePlayerCount}");
-            MessageUtils.Log(LogLevel.Debug, $"playersNeededInCT: {playersNeededInCT}");
-            MessageUtils.Log(LogLevel.Debug, $"CT + Q: {ctCount}");
-            MessageUtils.Log(LogLevel.Debug, $"CTs to switch to T: {ctCount - playersNeededInCT}");
 
             counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
 
@@ -287,9 +269,7 @@ namespace CS2Retake.Managers
             //Finding planted_c4 or weapon_c4
             var bombList = Utilities.FindAllEntitiesByDesignerName<CCSWeaponBase>("c4");
 
-            bombList.ToList().ForEach(x => MessageUtils.PrintToChatAll(x.DesignerName));
-
-            if (!bombList.Any())
+            if (!bombList.Any() && !this.IsWarmup)
             {
                 MessageUtils.PrintToChatAll($"No bomb was found in any players inventory resetting.");
                 this.ScrambleTeams();

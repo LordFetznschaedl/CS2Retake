@@ -164,7 +164,7 @@ namespace CS2Retake.Managers
                 return;
             }
 
-            var weaponService = player?.PlayerPawn?.Value?.WeaponServices;
+            var weaponService = player?.PlayerPawn?.Value?.WeaponServices ?? null;
 
             if (weaponService == null)
             {
@@ -192,7 +192,7 @@ namespace CS2Retake.Managers
 
             playerPawn.ArmorValue = 0;
 
-            var itemService = player?.PlayerPawn?.Value?.ItemServices;
+            var itemService = player?.PlayerPawn?.Value?.ItemServices ?? null;
 
             if(itemService == null)
             {
