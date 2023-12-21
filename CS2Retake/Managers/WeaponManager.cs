@@ -54,6 +54,12 @@ namespace CS2Retake.Managers
                 return;
             }
 
+            if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Warning, $"PlayerPawn is null or not valid. This might be because of a disconnected player.");
+                return;
+            }
+
             var team = (CsTeam)player.TeamNum;
             if (team != CsTeam.Terrorist && team != CsTeam.CounterTerrorist)
             {
@@ -158,9 +164,9 @@ namespace CS2Retake.Managers
                 return;
             }
 
-            if(player.PlayerPawn == null || !player.PlayerPawn.IsValid)
+            if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value.IsValid)
             {
-                MessageUtils.Log(LogLevel.Error, $"PlayerPawn is null or not valid");
+                MessageUtils.Log(LogLevel.Warning, $"PlayerPawn is null or not valid. This might be because of a disconnected player.");
                 return;
             }
 

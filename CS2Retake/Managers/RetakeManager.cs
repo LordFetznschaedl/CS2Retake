@@ -5,6 +5,7 @@ using CS2Retake.Utils;
 using CS2Retake.Managers.Base;
 using Microsoft.Extensions.Logging;
 using CS2Retake.Managers.Interfaces;
+using CounterStrikeSharp.API.Modules.Entities;
 
 namespace CS2Retake.Managers
 {
@@ -269,7 +270,7 @@ namespace CS2Retake.Managers
             //Finding planted_c4 or weapon_c4
             var bombList = Utilities.FindAllEntitiesByDesignerName<CCSWeaponBase>("c4");
 
-            if (!bombList.Any() && !this.IsWarmup)
+            if (!bombList.Any() && !this.IsWarmup && this.GetPlayerControllersOfTeam(CsTeam.Terrorist).Any())
             {
                 MessageUtils.PrintToChatAll($"No bomb was found in any players inventory resetting.");
                 this.ScrambleTeams();
@@ -289,8 +290,8 @@ namespace CS2Retake.Managers
             if (plantedBomb == null)
             {
                 Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName ?? "NOBODY"}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
-
-                var terroristPlayerList = this.GetPlayerControllers().Where(x => x.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
+                
+                var terroristPlayerList = this.GetPlayerControllers().Where(x => x != null && x.IsValid && x.PlayerPawn != null && x.PlayerPawn.IsValid && x.PlayerPawn.Value != null && x.PlayerPawn.Value.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
                 terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
             }
         }
@@ -367,6 +368,17 @@ namespace CS2Retake.Managers
             {
                 MessageUtils.Log(LogLevel.Error, $"No Players have been found!");
             }
+
+            return playerList;
+        }
+
+        private List<CCSPlayerController> GetPlayerControllersOfTeam(CsTeam team)
+        {
+            var playerList = this.GetPlayerControllers();
+
+            playerList = playerList.FindAll(x => x != null && x.IsValid && x.PlayerPawn != null && x.PlayerPawn.IsValid && x.PlayerPawn.Value != null && x.PlayerPawn.Value.IsValid);
+
+            playerList = playerList.FindAll(x => x.TeamNum == (int)team);
 
             return playerList;
         }

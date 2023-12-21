@@ -13,7 +13,7 @@ namespace CS2Retake.Managers
     {
         private static TeamManager? _instance = null;
 
-        private Dictionary<ulong, PlayerStateEnum> _playerStateDict = new Dictionary<ulong, PlayerStateEnum>();
+        private Dictionary<nint, PlayerStateEnum> _playerStateDict = new Dictionary<nint, PlayerStateEnum>();
 
         public static TeamManager Instance
         {
