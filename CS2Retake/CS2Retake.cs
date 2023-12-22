@@ -62,8 +62,15 @@ namespace CS2Retake
             this.RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
             this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
 
+            this.RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
+            this.RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
+            this.RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
+
+
             this.AddCommandListener("jointeam", OnCommandJoinTeam);
         }
+
+
 
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
         public void OnCommandInfo(CCSPlayerController? player, CommandInfo command)
@@ -378,6 +385,52 @@ namespace CS2Retake
             }
 
             @event.Silent = true;
+
+            return HookResult.Continue;
+        }
+
+        private HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
+        {
+            if(@event.Userid == null) 
+            {
+                return HookResult.Continue;
+            }
+            if(!@event.Userid.IsValid)
+            {
+                return HookResult.Continue;
+            }
+
+            TeamManager.Instance.PlayerConnected(@event.Userid);
+
+            return HookResult.Continue;
+        }
+        private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
+        {
+            if (@event.Userid == null)
+            {
+                return HookResult.Continue;
+            }
+            if (!@event.Userid.IsValid)
+            {
+                return HookResult.Continue;
+            }
+
+            TeamManager.Instance.PlayerConnectedFull(@event.Userid);
+
+            return HookResult.Continue;
+        }
+        private HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
+        {
+            if (@event.Userid == null)
+            {
+                return HookResult.Continue;
+            }
+            if (!@event.Userid.IsValid)
+            {
+                return HookResult.Continue;
+            }
+
+            TeamManager.Instance.PlayerDisconnected(@event.Userid);
 
             return HookResult.Continue;
         }
