@@ -6,6 +6,7 @@ using CS2Retake.Managers.Base;
 using Microsoft.Extensions.Logging;
 using CS2Retake.Managers.Interfaces;
 using CounterStrikeSharp.API.Modules.Entities;
+using CS2Retake.Configs;
 
 namespace CS2Retake.Managers
 {
@@ -19,7 +20,6 @@ namespace CS2Retake.Managers
 
         public List<CCSPlayerController> PlayerJoinQueue = new List<CCSPlayerController>();
         public bool IsWarmup { get; set; } = false;
-        public float SecondsUntilBombPlantedCheck { get; set; } = 5.0f;
 
         public CounterStrikeSharp.API.Modules.Timers.Timer? HasBombBeenPlantedTimer = null;
 
@@ -167,9 +167,9 @@ namespace CS2Retake.Managers
 
             this._planterPlayerController.GiveNamedItem("weapon_c4");
 
-            if(this.SecondsUntilBombPlantedCheck > 0)
+            if(RuntimeConfig.SecondsUntilBombPlantedCheck > 0)
             {
-                this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{this.SecondsUntilBombPlantedCheck}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
+                this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{RuntimeConfig.SecondsUntilBombPlantedCheck}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
             }
             
 
@@ -262,7 +262,7 @@ namespace CS2Retake.Managers
 
         public void HasBombBeenPlanted()
         {
-            if (this.SecondsUntilBombPlantedCheck <= 0 && RetakeManager.Instance.IsWarmup)
+            if (RuntimeConfig.SecondsUntilBombPlantedCheck <= 0 && RetakeManager.Instance.IsWarmup)
             {
                 return;
             }
@@ -278,7 +278,7 @@ namespace CS2Retake.Managers
                 return;
             }
 
-            this.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(this.SecondsUntilBombPlantedCheck, this.HasBombBeenPlantedCallback);
+            this.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(RuntimeConfig.SecondsUntilBombPlantedCheck, this.HasBombBeenPlantedCallback);
             
 
         }

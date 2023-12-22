@@ -38,10 +38,10 @@ namespace CS2Retake
             this.Logger?.LogInformation(this.PluginInfo());
             this.Logger?.LogInformation(this.ModuleDescription);
 
-            MessageUtils.ModuleName = this.ModuleName;
             MessageUtils.Logger = this.Logger;
-            WeaponManager.Instance.ModuleDirectory = this.ModuleDirectory;
-            RetakeManager.Instance.SecondsUntilBombPlantedCheck = this.Config.SecondsUntilBombPlantedCheck;
+
+            RuntimeConfig.SetModuleInfo(this.ModuleName, this.ModuleDirectory);
+            RuntimeConfig.SetBaseConfig(this.Config);
 
             if (MapManager.Instance.CurrentMap == null)
             {

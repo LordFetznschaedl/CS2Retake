@@ -36,17 +36,17 @@ namespace CS2Retake.Managers
 
         public void AddQueuePlayers()
         {
-            throw new NotImplementedException();
+            
         }
 
         public void ScrambleTeams()
         {
-            throw new NotImplementedException();
+            
         }
 
         public void SwitchTeams()
         {
-            throw new NotImplementedException();
+            
         }
 
         public void PlayerConnected(CCSPlayerController player)

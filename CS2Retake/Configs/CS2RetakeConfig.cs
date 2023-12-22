@@ -13,7 +13,8 @@ namespace CS2Retake.Configs
         public float SecondsUntilBombPlantedCheck { get; set; } = 5.0f;
         public bool SpotAnnouncerEnabled { get; set; } = true;
 
-        public float TeamBalanceRatio { get; set; } = 0.499f;       
+        public int MaxPlayers { get; set; } = 10;
+        public float TeamBalanceRatio { get; set; } = 0.499f;
 
         public CS2RetakeConfig() {
             this.Version = 2;
