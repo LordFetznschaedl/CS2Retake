@@ -270,7 +270,7 @@ namespace CS2Retake.Managers
             //Finding planted_c4 or weapon_c4
             var bombList = Utilities.FindAllEntitiesByDesignerName<CCSWeaponBase>("c4");
 
-            if (!bombList.Any() && !this.IsWarmup && this.GetPlayerControllersOfTeam(CsTeam.Terrorist).Any())
+            if (!bombList.Any() && !this.IsWarmup && PlayerUtils.GetPlayerControllersOfTeam(CsTeam.Terrorist).Any())
             {
                 MessageUtils.PrintToChatAll($"No bomb was found in any players inventory resetting.");
                 this.ScrambleTeams();
@@ -369,17 +369,6 @@ namespace CS2Retake.Managers
             {
                 MessageUtils.Log(LogLevel.Error, $"No Players have been found!");
             }
-
-            return playerList;
-        }
-
-        private List<CCSPlayerController> GetPlayerControllersOfTeam(CsTeam team)
-        {
-            var playerList = this.GetPlayerControllers();
-
-            playerList = playerList.FindAll(x => x != null && x.IsValid && x.PlayerPawn != null && x.PlayerPawn.IsValid && x.PlayerPawn.Value != null && x.PlayerPawn.Value.IsValid);
-
-            playerList = playerList.FindAll(x => x.TeamNum == (int)team);
 
             return playerList;
         }
