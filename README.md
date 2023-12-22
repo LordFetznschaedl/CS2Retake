@@ -53,7 +53,7 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 
 ---
 # special thanks:  
-[splewis](https://github.com/splewis): This plugin is inspired by [his instant defuse plugin for CSGO](https://github.com/splewis/csgo-retakes)
+[splewis](https://github.com/splewis): This plugin is inspired by [his retake plugin for CSGO](https://github.com/splewis/csgo-retakes)
 
 Discord:
 - @gorwok for creating spawns on de_mirage
