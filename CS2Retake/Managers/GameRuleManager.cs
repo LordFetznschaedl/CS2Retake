@@ -11,8 +11,10 @@ namespace CS2Retake.Managers
 {
     public class GameRuleManager : BaseManager, IGameRuleManager
     {
-
-
+        public bool IsWarmup()
+        {
+            throw new NotImplementedException();
+        }
 
         public override void ResetForNextRound(bool completeReset = true)
         {

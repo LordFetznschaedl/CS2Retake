@@ -8,5 +8,7 @@ namespace CS2Retake.Managers.Interfaces
 {
     public interface IGameRuleManager
     {
+        public bool IsWarmup();
+        
     }
 }
