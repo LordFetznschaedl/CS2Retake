@@ -259,7 +259,7 @@ namespace CS2Retake.Managers
 
         }
 
-        //FIX: Add check if bomb even exists
+
         public void HasBombBeenPlanted()
         {
             if (this.SecondsUntilBombPlantedCheck <= 0 && RetakeManager.Instance.IsWarmup)
@@ -289,7 +289,7 @@ namespace CS2Retake.Managers
 
             if (plantedBomb == null)
             {
-                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName ?? "NOBODY"}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
+                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController?.PlayerName ?? "NOBODY"}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
                 
                 var terroristPlayerList = this.GetPlayerControllers().Where(x => x != null && x.IsValid && x.PlayerPawn != null && x.PlayerPawn.IsValid && x.PlayerPawn.Value != null && x.PlayerPawn.Value.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
                 terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
