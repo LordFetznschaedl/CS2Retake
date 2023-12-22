@@ -6,7 +6,7 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 ---
 # reuirements:  
 - min. CounterStrikeSharp API Version: 129  
-- GameType: Casual or Competitive
+- GameType: Casual or Competitive  (Casual does work properly now!)
   
 ---
 # usage:  
@@ -25,7 +25,7 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 Extract the `addons` folder to the `/csgo/` directory of the dedicated server.  
 
 ---
-# release 1.0.4-alpha:  
+# release 1.0.5-alpha:  
 - [x] creating, saving and reading spawns
 - [x] player spawn in spawnpoints 
 - [x] scramble teams
