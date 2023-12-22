@@ -252,37 +252,9 @@ namespace CS2Retake
                 return HookResult.Handled;
             }
 
-            this.Logger?.LogDebug($"From {oldTeam} To {newTeam}");
+            TeamManager.Instance.PlayerSwitchTeam(player, oldTeam, newTeam);
 
-            if(oldTeam == newTeam && oldTeam != CsTeam.None) 
-            {
-                this.Logger?.LogDebug("Old Team is new team");
-                return HookResult.Continue;
-            }
-
-            if((oldTeam == CsTeam.CounterTerrorist && newTeam == CsTeam.Terrorist) || (oldTeam == CsTeam.Terrorist && newTeam == CsTeam.CounterTerrorist))
-            {
-                this.Logger?.LogDebug("team switch");
-                return HookResult.Continue;
-            }
-            else if(newTeam == CsTeam.Spectator)
-            {
-                MessageUtils.PrintToPlayerOrServer($"You have been removed from the queue.");
-                RetakeManager.Instance.PlayerJoinQueue.RemoveAll(x => x.SteamID == player.SteamID);
-
-                return HookResult.Continue;
-            }
-            else
-            {
-                if(!RetakeManager.Instance.PlayerJoinQueue.Any(x => x.SteamID == player.SteamID))
-                {
-                    MessageUtils.PrintToPlayerOrServer($"You have been placed into the queue. Please wait for the next round to start.");
-                    RetakeManager.Instance.PlayerJoinQueue.Add(player);
-                }
-                return HookResult.Handled;
-            }
-
-            
+            return HookResult.Handled;
         }
 
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
