@@ -129,7 +129,7 @@ namespace CS2Retake
         [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandScramble(CCSPlayerController? player, CommandInfo command)
         {
-            RetakeManager.Instance.ScrambleTeams();
+            TeamManager.Instance.ScrambleTeams();
         }
 
         [ConsoleCommand("css_retaketeleport", "This command teleports the player to the given coordinates")]

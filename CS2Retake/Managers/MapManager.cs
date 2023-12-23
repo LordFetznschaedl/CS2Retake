@@ -14,7 +14,7 @@ namespace CS2Retake.Managers
     public class MapManager : BaseManager, IMapManager
     {
         private static MapManager? _instance = null;
-        public MapEntity CurrentMap { get; set; }
+        public MapEntity? CurrentMap { get; set; } = null;
 
         public BombSiteEnum BombSite { get; private set; } = BombSiteEnum.Undefined;
         public bool HasToBeInBombZone { get; set; } = true;
