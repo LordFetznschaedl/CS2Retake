@@ -186,17 +186,7 @@ namespace CS2Retake.Managers
                 this._playerStateDict.Remove(userId);
             }
 
-            //Removing specific queued player from queue
-            var queueList = this._playerQueue.ToList();
-            this._playerQueue.Clear();
-
-            foreach(var queueUserId in queueList) 
-            {
-                if(queueUserId != userId)
-                {
-                    this._playerQueue.Enqueue(queueUserId);
-                }
-            }
+            this.RemoveFromQueue(userId);
 
             MessageUtils.Log(LogLevel.Information, $"Player {player.UserId.Value} is now disconnected.");
         }
@@ -220,15 +210,21 @@ namespace CS2Retake.Managers
             if((currentState == PlayerStateEnum.Connected || currentState == PlayerStateEnum.Playing) && newTeam == CsTeam.Spectator)
             {
                 this.UpdatePlayerStateDict(userId, PlayerStateEnum.Spectating);
-                player.SwitchTeam(CsTeam.Spectator);
             }
             //Place player into queue
             else if(currentState == PlayerStateEnum.Connected && (newTeam == CsTeam.Terrorist || newTeam == CsTeam.CounterTerrorist))
             {
                 this.UpdatePlayerStateDict(userId, PlayerStateEnum.Queue);
                 this.UpdateQueue(userId);
-                player.SwitchTeam(CsTeam.Spectator);
             }
+            //Remove player from queue when the player wants to switch to spectator
+            else if(currentState == PlayerStateEnum.Queue && newTeam == CsTeam.Spectator)
+            {
+                this.UpdatePlayerStateDict(userId, PlayerStateEnum.Spectating);
+                this.RemoveFromQueue(userId);
+            }
+
+            player.SwitchTeam(CsTeam.Spectator);
         }
 
         public override void ResetForNextRound(bool completeReset = true)
@@ -278,6 +274,21 @@ namespace CS2Retake.Managers
             if(!this._playerQueue.Contains(userId))
             {
                 this._playerQueue.Enqueue(userId);
+            }
+        }
+
+        private void RemoveFromQueue(int userId) 
+        {
+            //Removing specific queued player from queue
+            var queueList = this._playerQueue.ToList();
+            this._playerQueue.Clear();
+
+            foreach (var queueUserId in queueList)
+            {
+                if (queueUserId != userId)
+                {
+                    this._playerQueue.Enqueue(queueUserId);
+                }
             }
         }
 

@@ -18,7 +18,7 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.1.0-alpha";
+        public override string ModuleVersion => "1.0.6-alpha";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 
@@ -227,7 +227,7 @@ namespace CS2Retake
 
         private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
         {
-            if (RetakeManager.Instance.IsWarmup)
+            if (GameRuleManager.Instance.IsWarmup)
             {
                 return HookResult.Continue;
             }
@@ -326,20 +326,20 @@ namespace CS2Retake
             {
                 MapManager.Instance.TerroristRoundWinStreak++;
                 MessageUtils.PrintToChatAll($"The Terrorists have won {ChatColors.Darkred}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
-                RetakeManager.Instance.AddQueuedPlayersAndRebalance();
+                TeamManager.Instance.AddQueuePlayers();
             }
             else
             {
                 MessageUtils.PrintToChatAll($"The Counter-Terrorists have won!");
                 MapManager.Instance.TerroristRoundWinStreak = 0;
-                RetakeManager.Instance.SwitchTeams();
+                TeamManager.Instance.SwitchTeams();
             }
              
             if(MapManager.Instance.TerroristRoundWinStreak == 5)
             {
                 MessageUtils.PrintToChatAll($"Teams will be scrambled now!");
                 MapManager.Instance.TerroristRoundWinStreak = 0;
-                RetakeManager.Instance.ScrambleTeams();
+                TeamManager.Instance.ScrambleTeams();
             }
 
             MapManager.Instance.ResetForNextRound();
@@ -409,8 +409,6 @@ namespace CS2Retake
 
         private HookResult OnBeginNewMatch(EventBeginNewMatch @event, GameEventInfo info)
         {
-            RetakeManager.Instance.IsWarmup = false;
-
             //SCRAMBLE AT START OF MATCH
 
             return HookResult.Continue;
@@ -420,8 +418,6 @@ namespace CS2Retake
         {
             this.Logger?.LogDebug($"OnCsIntermission");
 
-            RetakeManager.Instance.IsWarmup = true;
-
             return HookResult.Continue;
         }
 
@@ -430,6 +426,7 @@ namespace CS2Retake
             this.Logger?.LogInformation($"Map changed to {mapName}");
             MapManager.Instance.CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory);
             RetakeManager.Instance.ConfigureForRetake();
+            GameRuleManager.Instance.GameRules = null;
         }
 
         private string PluginInfo()

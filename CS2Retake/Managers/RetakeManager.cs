@@ -16,10 +16,8 @@ namespace CS2Retake.Managers
         public bool BombHasBeenPlanted { get; set; } = false;
 
         private CCSPlayerController _planterPlayerController;
-        public CCSGameRules? GameRules { get; set; } = null;
 
         public List<CCSPlayerController> PlayerJoinQueue = new List<CCSPlayerController>();
-        public bool IsWarmup { get; set; } = false;
 
         public CounterStrikeSharp.API.Modules.Timers.Timer? HasBombBeenPlantedTimer = null;
 
@@ -262,7 +260,7 @@ namespace CS2Retake.Managers
 
         public void HasBombBeenPlanted()
         {
-            if (RuntimeConfig.SecondsUntilBombPlantedCheck <= 0 && RetakeManager.Instance.IsWarmup)
+            if (RuntimeConfig.SecondsUntilBombPlantedCheck <= 0 && GameRuleManager.Instance.IsWarmup)
             {
                 return;
             }
@@ -270,7 +268,7 @@ namespace CS2Retake.Managers
             //Finding planted_c4 or weapon_c4
             var bombList = Utilities.FindAllEntitiesByDesignerName<CCSWeaponBase>("c4");
 
-            if (!bombList.Any() && !this.IsWarmup && PlayerUtils.GetPlayerControllersOfTeam(CsTeam.Terrorist).Any())
+            if (!bombList.Any() && !GameRuleManager.Instance.IsWarmup && PlayerUtils.GetPlayerControllersOfTeam(CsTeam.Terrorist).Any())
             {
                 MessageUtils.PrintToChatAll($"No bomb was found in any players inventory resetting.");
                 this.ScrambleTeams();
@@ -310,55 +308,6 @@ namespace CS2Retake.Managers
         public void ConfigureForRetake()
         {   
             Server.ExecuteCommand($"execifexists cs2retake/retake.cfg");
-
-            this.IsWarmup = true;
-        }
-
-        
-
-        private void ModifyGameRulesBombPlanted(bool bombPlanted)
-        {
-            if (this.GameRules == null)
-            {
-                MessageUtils.Log(LogLevel.Information,$"GameRules is null. Fetching gamerule...");
-
-                var gameRuleProxyList = this.GetGameRulesProxies();
-
-                if (gameRuleProxyList.Count > 1)
-                {
-                    MessageUtils.Log(LogLevel.Error, $"Multiple GameRuleProxies found. Using firstOrDefault");
-                }
-
-                var gameRuleProxy = gameRuleProxyList.FirstOrDefault();
-
-                if (gameRuleProxy == null)
-                {
-                    MessageUtils.Log(LogLevel.Error, $"GameRuleProxy is null");
-                    return;
-                }
-
-                if (gameRuleProxy.GameRules == null)
-                {
-                    MessageUtils.Log(LogLevel.Error, $"GameRules is null");
-                    return;
-                }
-
-                this.GameRules = gameRuleProxy.GameRules;
-            }
-
-            this.GameRules.BombPlanted = bombPlanted;
-        }
-
-        private List<CCSGameRulesProxy> GetGameRulesProxies()
-        {
-            var gameRulesProxyList = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").ToList();
-
-            if(!gameRulesProxyList.Any())
-            {
-                MessageUtils.Log(LogLevel.Error, $"No gameRuleProxy found!");
-            }
-
-            return gameRulesProxyList;
         }
 
         private List<CCSPlayerController> GetPlayerControllers() 
