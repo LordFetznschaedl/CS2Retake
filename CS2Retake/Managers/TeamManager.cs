@@ -44,13 +44,29 @@ namespace CS2Retake.Managers
             this.DequeuePlayers();
             var ratio = this.GetPlayerRatio();
             var totalRatio = ratio.ctRatio + ratio.tRatio;
+            var totalPlayers = this.GetPlayingPlayersCount();
 
-            var playingCounterTerroristPlayers = playingPlayers.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).ToList();
-            var playingTerroristPlayers = playingPlayers.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
-            
-            if(ratio.tRatio < playingTerroristPlayers.Count) 
+            if (totalPlayers != totalRatio)
             {
-                
+                MessageUtils.Log(LogLevel.Error, $"AddQueuePlayers - Playing players count [{totalPlayers}] doesnt match the total ratio [CT: {ratio.ctRatio}, T: {ratio.tRatio}]!");
+                return;
+            }
+
+            var random = new Random();
+            var playingCounterTerroristPlayers = playingPlayers.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).OrderBy(x => random.Next()).ToList();
+            var playingTerroristPlayers = playingPlayers.Where(x => x.TeamNum == (int)CsTeam.Terrorist).OrderBy(x => random.Next()).ToList();
+            
+            var ctsNeededInT = ratio.tRatio - playingTerroristPlayers.Count;
+
+            queuedPlayers.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
+
+            if(ctsNeededInT > 0)
+            {
+                playingCounterTerroristPlayers.Take(ctsNeededInT).ToList().ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
+            }
+            else if(ctsNeededInT < 0) 
+            {
+                playingTerroristPlayers.Take(ctsNeededInT).ToList().ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
             }
 
         }
@@ -59,14 +75,17 @@ namespace CS2Retake.Managers
         {
             this.DequeuePlayers();
             var ratio = this.GetPlayerRatio();
+            var totalRatio = ratio.ctRatio + ratio.tRatio;
+            var totalPlayers = this.GetPlayingPlayersCount();
+
+            if(totalPlayers != totalRatio) 
+            {
+                MessageUtils.Log(LogLevel.Error, $"ScrambleTeams - Playing players count [{totalPlayers}] doesnt match the total ratio [CT: {ratio.ctRatio}, T: {ratio.tRatio}]!");
+                return;
+            }
 
             var random = new Random();
             var playingPlayers = this.GetPlayingPlayers().OrderBy(x => random.Next()).ToList();
-
-            if(playingPlayers.Count != (ratio.ctRatio + ratio.tRatio)) 
-            {
-                MessageUtils.Log(LogLevel.Error, $"Playing players count [{playingPlayers.Count}] doesnt match the total ratio [CT: {ratio.ctRatio}, T: {ratio.tRatio}]!");
-            }
 
             playingPlayers.Take(ratio.ctRatio).ToList().ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
             playingPlayers.TakeLast(ratio.tRatio).ToList().ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
@@ -74,10 +93,30 @@ namespace CS2Retake.Managers
 
         public void SwitchTeams()
         {
+            var playingPlayers = this.GetPlayingPlayers();
+            var queuedPlayers = this.GetQueuedPlayers();
+
             this.DequeuePlayers();
             var ratio = this.GetPlayerRatio();
+            var totalRatio = ratio.ctRatio + ratio.tRatio;
+            var totalPlayers = this.GetPlayingPlayersCount();
 
+            if (totalPlayers != totalRatio)
+            {
+                MessageUtils.Log(LogLevel.Error, $"SwitchTeams - Playing players count [{totalPlayers}] doesnt match the total ratio [CT: {ratio.ctRatio}, T: {ratio.tRatio}]!");
+                return;
+            }
 
+            var random = new Random();
+            var playingCounterTerroristPlayers = playingPlayers.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).OrderBy(x => random.Next()).ToList();
+            var playingTerroristPlayers = playingPlayers.Where(x => x.TeamNum == (int)CsTeam.Terrorist).OrderBy(x => random.Next()).ToList();
+
+            var ctsToSwitchToT =  playingCounterTerroristPlayers.Count >= ratio.tRatio ? ratio.tRatio : playingCounterTerroristPlayers.Count;
+            var tsToSwitchToCT = playingTerroristPlayers.Count - (ratio.tRatio - ctsToSwitchToT);
+
+            playingCounterTerroristPlayers.Take(ctsToSwitchToT).ToList().ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
+            playingTerroristPlayers.Take(tsToSwitchToCT).ToList().ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
+            queuedPlayers.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
         }
 
         public void PlayerConnected(CCSPlayerController player)
