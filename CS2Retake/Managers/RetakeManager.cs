@@ -17,7 +17,6 @@ namespace CS2Retake.Managers
 
         private CCSPlayerController? _planterPlayerController = null;
 
-        public List<CCSPlayerController> PlayerJoinQueue = new List<CCSPlayerController>();
 
         public CounterStrikeSharp.API.Modules.Timers.Timer? HasBombBeenPlantedTimer = null;
 

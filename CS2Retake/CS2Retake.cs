@@ -228,7 +228,7 @@ namespace CS2Retake
 
         private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
         {
-            if (GameRuleManager.Instance.IsWarmup)
+            if (GameRuleManager.Instance.IsWarmup || !FeatureConfig.EnableQueue)
             {
                 return HookResult.Continue;
             }
@@ -313,7 +313,7 @@ namespace CS2Retake
             WeaponManager.Instance.AssignWeapons();
             RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
 
-            if (this.Config.SpotAnnouncerEnabled)
+            if (FeatureConfig.EnableSpotAnnouncer)
             {
                 RetakeManager.Instance.PlaySpotAnnouncer();
             }
@@ -417,8 +417,6 @@ namespace CS2Retake
 
         private HookResult OnCsIntermission(EventCsIntermission @event, GameEventInfo info)
         {
-            this.Logger?.LogDebug($"OnCsIntermission");
-
             return HookResult.Continue;
         }
 
