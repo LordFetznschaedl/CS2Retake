@@ -38,6 +38,11 @@ namespace CS2Retake.Managers
 
         public void AddQueuePlayers()
         {
+            if (!FeatureConfig.EnableQueue)
+            {
+                return;
+            }
+               
             var playingPlayers = this.GetPlayingPlayers();
             var queuedPlayers = this.GetQueuedPlayers();
 
@@ -73,6 +78,15 @@ namespace CS2Retake.Managers
 
         public void ScrambleTeams()
         {
+            if(!FeatureConfig.EnableScramble)
+            {
+                if (FeatureConfig.EnableQueue)
+                {
+                    this.AddQueuePlayers();
+                }
+                return;
+            }
+
             this.DequeuePlayers();
             var ratio = this.GetPlayerRatio();
             var totalRatio = ratio.ctRatio + ratio.tRatio;
@@ -93,6 +107,15 @@ namespace CS2Retake.Managers
 
         public void SwitchTeams()
         {
+            if (!FeatureConfig.EnableSwitchOnRoundWin)
+            {
+                if (FeatureConfig.EnableQueue)
+                {
+                    this.AddQueuePlayers();
+                }
+                return;
+            }
+
             var playingPlayers = this.GetPlayingPlayers();
             var queuedPlayers = this.GetQueuedPlayers();
 

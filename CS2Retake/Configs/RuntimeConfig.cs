@@ -12,10 +12,12 @@ namespace CS2Retake.Configs
         public static string ModuleName { get; set; } = string.Empty;
         public static string ModuleDirectory { get; set; } = string.Empty;
 
-        public static float SecondsUntilBombPlantedCheck { get; set; }
+        public static float SecondsUntilBombPlantedCheck { get; set; } = 5;
 
-        public static int MaxPlayers { get; set; }
-        public static float TeamBalanceRatio { get; set; }
+        public static int ScrambleAfterSubsequentTerroristRoundWins { get; set; } = 5;
+
+        public static int MaxPlayers { get; set; } = 10;
+        public static float TeamBalanceRatio { get; set; } = 0.499f;
 
         
 
@@ -28,6 +30,8 @@ namespace CS2Retake.Configs
         public static void SetBaseConfig(CS2RetakeConfig baseConfig)
         {
             SecondsUntilBombPlantedCheck = baseConfig.SecondsUntilBombPlantedCheck;
+
+            ScrambleAfterSubsequentTerroristRoundWins = baseConfig.ScrambleAfterSubsequentTerroristRoundWins;
 
             MaxPlayers = baseConfig.MaxPlayers;
             TeamBalanceRatio = baseConfig.TeamBalanceRatio;

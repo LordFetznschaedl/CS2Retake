@@ -42,6 +42,7 @@ namespace CS2Retake
 
             RuntimeConfig.SetModuleInfo(this.ModuleName, this.ModuleDirectory);
             RuntimeConfig.SetBaseConfig(this.Config);
+            FeatureConfig.SetBaseConfig(this.Config);
 
             if (MapManager.Instance.CurrentMap == null)
             {
@@ -335,7 +336,7 @@ namespace CS2Retake
                 TeamManager.Instance.SwitchTeams();
             }
              
-            if(MapManager.Instance.TerroristRoundWinStreak == 5)
+            if(MapManager.Instance.TerroristRoundWinStreak == RuntimeConfig.ScrambleAfterSubsequentTerroristRoundWins)
             {
                 MessageUtils.PrintToChatAll($"Teams will be scrambled now!");
                 MapManager.Instance.TerroristRoundWinStreak = 0;
