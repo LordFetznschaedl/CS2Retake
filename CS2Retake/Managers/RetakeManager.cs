@@ -39,7 +39,7 @@ namespace CS2Retake.Managers
         {
 
             var random = new Random();
-            var plantSpawn = MapManager.Instance.CurrentMap.SpawnPoints.Where(spawn => spawn.SpawnUsedBy != null && spawn.IsInBombZone).OrderBy(x => random.Next()).FirstOrDefault();
+            var plantSpawn = MapManager.Instance.CurrentMap?.SpawnPoints.Where(spawn => spawn.SpawnUsedBy != null && spawn.IsInBombZone).OrderBy(x => random.Next()).FirstOrDefault();
 
 
             if(plantSpawn == null)

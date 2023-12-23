@@ -113,16 +113,16 @@ namespace CS2Retake
         [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandWrite(CCSPlayerController? player, CommandInfo command)
         {
-            MapManager.Instance.CurrentMap.SaveSpawns();
-            this.Logger?.LogInformation($"{MapManager.Instance.CurrentMap.SpawnPoints.Count} spawnpoints saved");
+            MapManager.Instance.CurrentMap?.SaveSpawns();
+            this.Logger?.LogInformation($"{MapManager.Instance.CurrentMap?.SpawnPoints.Count} spawnpoints saved");
         }
 
         [ConsoleCommand("css_retakeread", "This command reads the spawns for the current map")]
         [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandRead(CCSPlayerController? player, CommandInfo command)
         {
-            MapManager.Instance.CurrentMap.LoadSpawns();
-            this.Logger?.LogInformation($"{MapManager.Instance.CurrentMap.SpawnPoints.Count} spawnpoints read");
+            MapManager.Instance.CurrentMap?.LoadSpawns();
+            this.Logger?.LogInformation($"{MapManager.Instance.CurrentMap?.SpawnPoints.Count} spawnpoints read");
         }
 
         [ConsoleCommand("css_retakescramble", "This command scrambles the teams")]
