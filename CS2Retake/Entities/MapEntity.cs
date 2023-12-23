@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 using CounterStrikeSharp.API.Core;
+using CS2Retake.Configs;
+using Microsoft.Extensions.Logging;
 
 namespace CS2Retake.Entities
 {
@@ -39,7 +41,7 @@ namespace CS2Retake.Entities
 
             if(!spawnChoices.Any())
             {
-                this.Log($"No spawn choices found.");
+                MessageUtils.Log(LogLevel.Warning,$"No spawn choices found.");
                 return null;
             }
 
@@ -49,7 +51,7 @@ namespace CS2Retake.Entities
 
                 if (!spawnChoices.Any())
                 {
-                    this.Log($"hasToBeInBombZone has not found any spawns.");
+                    MessageUtils.Log(LogLevel.Warning, $"hasToBeInBombZone has not found any spawns.");
                     return null;
                 }
             }
@@ -103,13 +105,6 @@ namespace CS2Retake.Entities
         public void ResetSpawnInUse()
         {
             this.SpawnPoints.ForEach(spawn => spawn.SpawnUsedBy = null);
-        }
-
-        private void Log(string message)
-        {
-            Console.ForegroundColor = ConsoleColor.Green;
-            Console.WriteLine($"[{MessageUtils.ModuleName}:{this.GetType().Name}] {message}");
-            Console.ResetColor();
         }
     }
 }

@@ -159,7 +159,7 @@ namespace CS2Retake.Managers
 
         public void HasBombBeenPlanted()
         {
-            if (RuntimeConfig.SecondsUntilBombPlantedCheck <= 0 && GameRuleManager.Instance.IsWarmup)
+            if (RuntimeConfig.SecondsUntilBombPlantedCheck <= 0 || GameRuleManager.Instance.IsWarmup)
             {
                 return;
             }
