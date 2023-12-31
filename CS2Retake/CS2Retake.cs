@@ -48,7 +48,7 @@ namespace CS2Retake
                 this.OnMapStart(Server.MapName);
             }
 
-            this.AddTimer(7 * 60, MessageUtils.ThankYouMessage, TimerFlags.REPEAT);
+            // this.AddTimer(7 * 60, MessageUtils.ThankYouMessage, TimerFlags.REPEAT);
 
             this.RegisterListener<Listeners.OnMapStart>(mapName => this.OnMapStart(mapName));
 
@@ -61,6 +61,7 @@ namespace CS2Retake
             this.RegisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch, HookMode.Pre);
             this.RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
             this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
+            
 
             this.AddCommandListener("jointeam", OnCommandJoinTeam);
         }
@@ -315,6 +316,46 @@ namespace CS2Retake
 
             return HookResult.Continue;
         }
+        
+        private HookResult OnBombPickup(EventBombPickup @event, GameEventInfo info)
+        {
+            var pBombCarrierController = this.GetBombCarrier();
+            
+            if(pBombCarrierController == null)
+            {
+                return HookResult.Continue;
+            }
+
+            if(!pBombCarrierController.PlayerPawn.Value!.InBombZone)
+            {
+                return HookResult.Continue;
+            }
+            
+            pBombCarrierController.ExecuteClientCommand("slot5");
+
+            return HookResult.Continue;
+        }
+        
+        public CCSPlayerController? GetBombCarrier()
+        {
+            CCSPlayerController? foundPlayer = null;
+
+            foreach (var player in Utilities.GetPlayers())
+            {
+                if(player.PlayerPawn.Value!.WeaponServices == null) continue;
+                
+                foreach (var weapon in player.PlayerPawn.Value.WeaponServices.MyWeapons)
+                {
+                    if (weapon.Value == null) continue;
+                    if (weapon.Value.DesignerName != "weapon_c4") continue;
+
+                    foundPlayer = player;
+                    break;
+                }
+            }
+
+            return foundPlayer;
+        }
 
 
         private HookResult OnCsPreRestart(EventCsPreRestart @event, GameEventInfo info)
@@ -332,6 +373,15 @@ namespace CS2Retake
         {
             WeaponManager.Instance.AssignWeapons();
             RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
+            
+            var pBombCarrierController = this.GetBombCarrier();
+
+            if (pBombCarrierController == null)
+            {
+                return HookResult.Continue;
+            }
+            
+            pBombCarrierController.ExecuteClientCommand("slot5");
 
             if (this.Config.SpotAnnouncerEnabled)
             {
