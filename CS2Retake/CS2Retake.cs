@@ -363,8 +363,6 @@ public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
 
         pBombCarrierController.ExecuteClientCommand("slot5");
 
-        if (Config.SpotAnnouncerEnabled) RetakeManager.Instance.PlaySpotAnnouncer();
-
         return HookResult.Continue;
     }
 
