@@ -1,18 +1,12 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Text.Json.Serialization;
-using System.Threading.Tasks;
+﻿using System.Text.Json.Serialization;
 
-namespace CS2Retake.Utils
+namespace CS2Retake.Utils;
+
+[JsonConverter(typeof(JsonStringEnumConverter))]
+public enum RoundTypeEnum
 {
-    [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum RoundTypeEnum
-    {
-        Undefined = -1,
-        Pistol = 0,
-        Mid = 1,
-        FullBuy = 2,
-    }
+    Undefined = -1,
+    Pistol = 0,
+    Mid = 1,
+    FullBuy = 2
 }

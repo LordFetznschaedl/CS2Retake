@@ -10,258 +10,216 @@ using CS2Retake.Managers.Interfaces;
 using CS2Retake.Utils;
 using Microsoft.Extensions.Logging;
 
-namespace CS2Retake.Managers
+namespace CS2Retake.Managers;
+
+public class WeaponManager : BaseManager, IWeaponManager
 {
-    public class WeaponManager : BaseManager, IWeaponManager
+    private static WeaponManager? _instance;
+
+    private IAllocator _allocator;
+    private IGrenadeAllocator _grenadeKitAllocator;
+    private IWeaponAllocator _weaponKitAllocator;
+
+    private WeaponManager()
     {
-        private static WeaponManager? _instance = null;
+    }
 
-        public string ModuleDirectory { get; set; }
+    public string ModuleDirectory { get; set; }
 
-        private IAllocator _allocator;
-        private IWeaponAllocator _weaponKitAllocator;
-        private IGrenadeAllocator _grenadeKitAllocator;
+    public RoundTypeEnum RoundType { get; private set; } = RoundTypeEnum.Undefined;
 
-        public RoundTypeEnum RoundType { get; private set; } = RoundTypeEnum.Undefined;
-
-        public static WeaponManager Instance
+    public static WeaponManager Instance
+    {
+        get
         {
-            get
+            if (_instance == null) _instance = new WeaponManager();
+            return _instance;
+        }
+    }
+
+    public void AssignWeapons()
+    {
+        Utilities.GetPlayers()
+            .FindAll(x => x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist).ForEach(x =>
             {
-                if (_instance == null)
-                {
-                    _instance = new WeaponManager();
-                }
-                return _instance;
-            }
+                RemoveWeapons(x);
+                AssignWeapon(x);
+            });
+    }
+
+    public void AssignWeapon(CCSPlayerController player)
+    {
+        if (player == null || !player.IsValid)
+        {
+            MessageUtils.Log(LogLevel.Error, "Player is null or not valid");
+            return;
         }
 
-        private WeaponManager() { }
-
-        public void AssignWeapons()
+        if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null ||
+            !player.PlayerPawn.Value.IsValid)
         {
-            Utilities.GetPlayers().FindAll(x => x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist).ForEach(x => {
-                this.RemoveWeapons(x);
-                this.AssignWeapon(x);
-                });
+            MessageUtils.Log(LogLevel.Warning,
+                "PlayerPawn is null or not valid. This might be because of a disconnected player.");
+            return;
         }
 
-        public void AssignWeapon(CCSPlayerController player)
+        var team = (CsTeam)player.TeamNum;
+        if (team != CsTeam.Terrorist && team != CsTeam.CounterTerrorist)
         {
-            if(player == null || !player.IsValid) 
-            {
-                MessageUtils.Log(LogLevel.Error, $"Player is null or not valid");
-                return;
-            }
-
-            if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value.IsValid)
-            {
-                MessageUtils.Log(LogLevel.Warning, $"PlayerPawn is null or not valid. This might be because of a disconnected player.");
-                return;
-            }
-
-            var team = (CsTeam)player.TeamNum;
-            if (team != CsTeam.Terrorist && team != CsTeam.CounterTerrorist)
-            {
-                MessageUtils.Log(LogLevel.Error, $"Player not in Terrorist or CounterTerrorist Team");
-                return;
-            }
-
-            if(this._weaponKitAllocator == null) 
-            {
-                this._weaponKitAllocator = new WeaponKitAllocator(this.ModuleDirectory);
-            }
-            if(this._grenadeKitAllocator == null)
-            {
-                this._grenadeKitAllocator = new GrenadeKitAllocator(this.ModuleDirectory);
-            }
-
-            (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) weaponAllocationData = (string.Empty, string.Empty, KevlarEnum.None, false);
-            List<GrenadeEnum> grenadeAllocationList = new List<GrenadeEnum>();
-            try
-            {
-                if (this._allocator != null)
-                {
-                    var allocationData = this._allocator.Allocate(player, this.RoundType);
-                    weaponAllocationData = (allocationData.primaryWeapon, allocationData.secondaryWeapon, allocationData.kevlar, allocationData.kit);
-                    grenadeAllocationList = allocationData.grenades;
-                }
-                else
-                {
-                    if (this._weaponKitAllocator != null)
-                    {
-                        weaponAllocationData = this._weaponKitAllocator.Allocate(player, this.RoundType);
-                    }
-                    if (this._grenadeKitAllocator != null)
-                    {
-                        grenadeAllocationList = this._grenadeKitAllocator.Allocate(player, this.RoundType);
-                    }
-                }
-
-            }
-            catch(AllocatorException ex)
-            {
-                MessageUtils.Log(LogLevel.Error,$"An error happened while assigning the weapons. Message: {ex.Message}");
-                MessageUtils.PrintToPlayerOrServer($"An error occurred while assigning your weapons. Using fallback weapons!");
-
-                weaponAllocationData = (string.Empty, "weapon_deagle", KevlarEnum.KevlarHelmet, (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
-            }
-
-
-            if (player?.PlayerPawn?.Value?.ItemServices == null)
-            {
-                MessageUtils.Log(LogLevel.Error,$"Player has no item service");
-                return;
-            }
-
-            var itemService = new CCSPlayer_ItemServices(player.PlayerPawn.Value.ItemServices.Handle);
-
-            foreach (var grenade in grenadeAllocationList)
-            {
-                var enumMemberValue = EnumUtils.GetEnumMemberAttributeValue(grenade);
-
-                if (!string.IsNullOrWhiteSpace(enumMemberValue))
-                {
-                    player.GiveNamedItem(enumMemberValue);
-                }
-
-            }
-
-            if (!string.IsNullOrWhiteSpace(weaponAllocationData.secondaryWeapon))
-            {
-                player.GiveNamedItem(weaponAllocationData.secondaryWeapon);
-            }
-            if (!string.IsNullOrWhiteSpace(weaponAllocationData.primaryWeapon))
-            {
-                player.GiveNamedItem(weaponAllocationData.primaryWeapon);
-            }
-           
-
-            if (weaponAllocationData.kit)
-            {
-                itemService.HasDefuser = true;
-            }
-
-            switch (weaponAllocationData.kevlar)
-            {
-                case KevlarEnum.Kevlar:
-                    player.GiveNamedItem(CsItem.Kevlar);
-                    break;
-                case KevlarEnum.KevlarHelmet:
-                    player.GiveNamedItem(CsItem.AssaultSuit);
-                    itemService.HasHelmet = true;
-                    break;
-            }
-
-            
+            MessageUtils.Log(LogLevel.Error, "Player not in Terrorist or CounterTerrorist Team");
+            return;
         }
 
-        public void RemoveWeapons(CCSPlayerController player)
+        if (_weaponKitAllocator == null) _weaponKitAllocator = new WeaponKitAllocator(ModuleDirectory);
+        if (_grenadeKitAllocator == null) _grenadeKitAllocator = new GrenadeKitAllocator(ModuleDirectory);
+
+        (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) weaponAllocationData =
+            (string.Empty, string.Empty, KevlarEnum.None, false);
+        var grenadeAllocationList = new List<GrenadeEnum>();
+        try
         {
-            if (player == null || !player.IsValid)
+            if (_allocator != null)
             {
-                MessageUtils.Log(LogLevel.Error, $"Player is null or not valid");
-                return;
+                var allocationData = _allocator.Allocate(player, RoundType);
+                weaponAllocationData = (allocationData.primaryWeapon, allocationData.secondaryWeapon,
+                    allocationData.kevlar, allocationData.kit);
+                grenadeAllocationList = allocationData.grenades;
             }
-
-            if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value.IsValid)
+            else
             {
-                MessageUtils.Log(LogLevel.Warning, $"PlayerPawn is null or not valid. This might be because of a disconnected player.");
-                return;
+                if (_weaponKitAllocator != null) weaponAllocationData = _weaponKitAllocator.Allocate(player, RoundType);
+                if (_grenadeKitAllocator != null)
+                    grenadeAllocationList = _grenadeKitAllocator.Allocate(player, RoundType);
             }
+        }
+        catch (AllocatorException ex)
+        {
+            MessageUtils.Log(LogLevel.Error, $"An error happened while assigning the weapons. Message: {ex.Message}");
+            MessageUtils.PrintToPlayerOrServer(
+                "An error occurred while assigning your weapons. Using fallback weapons!");
 
-            var weaponService = player?.PlayerPawn?.Value?.WeaponServices ?? null;
-
-            if (weaponService == null)
-            {
-                MessageUtils.Log(LogLevel.Error, $"WeaponService of player is null");
-                return;
-            }
-
-            var playerWeaponService = new CCSPlayer_WeaponServices(weaponService.Handle);
-
-            if (playerWeaponService == null)
-            {
-                MessageUtils.Log(LogLevel.Error, $"PlayerWeaponService is null");
-                return;
-            }
-
-            playerWeaponService.MyWeapons.Where(weapon => weapon != null && weapon.IsValid && weapon.Value != null && weapon.Value.IsValid && !weapon.Value.DesignerName.Contains("knife")).ToList().ForEach(weapon => weapon.Value?.Remove());
-
-            var playerPawn = player?.PlayerPawn?.Value;
-
-            if(playerPawn == null || !playerPawn.IsValid) 
-            {
-                MessageUtils.Log(LogLevel.Error, $"PlayerPawn is null or not valid");
-                return;
-            }
-
-            playerPawn.ArmorValue = 0;
-
-            var itemService = player?.PlayerPawn?.Value?.ItemServices ?? null;
-
-            if(itemService == null)
-            {
-                MessageUtils.Log(LogLevel.Error, $"Player has no item service");
-                return;
-            }
-
-            var playerItemService = new CCSPlayer_ItemServices(itemService.Handle);
-            
-            if(playerItemService == null)
-            {
-                MessageUtils.Log(LogLevel.Error, $"PlayerItemService is null");
-                return;
-            }
-
-            playerItemService.HasHelmet = false;
+            weaponAllocationData = (string.Empty, "weapon_deagle", KevlarEnum.KevlarHelmet,
+                (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
         }
 
-        public void RandomRoundType()
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+        if (player?.PlayerPawn?.Value?.ItemServices == null)
         {
-            this.RoundType = (RoundTypeEnum)new Random().Next(0, Enum.GetNames(typeof(RoundTypeEnum)).Length-1);
+            MessageUtils.Log(LogLevel.Error, "Player has no item service");
+            return;
         }
 
-        public override void ResetForNextRound(bool completeReset = true)
-        {
-            if(completeReset) 
-            {
-                
-            }
+        var itemService = new CCSPlayer_ItemServices(player.PlayerPawn.Value.ItemServices.Handle);
 
-            this.RandomRoundType();
-            this._allocator?.ResetForNextRound();
-            this._weaponKitAllocator?.ResetForNextRound();
-            this._grenadeKitAllocator?.ResetForNextRound();
+        foreach (var grenade in grenadeAllocationList)
+        {
+            var enumMemberValue = EnumUtils.GetEnumMemberAttributeValue(grenade);
+
+            if (!string.IsNullOrWhiteSpace(enumMemberValue)) player.GiveNamedItem(enumMemberValue);
         }
+
+        if (!string.IsNullOrWhiteSpace(weaponAllocationData.secondaryWeapon))
+            player.GiveNamedItem(weaponAllocationData.secondaryWeapon);
+        if (!string.IsNullOrWhiteSpace(weaponAllocationData.primaryWeapon))
+            player.GiveNamedItem(weaponAllocationData.primaryWeapon);
+
+
+        if (weaponAllocationData.kit) itemService.HasDefuser = true;
+
+        switch (weaponAllocationData.kevlar)
+        {
+            case KevlarEnum.Kevlar:
+                player.GiveNamedItem(CsItem.Kevlar);
+                break;
+            case KevlarEnum.KevlarHelmet:
+                player.GiveNamedItem(CsItem.AssaultSuit);
+                itemService.HasHelmet = true;
+                break;
+        }
+    }
+
+    public void RemoveWeapons(CCSPlayerController player)
+    {
+        if (player == null || !player.IsValid)
+        {
+            MessageUtils.Log(LogLevel.Error, "Player is null or not valid");
+            return;
+        }
+
+        if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null ||
+            !player.PlayerPawn.Value.IsValid)
+        {
+            MessageUtils.Log(LogLevel.Warning,
+                "PlayerPawn is null or not valid. This might be because of a disconnected player.");
+            return;
+        }
+
+        var weaponService = player?.PlayerPawn?.Value?.WeaponServices ?? null;
+
+        if (weaponService == null)
+        {
+            MessageUtils.Log(LogLevel.Error, "WeaponService of player is null");
+            return;
+        }
+
+        var playerWeaponService = new CCSPlayer_WeaponServices(weaponService.Handle);
+
+        if (playerWeaponService == null)
+        {
+            MessageUtils.Log(LogLevel.Error, "PlayerWeaponService is null");
+            return;
+        }
+
+        playerWeaponService.MyWeapons
+            .Where(weapon => weapon != null && weapon.IsValid && weapon.Value != null && weapon.Value.IsValid &&
+                             !weapon.Value.DesignerName.Contains("knife")).ToList()
+            .ForEach(weapon => weapon.Value?.Remove());
+
+        var playerPawn = player?.PlayerPawn?.Value;
+
+        if (playerPawn == null || !playerPawn.IsValid)
+        {
+            MessageUtils.Log(LogLevel.Error, "PlayerPawn is null or not valid");
+            return;
+        }
+
+        playerPawn.ArmorValue = 0;
+
+        var itemService = player?.PlayerPawn?.Value?.ItemServices ?? null;
+
+        if (itemService == null)
+        {
+            MessageUtils.Log(LogLevel.Error, "Player has no item service");
+            return;
+        }
+
+        var playerItemService = new CCSPlayer_ItemServices(itemService.Handle);
+
+        if (playerItemService == null)
+        {
+            MessageUtils.Log(LogLevel.Error, "PlayerItemService is null");
+            return;
+        }
+
+        playerItemService.HasHelmet = false;
+    }
+
+    public void RandomRoundType()
+
+
+    {
+        RoundType = (RoundTypeEnum)new Random().Next(0, Enum.GetNames(typeof(RoundTypeEnum)).Length - 1);
+    }
+
+    public override void ResetForNextRound(bool completeReset = true)
+    {
+        if (completeReset)
+        {
+        }
+
+        RandomRoundType();
+        _allocator?.ResetForNextRound();
+        _weaponKitAllocator?.ResetForNextRound();
+        _grenadeKitAllocator?.ResetForNextRound();
     }
 }
