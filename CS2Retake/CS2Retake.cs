@@ -18,12 +18,13 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.0.5-alpha";
+        public override string ModuleVersion => "1.1.0";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 
         public CS2RetakeConfig Config { get; set; } = new CS2RetakeConfig();
- 
+        private bool _scrambleAfterWarmupDone = false;
+
         public void OnConfigParsed(CS2RetakeConfig config)
         {
             if(config.Version < this.Config.Version) 
@@ -38,19 +39,29 @@ namespace CS2Retake
             this.Logger?.LogInformation(this.PluginInfo());
             this.Logger?.LogInformation(this.ModuleDescription);
 
-            MessageUtils.ModuleName = this.ModuleName;
             MessageUtils.Logger = this.Logger;
-            WeaponManager.Instance.ModuleDirectory = this.ModuleDirectory;
-            RetakeManager.Instance.SecondsUntilBombPlantedCheck = this.Config.SecondsUntilBombPlantedCheck;
+
+            RuntimeConfig.SetModuleInfo(this.ModuleName, this.ModuleDirectory);
+            RuntimeConfig.SetBaseConfig(this.Config);
+            FeatureConfig.SetBaseConfig(this.Config);
 
             if (MapManager.Instance.CurrentMap == null)
             {
                 this.OnMapStart(Server.MapName);
             }
 
-            this.AddTimer(7 * 60, MessageUtils.ThankYouMessage, TimerFlags.REPEAT);
+            if(FeatureConfig.EnableThankYouMessage)
+            {
+                this.AddTimer(7 * 60, MessageUtils.ThankYouMessage, TimerFlags.REPEAT);
+            }
+            
+            if(hotReload)
+            {
+                Server.ExecuteCommand($"map {Server.MapName}");
+            }
 
             this.RegisterListener<Listeners.OnMapStart>(mapName => this.OnMapStart(mapName));
+            this.RegisterListener<Listeners.OnTick>(this.OnTick);
 
             this.RegisterEventHandler<EventPlayerSpawn>(OnPlayerSpawn);
             this.RegisterEventHandler<EventRoundFreezeEnd>(OnRoundFreezeEnd);
@@ -61,6 +72,12 @@ namespace CS2Retake
             this.RegisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch, HookMode.Pre);
             this.RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
             this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
+
+            this.RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
+            this.RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
+            this.RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
+
+           
 
             this.AddCommandListener("jointeam", OnCommandJoinTeam);
         }
@@ -106,23 +123,23 @@ namespace CS2Retake
         [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandWrite(CCSPlayerController? player, CommandInfo command)
         {
-            MapManager.Instance.CurrentMap.SaveSpawns();
-            this.Logger?.LogInformation($"{MapManager.Instance.CurrentMap.SpawnPoints.Count} spawnpoints saved");
+            MapManager.Instance.CurrentMap?.SaveSpawns();
+            this.Logger?.LogInformation($"{MapManager.Instance.CurrentMap?.SpawnPoints.Count} spawnpoints saved");
         }
 
         [ConsoleCommand("css_retakeread", "This command reads the spawns for the current map")]
         [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandRead(CCSPlayerController? player, CommandInfo command)
         {
-            MapManager.Instance.CurrentMap.LoadSpawns();
-            this.Logger?.LogInformation($"{MapManager.Instance.CurrentMap.SpawnPoints.Count} spawnpoints read");
+            MapManager.Instance.CurrentMap?.LoadSpawns();
+            this.Logger?.LogInformation($"{MapManager.Instance.CurrentMap?.SpawnPoints.Count} spawnpoints read");
         }
 
         [ConsoleCommand("css_retakescramble", "This command scrambles the teams")]
         [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandScramble(CCSPlayerController? player, CommandInfo command)
         {
-            RetakeManager.Instance.ScrambleTeams();
+            TeamManager.Instance.ScrambleTeams();
         }
 
         [ConsoleCommand("css_retaketeleport", "This command teleports the player to the given coordinates")]
@@ -220,8 +237,9 @@ namespace CS2Retake
 
         private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
         {
-            if (RetakeManager.Instance.IsWarmup)
+            if (!FeatureConfig.EnableQueue)
             {
+                
                 return HookResult.Continue;
             }
 
@@ -245,37 +263,11 @@ namespace CS2Retake
                 return HookResult.Handled;
             }
 
-            this.Logger?.LogDebug($"From {oldTeam} To {newTeam}");
-
-            if(oldTeam == newTeam && oldTeam != CsTeam.None) 
-            {
-                this.Logger?.LogDebug("Old Team is new team");
-                return HookResult.Continue;
-            }
-
-            if((oldTeam == CsTeam.CounterTerrorist && newTeam == CsTeam.Terrorist) || (oldTeam == CsTeam.Terrorist && newTeam == CsTeam.CounterTerrorist))
-            {
-                this.Logger?.LogDebug("team switch");
-                return HookResult.Continue;
-            }
-            else if(newTeam == CsTeam.Spectator)
-            {
-                MessageUtils.PrintToPlayerOrServer($"You have been removed from the queue.");
-                RetakeManager.Instance.PlayerJoinQueue.RemoveAll(x => x.SteamID == player.SteamID);
-
-                return HookResult.Continue;
-            }
-            else
-            {
-                if(!RetakeManager.Instance.PlayerJoinQueue.Any(x => x.SteamID == player.SteamID))
-                {
-                    MessageUtils.PrintToPlayerOrServer($"You have been placed into the queue. Please wait for the next round to start.");
-                    RetakeManager.Instance.PlayerJoinQueue.Add(player);
-                }
-                return HookResult.Handled;
-            }
+            TeamManager.Instance.PlayerSwitchTeam(player, oldTeam, newTeam);
 
             
+
+            return HookResult.Handled;
         }
 
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
@@ -322,7 +314,9 @@ namespace CS2Retake
             MapManager.Instance.ResetForNextRound(false);
             RetakeManager.Instance.ResetForNextRound();
 
-            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.Darkred}{MapManager.Instance.BombSite}{ChatColors.White} - Roundtype: {ChatColors.Darkred}{WeaponManager.Instance.RoundType}{ChatColors.White}");
+            var ratio = TeamManager.Instance.LatestRatio;
+
+            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.Darkred}{MapManager.Instance.BombSite}{ChatColors.White} - Roundtype: {ChatColors.Darkred}{WeaponManager.Instance.RoundType}{ChatColors.White} - {ChatColors.Blue}{ratio.ctRatio}CTs{ChatColors.White} VS {ChatColors.Red}{ratio.tRatio}Ts{ChatColors.White}");
             
 
             return HookResult.Continue;
@@ -333,7 +327,7 @@ namespace CS2Retake
             WeaponManager.Instance.AssignWeapons();
             RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
 
-            if (this.Config.SpotAnnouncerEnabled)
+            if (FeatureConfig.EnableSpotAnnouncer)
             {
                 RetakeManager.Instance.PlaySpotAnnouncer();
             }
@@ -342,25 +336,25 @@ namespace CS2Retake
         }
 
         private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
-        {
+        { 
             if (@event.Winner == (int)CsTeam.Terrorist)
             {
                 MapManager.Instance.TerroristRoundWinStreak++;
                 MessageUtils.PrintToChatAll($"The Terrorists have won {ChatColors.Darkred}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
-                RetakeManager.Instance.AddQueuedPlayersAndRebalance();
+                TeamManager.Instance.AddQueuePlayers();
             }
             else
             {
                 MessageUtils.PrintToChatAll($"The Counter-Terrorists have won!");
                 MapManager.Instance.TerroristRoundWinStreak = 0;
-                RetakeManager.Instance.SwitchTeams();
+                TeamManager.Instance.SwitchTeams();
             }
              
-            if(MapManager.Instance.TerroristRoundWinStreak == 5)
+            if(MapManager.Instance.TerroristRoundWinStreak == RuntimeConfig.ScrambleAfterSubsequentTerroristRoundWins)
             {
                 MessageUtils.PrintToChatAll($"Teams will be scrambled now!");
                 MapManager.Instance.TerroristRoundWinStreak = 0;
-                RetakeManager.Instance.ScrambleTeams();
+                TeamManager.Instance.ScrambleTeams();
             }
 
             MapManager.Instance.ResetForNextRound();
@@ -382,21 +376,62 @@ namespace CS2Retake
             return HookResult.Continue;
         }
 
+        private HookResult OnPlayerConnect(EventPlayerConnect @event, GameEventInfo info)
+        {
+            if(@event.Userid == null) 
+            {
+                return HookResult.Continue;
+            }
+            if(!@event.Userid.IsValid)
+            {
+                return HookResult.Continue;
+            }
+
+            TeamManager.Instance.PlayerConnected(@event.Userid);
+
+            return HookResult.Continue;
+        }
+        private HookResult OnPlayerConnectFull(EventPlayerConnectFull @event, GameEventInfo info)
+        {
+            if (@event.Userid == null)
+            {
+                return HookResult.Continue;
+            }
+            if (!@event.Userid.IsValid)
+            {
+                return HookResult.Continue;
+            }
+
+            TeamManager.Instance.PlayerConnectedFull(@event.Userid);
+
+            return HookResult.Continue;
+        }
+        private HookResult OnPlayerDisconnect(EventPlayerDisconnect @event, GameEventInfo info)
+        {
+            if (@event.Userid == null)
+            {
+                return HookResult.Continue;
+            }
+            if (!@event.Userid.IsValid)
+            {
+                return HookResult.Continue;
+            }
+
+            TeamManager.Instance.PlayerDisconnected(@event.Userid);
+
+            return HookResult.Continue;
+        }
+
         private HookResult OnBeginNewMatch(EventBeginNewMatch @event, GameEventInfo info)
         {
-            RetakeManager.Instance.IsWarmup = false;
-
             //SCRAMBLE AT START OF MATCH
+
 
             return HookResult.Continue;
         }
 
         private HookResult OnCsIntermission(EventCsIntermission @event, GameEventInfo info)
         {
-            this.Logger?.LogDebug($"OnCsIntermission");
-
-            RetakeManager.Instance.IsWarmup = true;
-
             return HookResult.Continue;
         }
 
@@ -405,6 +440,20 @@ namespace CS2Retake
             this.Logger?.LogInformation($"Map changed to {mapName}");
             MapManager.Instance.CurrentMap = new MapEntity(Server.MapName, this.ModuleDirectory);
             RetakeManager.Instance.ConfigureForRetake();
+            GameRuleManager.Instance.GameRules = null;
+            this._scrambleAfterWarmupDone = false;
+    }
+
+
+        public void OnTick()
+        {
+            var currentTime = Server.CurrentTime;
+
+            if(currentTime >= GameRuleManager.Instance.WarmupEnd && GameRuleManager.Instance.IsWarmup && !this._scrambleAfterWarmupDone)
+            {
+                this._scrambleAfterWarmupDone = true;
+                TeamManager.Instance.ScrambleTeams();
+            }
         }
 
         private string PluginInfo()

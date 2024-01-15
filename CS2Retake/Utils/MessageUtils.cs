@@ -1,23 +1,17 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
+using CS2Retake.Configs;
 using Microsoft.Extensions.Logging;
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Runtime.CompilerServices;
-using System.Runtime.ConstrainedExecution;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CS2Retake.Utils
 {
     public static class MessageUtils
     {
-        public static string ModuleName { get; set; } = string.Empty;
         public static ILogger? Logger { get; set; }
 
-        public static string PluginPrefix => $"[{ChatColors.Gold}{MessageUtils.ModuleName}{ChatColors.White}]";
+        public static string PluginPrefix => $"[{ChatColors.Gold}{RuntimeConfig.ModuleName}{ChatColors.White}]";
 
         private static List<string> _thankYouMessages = new List<string>() 
         {
@@ -59,6 +53,16 @@ namespace CS2Retake.Utils
         public static void Log(LogLevel level, string? message, params object?[] args)
         {
             Logger?.Log(level, message, args);
+        }
+
+        public static void LogDebug(string? message, params object?[] args)
+        {
+            if(!FeatureConfig.EnableDebug)
+            {
+                return;
+            }
+
+            Logger?.LogInformation(message, args); 
         }
     }
 }

@@ -14,7 +14,7 @@ namespace CS2Retake.Managers
     public class MapManager : BaseManager, IMapManager
     {
         private static MapManager? _instance = null;
-        public MapEntity CurrentMap { get; set; }
+        public MapEntity? CurrentMap { get; set; } = null;
 
         public BombSiteEnum BombSite { get; private set; } = BombSiteEnum.Undefined;
         public bool HasToBeInBombZone { get; set; } = true;
@@ -78,7 +78,7 @@ namespace CS2Retake.Managers
 
             var newSpawnPoint = new SpawnPointEntity(playerPawn.AbsOrigin, playerPawn.AbsRotation, bombSite, team, isInBombZone.Value);
 
-            this.CurrentMap.SpawnPoints.Add(newSpawnPoint);
+            this.CurrentMap?.SpawnPoints.Add(newSpawnPoint);
 
             player?.PrintToChat($"SpawnPoint added! BombSite: {bombSite} - Team: {team} - isInBombZone: {isInBombZone}");
         }
@@ -94,20 +94,20 @@ namespace CS2Retake.Managers
             SpawnPointEntity? spawn;
             if (!spawnIndex.HasValue)
             {
-                spawn = this.CurrentMap.GetRandomSpawn(team, this.BombSite, team == CsTeam.CounterTerrorist ? false : this.HasToBeInBombZone);
+                spawn = this.CurrentMap?.GetRandomSpawn(team, this.BombSite, team == CsTeam.CounterTerrorist ? false : this.HasToBeInBombZone);
 
                 if (team == CsTeam.Terrorist && this.HasToBeInBombZone)
                 {
                     this.HasToBeInBombZone = false;
                 }
             }
-            else if (spawnIndex.Value > (this.CurrentMap.SpawnPoints.Count - 1) || spawnIndex.Value < 0)
+            else if (spawnIndex.Value > (this.CurrentMap?.SpawnPoints.Count - 1) || spawnIndex.Value < 0)
             {
                 return;
             }
             else
             {
-                spawn = this.CurrentMap.SpawnPoints[spawnIndex.Value];
+                spawn = this.CurrentMap?.SpawnPoints[spawnIndex.Value];
             }
 
             if (spawn == null)

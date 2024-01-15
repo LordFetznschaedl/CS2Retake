@@ -1,4 +1,6 @@
-﻿using CS2Retake.Utils;
+﻿using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Utils;
+using CS2Retake.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -12,5 +14,14 @@ namespace CS2Retake.Managers.Interfaces
         public void ScrambleTeams();
         public void AddQueuePlayers();
         public void SwitchTeams();
+
+        public void HotReload();
+
+
+        public void PlayerConnected(CCSPlayerController player);
+        public void PlayerConnectedFull(CCSPlayerController player);
+        public void PlayerDisconnected(CCSPlayerController player);
+
+        public void PlayerSwitchTeam(CCSPlayerController player, CsTeam previousTeam, CsTeam newTeam);
     }
 }

@@ -6,6 +6,7 @@ using CS2Retake.Managers.Base;
 using Microsoft.Extensions.Logging;
 using CS2Retake.Managers.Interfaces;
 using CounterStrikeSharp.API.Modules.Entities;
+using CS2Retake.Configs;
 
 namespace CS2Retake.Managers
 {
@@ -14,12 +15,8 @@ namespace CS2Retake.Managers
         private static RetakeManager? _instance = null;
         public bool BombHasBeenPlanted { get; set; } = false;
 
-        private CCSPlayerController _planterPlayerController;
-        public CCSGameRules? GameRules { get; set; } = null;
+        private CCSPlayerController? _planterPlayerController = null;
 
-        public List<CCSPlayerController> PlayerJoinQueue = new List<CCSPlayerController>();
-        public bool IsWarmup { get; set; } = false;
-        public float SecondsUntilBombPlantedCheck { get; set; } = 5.0f;
 
         public CounterStrikeSharp.API.Modules.Timers.Timer? HasBombBeenPlantedTimer = null;
 
@@ -37,112 +34,11 @@ namespace CS2Retake.Managers
 
         private RetakeManager() { }
 
-        /*
-         * TODO:
-         * 
-         * ScrambleTeams, SwitchTeams & AddQueuePlayers has an issue with reconnecting players because the server still thinks they are on the server
-         * Thus leading to issues with the algorithm. (Scrambling and team switching algorithm seems to be working if no player disconnects and reconnects).
-         * 
-         * Possible solutions: 
-         *      - solve the issue by implementing a check if the user is a active player
-         *      - implement a list with a player status (connecting, queue, playing, spectator, disconnected, ...)
-         *
-         */
-
-        public void ScrambleTeams()
-        {
-            MessageUtils.Log(LogLevel.Debug,$"ScrambleTeams");
-
-            var nonSpectatingValidPlayers = this.GetPlayerControllers().Where(x => x.IsValid && x.PlayerPawn.IsValid && x.PlayerPawn.Value.IsValid && (x.TeamNum == (int)CsTeam.Terrorist || x.TeamNum == (int)CsTeam.CounterTerrorist)).ToList();
-
-            if (!nonSpectatingValidPlayers.Any())
-            {
-                MessageUtils.Log(LogLevel.Error,$"No valid non spectating players have been found!");
-                return;
-            }
-
-            var random = new Random();
-            nonSpectatingValidPlayers = nonSpectatingValidPlayers.OrderBy(x => random.Next()).ToList();
-
-            for (int i = 0; i < nonSpectatingValidPlayers.Count; i++)
-            {
-                nonSpectatingValidPlayers[i].SwitchTeam(i % 2 == 0 ? CsTeam.CounterTerrorist : CsTeam.Terrorist);
-            }
-        }
-
-        public void SwitchTeams()
-        {
-            MessageUtils.Log(LogLevel.Debug, $"SwitchTeams");
-
-            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid && x.PlayerPawn.IsValid && x.PlayerPawn.Value.IsValid).ToList();
-
-            var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
-            var counterTerroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).ToList();
-
-            var playersInQueue = this.PlayerJoinQueue.Count();
-
-            var activePlayerCount = playersInQueue + terroristPlayers.Count + counterTerroristPlayers.Count;
-
-            var playersNeededInCT = (int)Math.Ceiling((decimal)activePlayerCount / 2);
-
-            var random = new Random();
-
-            this.PlayerJoinQueue.ForEach(player => player.SwitchTeam(CsTeam.CounterTerrorist));
-
-            playersNeededInCT = playersNeededInCT - this.PlayerJoinQueue.Count();
-
-            var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(terroristPlayers.Count).ToList();
-            var terroristsToSwitch = terroristPlayers.OrderBy(x => random.Next()).Take(playersNeededInCT).ToList();
-
-            terroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
-            counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
-
-            this.PlayerJoinQueue.Clear();
-        }
-
-        public void AddQueuedPlayersAndRebalance()
-        {
-            MessageUtils.Log(LogLevel.Debug, $"AddQueuedPlayers");
-
-            if(!this.PlayerJoinQueue.Any())
-            {
-                return;
-            }
-
-            var playersOnServer = this.GetPlayerControllers().Where(x => x.IsValid && x.PlayerPawn.IsValid && x.PlayerPawn.Value.IsValid).ToList();
-
-            var terroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.Terrorist).ToList();
-            var counterTerroristPlayers = playersOnServer.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).ToList();
-
-            var playersInQueue = this.PlayerJoinQueue.Count();
-
-            var activePlayerCount = playersInQueue + terroristPlayers.Count + counterTerroristPlayers.Count;
-
-            var playersNeededInCT = (int)Math.Ceiling((decimal)activePlayerCount / 2);
-
-            var random = new Random();
-
-            this.PlayerJoinQueue.ForEach(player => player.SwitchTeam(CsTeam.CounterTerrorist));
-
-            var ctCount = counterTerroristPlayers.Count() + playersInQueue;
-
-            var counterTerroristsToSwitch = counterTerroristPlayers.OrderBy(x => random.Next()).Take(ctCount - playersNeededInCT).ToList();
-
-            counterTerroristsToSwitch.ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
-
-            if(terroristPlayers.Count > ctCount)
-            {
-               //REBALANCE IF TERRORISTS HAS MORE PLAYERS THEN COUNTER TERRORISTS
-            }
-
-            this.PlayerJoinQueue.Clear();
-        }
-
         public void GiveBombToPlayerRandomPlayerInBombZone()
         {
 
             var random = new Random();
-            var plantSpawn = MapManager.Instance.CurrentMap.SpawnPoints.Where(spawn => spawn.SpawnUsedBy != null && spawn.IsInBombZone).OrderBy(x => random.Next()).FirstOrDefault();
+            var plantSpawn = MapManager.Instance.CurrentMap?.SpawnPoints.Where(spawn => spawn.SpawnUsedBy != null && spawn.IsInBombZone).OrderBy(x => random.Next()).FirstOrDefault();
 
 
             if(plantSpawn == null)
@@ -167,9 +63,9 @@ namespace CS2Retake.Managers
 
             this._planterPlayerController.GiveNamedItem("weapon_c4");
 
-            if(this.SecondsUntilBombPlantedCheck > 0)
+            if(RuntimeConfig.SecondsUntilBombPlantedCheck > 0)
             {
-                this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{this.SecondsUntilBombPlantedCheck}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
+                this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{RuntimeConfig.SecondsUntilBombPlantedCheck}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
             }
             
 
@@ -262,7 +158,7 @@ namespace CS2Retake.Managers
 
         public void HasBombBeenPlanted()
         {
-            if (this.SecondsUntilBombPlantedCheck <= 0 && RetakeManager.Instance.IsWarmup)
+            if (RuntimeConfig.SecondsUntilBombPlantedCheck <= 0 || GameRuleManager.Instance.IsWarmup)
             {
                 return;
             }
@@ -270,15 +166,15 @@ namespace CS2Retake.Managers
             //Finding planted_c4 or weapon_c4
             var bombList = Utilities.FindAllEntitiesByDesignerName<CCSWeaponBase>("c4");
 
-            if (!bombList.Any() && !this.IsWarmup && this.GetPlayerControllersOfTeam(CsTeam.Terrorist).Any())
+            if (!bombList.Any() && !GameRuleManager.Instance.IsWarmup && PlayerUtils.GetPlayerControllersOfTeam(CsTeam.Terrorist).Any())
             {
                 MessageUtils.PrintToChatAll($"No bomb was found in any players inventory resetting.");
-                this.ScrambleTeams();
+                TeamManager.Instance.ScrambleTeams();
                 this.GetPlayerControllers().ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(false, true));
                 return;
             }
 
-            this.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(this.SecondsUntilBombPlantedCheck, this.HasBombBeenPlantedCallback);
+            this.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(RuntimeConfig.SecondsUntilBombPlantedCheck, this.HasBombBeenPlantedCallback);
             
 
         }
@@ -287,13 +183,19 @@ namespace CS2Retake.Managers
         {
             var plantedBomb = this.FindPlantedBomb();
 
-            if (plantedBomb == null)
+            if (plantedBomb != null)
             {
-                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController?.PlayerName ?? "NOBODY"}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
-                
-                var terroristPlayerList = this.GetPlayerControllers().Where(x => x != null && x.IsValid && x.PlayerPawn != null && x.PlayerPawn.IsValid && x.PlayerPawn.Value != null && x.PlayerPawn.Value.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
-                terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
+                return;
             }
+
+            if(this._planterPlayerController != null)
+            {
+                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
+            }
+
+            var terroristPlayerList = this.GetPlayerControllers().Where(x => x != null && x.IsValid && x.PlayerPawn != null && x.PlayerPawn.IsValid && x.PlayerPawn.Value != null && x.PlayerPawn.Value.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
+            terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
+            
         }
         
         public void PlaySpotAnnouncer()
@@ -309,76 +211,16 @@ namespace CS2Retake.Managers
         public void ConfigureForRetake()
         {   
             Server.ExecuteCommand($"execifexists cs2retake/retake.cfg");
-
-            this.IsWarmup = true;
-        }
-
-        
-
-        private void ModifyGameRulesBombPlanted(bool bombPlanted)
-        {
-            if (this.GameRules == null)
-            {
-                MessageUtils.Log(LogLevel.Information,$"GameRules is null. Fetching gamerule...");
-
-                var gameRuleProxyList = this.GetGameRulesProxies();
-
-                if (gameRuleProxyList.Count > 1)
-                {
-                    MessageUtils.Log(LogLevel.Error, $"Multiple GameRuleProxies found. Using firstOrDefault");
-                }
-
-                var gameRuleProxy = gameRuleProxyList.FirstOrDefault();
-
-                if (gameRuleProxy == null)
-                {
-                    MessageUtils.Log(LogLevel.Error, $"GameRuleProxy is null");
-                    return;
-                }
-
-                if (gameRuleProxy.GameRules == null)
-                {
-                    MessageUtils.Log(LogLevel.Error, $"GameRules is null");
-                    return;
-                }
-
-                this.GameRules = gameRuleProxy.GameRules;
-            }
-
-            this.GameRules.BombPlanted = bombPlanted;
-        }
-
-        private List<CCSGameRulesProxy> GetGameRulesProxies()
-        {
-            var gameRulesProxyList = Utilities.FindAllEntitiesByDesignerName<CCSGameRulesProxy>("cs_gamerules").ToList();
-
-            if(!gameRulesProxyList.Any())
-            {
-                MessageUtils.Log(LogLevel.Error, $"No gameRuleProxy found!");
-            }
-
-            return gameRulesProxyList;
         }
 
         private List<CCSPlayerController> GetPlayerControllers() 
         {
-            var playerList = Utilities.FindAllEntitiesByDesignerName<CCSPlayerController>("cs_player_controller").ToList();
+            var playerList = Utilities.GetPlayers();
 
             if (!playerList.Any())
             {
                 MessageUtils.Log(LogLevel.Error, $"No Players have been found!");
             }
-
-            return playerList;
-        }
-
-        private List<CCSPlayerController> GetPlayerControllersOfTeam(CsTeam team)
-        {
-            var playerList = this.GetPlayerControllers();
-
-            playerList = playerList.FindAll(x => x != null && x.IsValid && x.PlayerPawn != null && x.PlayerPawn.IsValid && x.PlayerPawn.Value != null && x.PlayerPawn.Value.IsValid);
-
-            playerList = playerList.FindAll(x => x.TeamNum == (int)team);
 
             return playerList;
         }

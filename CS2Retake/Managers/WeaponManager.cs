@@ -5,6 +5,7 @@ using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Allocators;
 using CS2Retake.Allocators.Exceptions;
 using CS2Retake.Allocators.Interfaces;
+using CS2Retake.Configs;
 using CS2Retake.Managers.Base;
 using CS2Retake.Managers.Interfaces;
 using CS2Retake.Utils;
@@ -15,8 +16,6 @@ namespace CS2Retake.Managers
     public class WeaponManager : BaseManager, IWeaponManager
     {
         private static WeaponManager? _instance = null;
-
-        public string ModuleDirectory { get; set; }
 
         private IAllocator _allocator;
         private IWeaponAllocator _weaponKitAllocator;
@@ -69,11 +68,11 @@ namespace CS2Retake.Managers
 
             if(this._weaponKitAllocator == null) 
             {
-                this._weaponKitAllocator = new WeaponKitAllocator(this.ModuleDirectory);
+                this._weaponKitAllocator = new WeaponKitAllocator(RuntimeConfig.ModuleDirectory);
             }
             if(this._grenadeKitAllocator == null)
             {
-                this._grenadeKitAllocator = new GrenadeKitAllocator(this.ModuleDirectory);
+                this._grenadeKitAllocator = new GrenadeKitAllocator(RuntimeConfig.ModuleDirectory);
             }
 
             (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) weaponAllocationData = (string.Empty, string.Empty, KevlarEnum.None, false);
@@ -218,35 +217,6 @@ namespace CS2Retake.Managers
         }
 
         public void RandomRoundType()
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
         {
             this.RoundType = (RoundTypeEnum)new Random().Next(0, Enum.GetNames(typeof(RoundTypeEnum)).Length-1);
         }
