@@ -22,13 +22,15 @@ namespace CS2Retake.Managers
         private Dictionary<int, PlayerStateEnum> _playerStateDict = new Dictionary<int, PlayerStateEnum>();
         private Queue<int> _playerQueue = new Queue<int>();
 
+        public (int ctRatio, int tRatio) LatestRatio { get; private set; } = (0, 0);
+
         public static TeamManager Instance
         {
             get
             {
                 if (_instance == null)
                 {
-                    _instance = new TeamManager();
+                    _instance = new TeamManager(); 
                 }
                 return _instance;
             }
@@ -36,10 +38,15 @@ namespace CS2Retake.Managers
 
         private TeamManager() { }
 
+        //TODO FIX: AddQueuePlayers does not rebalance properly
         public void AddQueuePlayers()
         {
+            MessageUtils.LogDebug($"Methode: AddQueuePlayers");
+
             if (!FeatureConfig.EnableQueue)
             {
+                MessageUtils.LogDebug($"Feature Queue is disabled!");
+
                 return;
             }
                
@@ -50,6 +57,8 @@ namespace CS2Retake.Managers
             var ratio = this.GetPlayerRatio();
             var totalRatio = ratio.ctRatio + ratio.tRatio;
             var totalPlayers = this.GetPlayingPlayersCount();
+
+            MessageUtils.LogDebug($"Ratio CT {ratio.ctRatio}, Ratio T {ratio.tRatio}, Total Ratio {totalRatio}, Total Players {totalPlayers}");
 
             if (totalPlayers != totalRatio)
             {
@@ -71,15 +80,19 @@ namespace CS2Retake.Managers
             }
             else if(ctsNeededInT < 0) 
             {
-                playingTerroristPlayers.Take(ctsNeededInT).ToList().ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
+                playingTerroristPlayers.Take(ctsNeededInT * -1).ToList().ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
             }
 
         }
 
         public void ScrambleTeams()
         {
-            if(!FeatureConfig.EnableScramble)
+            MessageUtils.LogDebug($"Methode: ScrambleTeams");
+
+            if (!FeatureConfig.EnableScramble)
             {
+                MessageUtils.LogDebug($"Feature Scramble is disabled!");
+
                 if (FeatureConfig.EnableQueue)
                 {
                     this.AddQueuePlayers();
@@ -92,7 +105,9 @@ namespace CS2Retake.Managers
             var totalRatio = ratio.ctRatio + ratio.tRatio;
             var totalPlayers = this.GetPlayingPlayersCount();
 
-            if(totalPlayers != totalRatio) 
+            MessageUtils.LogDebug($"Ratio CT {ratio.ctRatio}, Ratio T {ratio.tRatio}, Total Ratio {totalRatio}, Total Players {totalPlayers}");
+
+            if (totalPlayers != totalRatio) 
             {
                 MessageUtils.Log(LogLevel.Error, $"ScrambleTeams - Playing players count [{totalPlayers}] doesnt match the total ratio [CT: {ratio.ctRatio}, T: {ratio.tRatio}]!");
                 return;
@@ -107,8 +122,12 @@ namespace CS2Retake.Managers
 
         public void SwitchTeams()
         {
+            MessageUtils.LogDebug($"Methode: SwitchTeams");
+
             if (!FeatureConfig.EnableSwitchOnRoundWin)
             {
+                MessageUtils.LogDebug($"Feature SwitchOnRoundWin is disabled!");
+
                 if (FeatureConfig.EnableQueue)
                 {
                     this.AddQueuePlayers();
@@ -124,6 +143,8 @@ namespace CS2Retake.Managers
             var totalRatio = ratio.ctRatio + ratio.tRatio;
             var totalPlayers = this.GetPlayingPlayersCount();
 
+            MessageUtils.LogDebug($"Ratio CT {ratio.ctRatio}, Ratio T {ratio.tRatio}, Total Ratio {totalRatio}, Total Players {totalPlayers}");
+
             if (totalPlayers != totalRatio)
             {
                 MessageUtils.Log(LogLevel.Error, $"SwitchTeams - Playing players count [{totalPlayers}] doesnt match the total ratio [CT: {ratio.ctRatio}, T: {ratio.tRatio}]!");
@@ -137,10 +158,41 @@ namespace CS2Retake.Managers
             var ctsToSwitchToT =  playingCounterTerroristPlayers.Count >= ratio.tRatio ? ratio.tRatio : playingCounterTerroristPlayers.Count;
             var tsToSwitchToCT = playingTerroristPlayers.Count - (ratio.tRatio - ctsToSwitchToT);
 
+            MessageUtils.LogDebug($"CT->T {ctsToSwitchToT}, T->CT {tsToSwitchToCT}");
+
             playingCounterTerroristPlayers.Take(ctsToSwitchToT).ToList().ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
             playingTerroristPlayers.Take(tsToSwitchToCT).ToList().ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
             queuedPlayers.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
         }
+
+        public void HotReload()
+        {
+            var players = Utilities.GetPlayers();
+            foreach (var player in players) 
+            {
+                if (player.UserId == null || !player.UserId.HasValue)
+                {
+                    continue;
+                }
+
+                switch(player.TeamNum)
+                {
+                    case (int)CsTeam.Spectator:
+                        this._playerStateDict.Add(player.UserId.Value, PlayerStateEnum.Spectating);
+                        break;
+                    case (int)CsTeam.Terrorist:
+                        this._playerStateDict.Add(player.UserId.Value, PlayerStateEnum.Playing);
+                        break;
+                    case (int)CsTeam.CounterTerrorist:
+                        this._playerStateDict.Add(player.UserId.Value, PlayerStateEnum.Playing);
+                        break;
+                    default:
+                        this._playerStateDict.Add(player.UserId.Value, PlayerStateEnum.Connected);
+                        break;
+                }
+            }
+        }
+
 
         public void PlayerConnected(CCSPlayerController player)
         {
@@ -232,22 +284,28 @@ namespace CS2Retake.Managers
             //Allow switch to spectator
             if((currentState == PlayerStateEnum.Connected || currentState == PlayerStateEnum.Playing) && newTeam == CsTeam.Spectator)
             {
+                MessageUtils.LogDebug($"Switch to spectator from playing or connected {userId}");
                 this.UpdatePlayerStateDict(userId, PlayerStateEnum.Spectating);
             }
             //Place player into queue
-            else if(currentState == PlayerStateEnum.Connected && (newTeam == CsTeam.Terrorist || newTeam == CsTeam.CounterTerrorist))
+            else if((currentState == PlayerStateEnum.Connected || currentState == PlayerStateEnum.Spectating) && (newTeam == CsTeam.Terrorist || newTeam == CsTeam.CounterTerrorist))
             {
+                MessageUtils.LogDebug($"Switch to queue {userId}");
                 this.UpdatePlayerStateDict(userId, PlayerStateEnum.Queue);
                 this.UpdateQueue(userId);
             }
             //Remove player from queue when the player wants to switch to spectator
             else if(currentState == PlayerStateEnum.Queue && newTeam == CsTeam.Spectator)
             {
+                MessageUtils.LogDebug($"Switch to spectator from queue {userId}");
                 this.UpdatePlayerStateDict(userId, PlayerStateEnum.Spectating);
                 this.RemoveFromQueue(userId);
             }
 
-            player.SwitchTeam(CsTeam.Spectator);
+            if (!GameRuleManager.Instance.IsWarmup)
+            {
+                player.ChangeTeam(CsTeam.Spectator);
+            }        
         }
 
         public override void ResetForNextRound(bool completeReset = true)
@@ -366,6 +424,8 @@ namespace CS2Retake.Managers
                 playerRatio.ctRatio = totalPlayers - tRatio;
                 playerRatio.tRatio = tRatio;
             }
+
+            this.LatestRatio = playerRatio;
 
             return playerRatio;
         }

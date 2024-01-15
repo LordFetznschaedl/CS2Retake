@@ -13,12 +13,20 @@ namespace CS2Retake.Configs
         public static bool EnableScramble { get; set; } = true;
         public static bool EnableSwitchOnRoundWin { get; set; } = true;
 
+        public static bool EnableThankYouMessage { get; set; } = true;
+
+        public static bool EnableDebug { get; set; } = false;
+
         public static void SetBaseConfig(CS2RetakeConfig baseConfig)
         {
             EnableSpotAnnouncer = baseConfig.SpotAnnouncerEnabled;
             EnableQueue = baseConfig.EnableQueue;
             EnableScramble = baseConfig.EnableScramble;
             EnableSwitchOnRoundWin = baseConfig.EnableSwitchOnRoundWin;
+
+            EnableThankYouMessage = baseConfig.EnableThankYouMessage;
+
+            EnableDebug = baseConfig.EnableDebug;
         }
     }
 }

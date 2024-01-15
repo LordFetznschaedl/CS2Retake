@@ -3,7 +3,7 @@ using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Configs;
 using Microsoft.Extensions.Logging;
-
+using System.Runtime.CompilerServices;
 
 namespace CS2Retake.Utils
 {
@@ -53,6 +53,16 @@ namespace CS2Retake.Utils
         public static void Log(LogLevel level, string? message, params object?[] args)
         {
             Logger?.Log(level, message, args);
+        }
+
+        public static void LogDebug(string? message, params object?[] args)
+        {
+            if(!FeatureConfig.EnableDebug)
+            {
+                return;
+            }
+
+            Logger?.LogInformation(message, args); 
         }
     }
 }

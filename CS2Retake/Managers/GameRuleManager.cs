@@ -45,6 +45,19 @@ namespace CS2Retake.Managers
             }
         }
 
+        public float WarmupEnd
+        {
+            get
+            {
+                if (this.GameRules == null)
+                {
+                    this.GetGameRules();
+                }
+
+                return this.GameRules?.WarmupPeriodEnd ?? 0f;
+            }
+        }
+
         private void GetGameRules()
         {
             MessageUtils.Log(LogLevel.Information, $"GameRules is null. Fetching gamerule...");

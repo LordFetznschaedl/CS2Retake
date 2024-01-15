@@ -23,6 +23,9 @@ namespace CS2Retake.Configs
         public int MaxPlayers { get; set; } = 10;
         public float TeamBalanceRatio { get; set; } = 0.499f;
 
+        public bool EnableThankYouMessage { get; set; } = true;
+
+        public bool EnableDebug { get; set; } = false;
         public CS2RetakeConfig() {
             this.Version = 2;
         }
