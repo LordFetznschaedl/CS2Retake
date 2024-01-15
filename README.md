@@ -1,4 +1,4 @@
-# CS2Retake is now in ALPHA
+# CS2Retake is now in Released
   
 WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp  
 <https://docs.cssharp.dev/>  
@@ -25,7 +25,7 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 Extract the `addons` folder to the `/csgo/` directory of the dedicated server.  
 
 ---
-# release 1.0.5-alpha:  
+# release 1.1.0:  
 - [x] creating, saving and reading spawns
 - [x] player spawn in spawnpoints 
 - [x] scramble teams
@@ -39,9 +39,6 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [x] KevlarHelmet being only given as Kevlar without Helmet
 
 ---
-# known bugs:  
-- [ ] Queue System when joining into a running retake match
-
 ---
 # future releases:  
 - [ ] config system
