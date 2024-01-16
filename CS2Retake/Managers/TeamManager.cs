@@ -302,10 +302,9 @@ namespace CS2Retake.Managers
                 this.RemoveFromQueue(userId);
             }
 
-            if (!GameRuleManager.Instance.IsWarmup)
-            {
-                player.ChangeTeam(CsTeam.Spectator);
-            }        
+            
+            player.ChangeTeam(CsTeam.Spectator);
+            
         }
 
         public override void ResetForNextRound(bool completeReset = true)

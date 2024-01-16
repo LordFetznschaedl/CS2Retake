@@ -18,7 +18,7 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.1.0";
+        public override string ModuleVersion => "1.1.1";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 
@@ -237,12 +237,6 @@ namespace CS2Retake
 
         private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
         {
-            if (!FeatureConfig.EnableQueue)
-            {
-                
-                return HookResult.Continue;
-            }
-
             if (player == null || !player.IsValid)
             {
                 this.Logger?.LogError("Player is null or not valid");
@@ -265,9 +259,16 @@ namespace CS2Retake
 
             TeamManager.Instance.PlayerSwitchTeam(player, oldTeam, newTeam);
 
-            
+            if (GameRuleManager.Instance.IsWarmup || !FeatureConfig.EnableQueue)
+            {
+                return HookResult.Continue;
+            }
+            else
+            {
+                return HookResult.Handled;
+            }
 
-            return HookResult.Handled;
+            
         }
 
         public HookResult OnPlayerSpawn(EventPlayerSpawn @event, GameEventInfo info)
