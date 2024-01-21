@@ -165,31 +165,22 @@ namespace CS2Retake.Managers
             queuedPlayers.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
         }
 
-        public void HotReload()
+        public void OnTick()
         {
-            var players = Utilities.GetPlayers();
-            foreach (var player in players) 
+            var playerIds = this._playerStateDict.Where(x => x.Value == PlayerStateEnum.Connected).Select(x => x.Key).ToList();
+            
+            foreach(var playerId in playerIds)
             {
-                if (player.UserId == null || !player.UserId.HasValue)
+                var player = Utilities.GetPlayerFromUserid(playerId);
+
+                if (player == null || !player.IsValid || player.UserId == null || !player.UserId.HasValue)
                 {
                     continue;
                 }
 
-                switch(player.TeamNum)
-                {
-                    case (int)CsTeam.Spectator:
-                        this._playerStateDict.Add(player.UserId.Value, PlayerStateEnum.Spectating);
-                        break;
-                    case (int)CsTeam.Terrorist:
-                        this._playerStateDict.Add(player.UserId.Value, PlayerStateEnum.Playing);
-                        break;
-                    case (int)CsTeam.CounterTerrorist:
-                        this._playerStateDict.Add(player.UserId.Value, PlayerStateEnum.Playing);
-                        break;
-                    default:
-                        this._playerStateDict.Add(player.UserId.Value, PlayerStateEnum.Connected);
-                        break;
-                }
+                if(player.TeamNum == (int)CsTeam.Terrorist || player.TeamNum == (int)CsTeam.CounterTerrorist)
+
+                this.PlayerSwitchTeam(player, CsTeam.None, CsTeam.Spectator);
             }
         }
 

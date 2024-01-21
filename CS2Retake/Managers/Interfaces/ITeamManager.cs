@@ -15,7 +15,7 @@ namespace CS2Retake.Managers.Interfaces
         public void AddQueuePlayers();
         public void SwitchTeams();
 
-        public void HotReload();
+        public void OnTick();
 
 
         public void PlayerConnected(CCSPlayerController player);

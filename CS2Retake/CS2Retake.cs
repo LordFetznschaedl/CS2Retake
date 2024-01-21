@@ -18,7 +18,7 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.1.1";
+        public override string ModuleVersion => "1.1.2";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 
@@ -251,7 +251,7 @@ namespace CS2Retake
                 return HookResult.Handled;
             }
 
-            if(!Enum.TryParse(commandInfo.GetArg(1), out CsTeam newTeam))
+            if (!Enum.TryParse(commandInfo.GetArg(1), out CsTeam newTeam))
             {
                 this.Logger?.LogError("Parsing new team failed");
                 return HookResult.Handled;
@@ -259,7 +259,11 @@ namespace CS2Retake
 
             TeamManager.Instance.PlayerSwitchTeam(player, oldTeam, newTeam);
 
-            if (GameRuleManager.Instance.IsWarmup || !FeatureConfig.EnableQueue)
+            if (GameRuleManager.Instance.IsWarmup || !FeatureConfig.EnableQueue) 
+            {
+                return HookResult.Continue;
+            }
+            else if(!PlayerUtils.AreMoreThenPlayersConnected(2))
             {
                 return HookResult.Continue;
             }
@@ -297,6 +301,15 @@ namespace CS2Retake
 
         private HookResult OnRoundFreezeEnd(EventRoundFreezeEnd @event, GameEventInfo info)
         {
+            var ratios = TeamManager.Instance.LatestRatio;
+
+            if(!GameRuleManager.Instance.IsWarmup && (ratios.ctRatio != PlayerUtils.GetCounterTerroristPlayers().Count || ratios.tRatio != PlayerUtils.GetTerroristPlayers().Count))
+            {
+                MessageUtils.PrintToChatAll($"Player ratios not matching how they should be. Resetting...");
+                PlayerUtils.SuicideAll();
+                return HookResult.Continue;
+            }
+
             RetakeManager.Instance.HasBombBeenPlanted();
 
             return HookResult.Continue;
@@ -312,13 +325,8 @@ namespace CS2Retake
 
         private HookResult OnCsPreRestart(EventCsPreRestart @event, GameEventInfo info)
         {
-            MapManager.Instance.ResetForNextRound(false);
+            MapManager.Instance.ResetForNextRound(true);
             RetakeManager.Instance.ResetForNextRound();
-
-            var ratio = TeamManager.Instance.LatestRatio;
-
-            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.Darkred}{MapManager.Instance.BombSite}{ChatColors.White} - Roundtype: {ChatColors.Darkred}{WeaponManager.Instance.RoundType}{ChatColors.White} - {ChatColors.Blue}{ratio.ctRatio}CTs{ChatColors.White} VS {ChatColors.Red}{ratio.tRatio}Ts{ChatColors.White}");
-            
 
             return HookResult.Continue;
         }
@@ -328,16 +336,34 @@ namespace CS2Retake
             WeaponManager.Instance.AssignWeapons();
             RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
 
+            if(GameRuleManager.Instance.IsWarmup) 
+            {
+                return HookResult.Continue;
+            }
+        
             if (FeatureConfig.EnableSpotAnnouncer)
             {
                 RetakeManager.Instance.PlaySpotAnnouncer();
             }
 
+            var ratio = TeamManager.Instance.LatestRatio;
+
+            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.Darkred}{MapManager.Instance.BombSite}{ChatColors.White} - Roundtype: {ChatColors.Darkred}{WeaponManager.Instance.RoundType}{ChatColors.White} - {ChatColors.Blue}{ratio.ctRatio}CTs{ChatColors.White} VS {ChatColors.Red}{ratio.tRatio}Ts{ChatColors.White}");
+
             return HookResult.Continue;
         }
 
         private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
-        { 
+        {   
+            MapManager.Instance.ResetForNextRound();
+            WeaponManager.Instance.ResetForNextRound();
+            RetakeManager.Instance.ResetForNextRound();
+
+            if(GameRuleManager.Instance.IsWarmup)
+            {
+                return HookResult.Continue;
+            }
+
             if (@event.Winner == (int)CsTeam.Terrorist)
             {
                 MapManager.Instance.TerroristRoundWinStreak++;
@@ -357,10 +383,6 @@ namespace CS2Retake
                 MapManager.Instance.TerroristRoundWinStreak = 0;
                 TeamManager.Instance.ScrambleTeams();
             }
-
-            MapManager.Instance.ResetForNextRound();
-            WeaponManager.Instance.ResetForNextRound();
-            RetakeManager.Instance.ResetForNextRound();
 
             return HookResult.Continue;
         }
@@ -448,13 +470,13 @@ namespace CS2Retake
 
         public void OnTick()
         {
-            var currentTime = Server.CurrentTime;
-
-            if(currentTime >= GameRuleManager.Instance.WarmupEnd && GameRuleManager.Instance.IsWarmup && !this._scrambleAfterWarmupDone)
+            if(GameRuleManager.Instance.IsWarmup && Server.CurrentTime >= GameRuleManager.Instance.WarmupEnd && !this._scrambleAfterWarmupDone)
             {
                 this._scrambleAfterWarmupDone = true;
                 TeamManager.Instance.ScrambleTeams();
             }
+
+            TeamManager.Instance.OnTick();
         }
 
         private string PluginInfo()

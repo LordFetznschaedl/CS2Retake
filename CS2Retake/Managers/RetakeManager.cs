@@ -63,6 +63,8 @@ namespace CS2Retake.Managers
 
             this._planterPlayerController.GiveNamedItem("weapon_c4");
 
+            this._planterPlayerController.ExecuteClientCommand("slot5");
+
             if(RuntimeConfig.SecondsUntilBombPlantedCheck > 0)
             {
                 this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{RuntimeConfig.SecondsUntilBombPlantedCheck}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
@@ -158,7 +160,7 @@ namespace CS2Retake.Managers
 
         public void HasBombBeenPlanted()
         {
-            if (RuntimeConfig.SecondsUntilBombPlantedCheck <= 0 || GameRuleManager.Instance.IsWarmup)
+            if (RuntimeConfig.SecondsUntilBombPlantedCheck <= 0 || GameRuleManager.Instance.IsWarmup || !PlayerUtils.AreMoreThenOrEqualPlayersConnected(2))
             {
                 return;
             }

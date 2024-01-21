@@ -26,5 +26,13 @@ namespace CS2Retake.Utils
 
         public static List<CCSPlayerController> GetCounterTerroristPlayers() => GetPlayerControllersOfTeam(CsTeam.CounterTerrorist);
         public static List<CCSPlayerController> GetTerroristPlayers() => GetPlayerControllersOfTeam(CsTeam.Terrorist);
+
+        public static List<CCSPlayerController> GetValidPlayerControllers() => Utilities.GetPlayers().Where(player => player.PlayerPawn != null && player.PlayerPawn.IsValid && player.PlayerPawn.Value != null && player.PlayerPawn.Value.IsValid).ToList();
+
+        public static bool AreMoreThenPlayersConnected(int playerCount) => GetValidPlayerControllers().Count() >= playerCount;
+
+        public static bool AreMoreThenOrEqualPlayersConnected(int playerCount) => GetValidPlayerControllers().Count() >= playerCount;
+
+        public static void SuicideAll() => GetValidPlayerControllers().ForEach(x => x.CommitSuicide(true, true));
     }
 }
