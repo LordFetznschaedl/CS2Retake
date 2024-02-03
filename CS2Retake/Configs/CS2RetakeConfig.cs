@@ -1,4 +1,5 @@
 ﻿using CounterStrikeSharp.API.Core;
+using CS2Retake.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -10,6 +11,8 @@ namespace CS2Retake.Configs
 {
     public class CS2RetakeConfig : BasePluginConfig
     {
+        public PlantTypeEnum PlantType { get; set; } = PlantTypeEnum.AutoPlant;
+
         public float SecondsUntilBombPlantedCheck { get; set; } = 5.0f;
 
         public bool SpotAnnouncerEnabled { get; set; } = true;
@@ -27,7 +30,7 @@ namespace CS2Retake.Configs
 
         public bool EnableDebug { get; set; } = false;
         public CS2RetakeConfig() {
-            this.Version = 2;
+            this.Version = 3;
         }
     }
 }

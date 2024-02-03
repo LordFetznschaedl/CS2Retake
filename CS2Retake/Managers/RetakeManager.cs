@@ -17,8 +17,16 @@ namespace CS2Retake.Managers
 
         private CCSPlayerController? _planterPlayerController = null;
 
+        public CCSPlayerController? PlanterPlayerController
+        {
+            get
+            {
 
-        public CounterStrikeSharp.API.Modules.Timers.Timer? HasBombBeenPlantedTimer = null;
+                return this._planterPlayerController;
+            }
+        }
+
+
 
         public static RetakeManager Instance
         {
@@ -34,7 +42,7 @@ namespace CS2Retake.Managers
 
         private RetakeManager() { }
 
-        public void GiveBombToPlayerRandomPlayerInBombZone()
+        public void AssignRandomPlayerInBombZoneAsPlanter()
         {
 
             var random = new Random();
@@ -61,11 +69,17 @@ namespace CS2Retake.Managers
                 return;
             }
 
-            this._planterPlayerController.GiveNamedItem("weapon_c4");
+            if (RuntimeConfig.PlantType == PlantTypeEnum.AutoPlant)
+            {
+                return;
+            }
 
+            this._planterPlayerController.GiveNamedItem("weapon_c4");
             this._planterPlayerController.ExecuteClientCommand("slot5");
 
-            if(RuntimeConfig.SecondsUntilBombPlantedCheck > 0)
+            
+
+            if (RuntimeConfig.SecondsUntilBombPlantedCheck > 0)
             {
                 this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{RuntimeConfig.SecondsUntilBombPlantedCheck}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
             }
@@ -132,79 +146,12 @@ namespace CS2Retake.Managers
 
         }
 
-        public void FastPlantBomb()
-        {
-            var c4list = Utilities.FindAllEntitiesByDesignerName<CC4>("weapon_c4");
 
-
-            if (!c4list.Any())
-            {
-                return;
-            }
-
-            var c4 = c4list.FirstOrDefault();
-            if (c4 == null)
-            {
-                return;
-            }
-
-            c4.BombPlacedAnimation = false;
-            c4.ArmedTime = 0f;
-
-            //c4.IsPlantingViaUse = true;
-            //c4.StartedArming = true;
-            //c4.BombPlanted = true;
-
-        }
-
-
-        public void HasBombBeenPlanted()
-        {
-            if (RuntimeConfig.SecondsUntilBombPlantedCheck <= 0 || GameRuleManager.Instance.IsWarmup || !PlayerUtils.AreMoreThenOrEqualPlayersConnected(2))
-            {
-                return;
-            }
-
-            //Finding planted_c4 or weapon_c4
-            var bombList = Utilities.FindAllEntitiesByDesignerName<CCSWeaponBase>("c4");
-
-            if (!bombList.Any() && !GameRuleManager.Instance.IsWarmup && PlayerUtils.GetPlayerControllersOfTeam(CsTeam.Terrorist).Any())
-            {
-                MessageUtils.PrintToChatAll($"No bomb was found in any players inventory resetting.");
-                TeamManager.Instance.ScrambleTeams();
-                this.GetPlayerControllers().ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(false, true));
-                return;
-            }
-
-            this.HasBombBeenPlantedTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(RuntimeConfig.SecondsUntilBombPlantedCheck, this.HasBombBeenPlantedCallback);
-            
-
-        }
-
-        public void HasBombBeenPlantedCallback()
-        {
-            var plantedBomb = this.FindPlantedBomb();
-
-            if (plantedBomb != null)
-            {
-                return;
-            }
-
-            if(this._planterPlayerController != null)
-            {
-                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{this._planterPlayerController.PlayerName}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
-            }
-
-            var terroristPlayerList = this.GetPlayerControllers().Where(x => x != null && x.IsValid && x.PlayerPawn != null && x.PlayerPawn.IsValid && x.PlayerPawn.Value != null && x.PlayerPawn.Value.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
-            terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
-            
-        }
-        
         public void PlaySpotAnnouncer()
         {
             var bombsite = MapManager.Instance.BombSite;
 
-            foreach(var player in this.GetPlayerControllers().FindAll(x => x.TeamNum == (int)CsTeam.CounterTerrorist))
+            foreach(var player in Utilities.GetPlayers().FindAll(x => x.TeamNum == (int)CsTeam.CounterTerrorist))
             {
                 player.ExecuteClientCommand($"play sounds/vo/agents/seal_epic/loc_{bombsite.ToString().ToLower()}_01");
             }
@@ -215,39 +162,11 @@ namespace CS2Retake.Managers
             Server.ExecuteCommand($"execifexists cs2retake/retake.cfg");
         }
 
-        private List<CCSPlayerController> GetPlayerControllers() 
-        {
-            var playerList = Utilities.GetPlayers();
-
-            if (!playerList.Any())
-            {
-                MessageUtils.Log(LogLevel.Error, $"No Players have been found!");
-            }
-
-            return playerList;
-        }
-
-        private CPlantedC4? FindPlantedBomb()
-        {
-            var plantedBombList = Utilities.FindAllEntitiesByDesignerName<CPlantedC4>("planted_c4");
-
-            if (!plantedBombList.Any())
-            {
-                MessageUtils.Log(LogLevel.Warning, "No planted bomb entities have been found! This might be because no bomb was planted.");
-                return null;
-            }
-
-            return plantedBombList.FirstOrDefault();
-        }
-
         public override void ResetForNextRound(bool completeReset = true)
         {
             if (completeReset)
             {
-                if(this.HasBombBeenPlantedTimer != null)
-                {
-                    this.HasBombBeenPlantedTimer?.Kill();
-                }
+                
             }
 
             this.BombHasBeenPlanted = false;

@@ -58,6 +58,25 @@ namespace CS2Retake.Managers
             }
         }
 
+        public void ModifyBombPlanted(bool bombPlanted)
+        {
+            if (this.GameRules == null)
+            {
+                this.GetGameRules();
+            }
+            this.GameRules!.BombPlanted = bombPlanted;
+        }
+
+        public void ModifyBombDefused(bool bombDefused)
+        {
+            if (this.GameRules == null)
+            {
+                this.GetGameRules();
+            }
+            this.GameRules!.BombDefused = bombDefused;
+        }
+
+
         private void GetGameRules()
         {
             MessageUtils.Log(LogLevel.Information, $"GameRules is null. Fetching gamerule...");

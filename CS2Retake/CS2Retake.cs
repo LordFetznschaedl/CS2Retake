@@ -14,11 +14,11 @@ using Microsoft.Extensions.Logging;
 
 namespace CS2Retake
 {
-    [MinimumApiVersion(129)]
+    [MinimumApiVersion(159)]
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.1.2";
+        public override string ModuleVersion => "1.2.0";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Retake Plugin implementation for CS2";
 
@@ -76,8 +76,6 @@ namespace CS2Retake
             this.RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
             this.RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
             this.RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
-
-           
 
             this.AddCommandListener("jointeam", OnCommandJoinTeam);
         }
@@ -259,18 +257,26 @@ namespace CS2Retake
 
             TeamManager.Instance.PlayerSwitchTeam(player, oldTeam, newTeam);
 
-            if (GameRuleManager.Instance.IsWarmup || !FeatureConfig.EnableQueue) 
+            if((oldTeam == CsTeam.CounterTerrorist && newTeam == CsTeam.Terrorist) || (oldTeam == CsTeam.Terrorist && newTeam == CsTeam.CounterTerrorist))
             {
-                return HookResult.Continue;
-            }
-            else if(!PlayerUtils.AreMoreThenPlayersConnected(2))
-            {
-                return HookResult.Continue;
-            }
-            else
-            {
+                MessageUtils.PrintToPlayerOrServer($"You cant switch your team manually. This will be done automatically.", player);
                 return HookResult.Handled;
             }
+
+            return HookResult.Continue;
+
+            //if (GameRuleManager.Instance.IsWarmup || !FeatureConfig.EnableQueue) 
+            //{
+            //    return HookResult.Continue;
+            //}
+            //else if(!PlayerUtils.AreMoreThenPlayersConnected(2))
+            //{
+            //    return HookResult.Continue;
+            //}
+            //else
+            //{
+            //    return HookResult.Handled;
+            //}
 
             
         }
@@ -310,14 +316,31 @@ namespace CS2Retake
                 return HookResult.Continue;
             }
 
-            RetakeManager.Instance.HasBombBeenPlanted();
+            if(RuntimeConfig.PlantType == PlantTypeEnum.FastPlant)
+            {
+                PlantManager.Instance.HasBombBeenPlanted();
+            }
+            else if(RuntimeConfig.PlantType == PlantTypeEnum.AutoPlant)
+            {
+                PlantManager.Instance.HandlePlant();
+            }
+
+            
 
             return HookResult.Continue;
         }
 
         private HookResult OnBombBeginPlant(EventBombBeginplant @event, GameEventInfo info)
         {
-            RetakeManager.Instance.FastPlantBomb();
+            if(RuntimeConfig.PlantType == PlantTypeEnum.FastPlant)
+            {
+                PlantManager.Instance.HandlePlant();
+            }
+
+            if(RuntimeConfig.PlantType == PlantTypeEnum.AutoPlant)
+            {
+                return HookResult.Handled;
+            }
 
             return HookResult.Continue;
         }
@@ -325,8 +348,9 @@ namespace CS2Retake
 
         private HookResult OnCsPreRestart(EventCsPreRestart @event, GameEventInfo info)
         {
-            MapManager.Instance.ResetForNextRound(true);
+            MapManager.Instance.ResetForNextRound();
             RetakeManager.Instance.ResetForNextRound();
+            PlantManager.Instance.ResetForNextRound();
 
             return HookResult.Continue;
         }
@@ -334,8 +358,9 @@ namespace CS2Retake
         private HookResult OnRoundStart(EventRoundStart @event, GameEventInfo info)
         {
             WeaponManager.Instance.AssignWeapons();
-            RetakeManager.Instance.GiveBombToPlayerRandomPlayerInBombZone();
 
+            RetakeManager.Instance.AssignRandomPlayerInBombZoneAsPlanter();
+            
             if(GameRuleManager.Instance.IsWarmup) 
             {
                 return HookResult.Continue;
@@ -358,6 +383,7 @@ namespace CS2Retake
             MapManager.Instance.ResetForNextRound();
             WeaponManager.Instance.ResetForNextRound();
             RetakeManager.Instance.ResetForNextRound();
+            PlantManager.Instance.ResetForNextRound();
 
             if(GameRuleManager.Instance.IsWarmup)
             {
