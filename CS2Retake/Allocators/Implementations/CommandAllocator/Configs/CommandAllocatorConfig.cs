@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace CS2Retake.Allocators.Configs
+namespace CS2Retake.Allocators.Implementations.CommandAllocator.Configs
 {
     public class CommandAllocatorConfig : BaseAllocatorConfig
     {

@@ -8,7 +8,7 @@
 
   <ItemGroup>
     <PackageReference Include="CounterStrikeSharp.API" Version="1.0.159" />
-    <PackageReference Include="CSZoneNet.Plugin.CS2BaseAllocator" Version="1.0.1" />
+    <PackageReference Include="CSZoneNet.Plugin.CS2BaseAllocator" Version="1.0.3" />
     <PackageReference Include="CSZoneNet.Plugin.Utils" Version="1.0.1" />
   </ItemGroup>
   

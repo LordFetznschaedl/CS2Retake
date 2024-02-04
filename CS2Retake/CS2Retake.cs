@@ -234,6 +234,11 @@ namespace CS2Retake
             MapManager.Instance.AddSpawn(player, (CsTeam)team, (BombSiteEnum)bombSite);
         }
 
+        [ConsoleCommand("css_guns", "Base guns command for weapon allocation settings.")]
+        public void OnGuns(CCSPlayerController? player, CommandInfo command)
+        {
+            
+        }
 
         private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
         {

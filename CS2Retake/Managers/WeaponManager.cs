@@ -70,10 +70,10 @@ namespace CS2Retake.Managers
             var roundType = RoundTypeManager.Instance.RoundType;
 
 
-            if(this._allocator == null)
+            if(!this.HandleAllocatorCreation())
             {
-                AllocatorFactory factory = new AllocatorFactory();
-                factory.GetAllocator(RuntimeConfig.Allocator);
+                MessageUtils.Log(LogLevel.Error, $"Error while Handling the creation of an allocator");
+                return;
             }
 
 
@@ -188,6 +188,41 @@ namespace CS2Retake.Managers
             }
 
             playerItemService.HasHelmet = false;
+        }
+
+        public void OnGunsCommand(CCSPlayerController? player)
+        {
+            if (player == null || !player.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Error, $"Player is null or not valid");
+                return;
+            }
+
+            if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Warning, $"PlayerPawn is null or not valid. This might be because of a disconnected player.");
+                return;
+            }
+
+            if (!this.HandleAllocatorCreation())
+            {
+                MessageUtils.Log(LogLevel.Error, $"Error while Handling the creation of an allocator");
+                return;
+            }
+
+            this._allocator.OnGunsCommand(player);
+
+        }
+
+        private bool HandleAllocatorCreation()
+        {
+            if (this._allocator == null)
+            {
+                AllocatorFactory factory = new AllocatorFactory();
+                this._allocator = factory.GetAllocator(RuntimeConfig.Allocator);
+            }
+
+            return this._allocator != null;
         }
 
         public override void ResetForNextRound(bool completeReset = true)
