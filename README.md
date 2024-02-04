@@ -49,6 +49,7 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 
 ---
 # plugin base config 
+location: addons\counterstrikesharp\configs\plugins\CS2Retake.json
 ```
 {
   //PlantType Options: AutoPlant, FastPlant
