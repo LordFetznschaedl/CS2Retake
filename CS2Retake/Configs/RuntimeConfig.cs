@@ -6,6 +6,7 @@ using System.Linq;
 using System.Runtime.CompilerServices;
 using System.Text;
 using System.Threading.Tasks;
+using CSZoneNet.Plugin.Utils.Enums;
 
 namespace CS2Retake.Configs
 {

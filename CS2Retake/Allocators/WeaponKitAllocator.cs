@@ -12,6 +12,7 @@ using System.Runtime.CompilerServices;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using CSZoneNet.Plugin.Utils.Enums;
 
 namespace CS2Retake.Allocators
 {

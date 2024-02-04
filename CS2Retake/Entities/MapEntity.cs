@@ -11,6 +11,7 @@ using System.Text.Json.Serialization;
 using CounterStrikeSharp.API.Core;
 using CS2Retake.Configs;
 using Microsoft.Extensions.Logging;
+using CSZoneNet.Plugin.Utils.Enums;
 
 namespace CS2Retake.Entities
 {

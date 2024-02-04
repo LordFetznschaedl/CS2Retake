@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CSZoneNet.Plugin.Utils.Enums;
 
 namespace CS2Retake.Allocators.Interfaces
 {
@@ -14,3 +15,4 @@ namespace CS2Retake.Allocators.Interfaces
         public (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) Allocate(CCSPlayerController player, RoundTypeEnum roundType = RoundTypeEnum.Undefined);
     }
 }
+
