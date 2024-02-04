@@ -12,6 +12,7 @@ using CS2Retake.Managers;
 using CS2Retake.Utils;
 using Microsoft.Extensions.Logging;
 using CSZoneNet.Plugin.Utils.Enums;
+using CounterStrikeSharp.API.Modules.Entities.Constants;
 
 namespace CS2Retake
 {
@@ -55,7 +56,7 @@ namespace CS2Retake
             {
                 this.AddTimer(7 * 60, MessageUtils.ThankYouMessage, TimerFlags.REPEAT);
             }
-            
+
             if(hotReload)
             {
                 Server.ExecuteCommand($"map {Server.MapName}");

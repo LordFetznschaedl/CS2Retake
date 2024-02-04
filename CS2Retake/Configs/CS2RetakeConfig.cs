@@ -25,6 +25,8 @@ namespace CS2Retake.Configs
 
         public RoundTypeEnum RoundTypeSpecific { get; set; } = RoundTypeEnum.FullBuy;
 
+        public AllocatorEnum Allocator { get; set; } = AllocatorEnum.Command;
+
         public float SecondsUntilBombPlantedCheck { get; set; } = 5.0f;
 
         public bool SpotAnnouncerEnabled { get; set; } = true;
@@ -45,7 +47,7 @@ namespace CS2Retake.Configs
 
         public bool EnableDebug { get; set; } = false;
         public CS2RetakeConfig() {
-            this.Version = 4;
+            this.Version = 5;
         }
     }
 }
