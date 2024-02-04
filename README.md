@@ -49,7 +49,7 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 
 ---
 # plugin base config 
-``
+```
 {
   //PlantType Options: AutoPlant, FastPlant
   "PlantType": "AutoPlant",
@@ -93,7 +93,7 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
   "EnableDebug": false,
   "ConfigVersion": 4
 }
-``
+```
 
 ---
 # special thanks:  
