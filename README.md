@@ -1,11 +1,11 @@
-# CS2Retake is now in Released
+# CS2Retake 1.3.0
   
 WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp  
 <https://docs.cssharp.dev/>  
   
 ---
 # reuirements:  
-- min. CounterStrikeSharp API Version: 129  
+- min. CounterStrikeSharp API Version: 159  
 - GameType: Casual or Competitive  (Casual does work properly now!)
   
 ---
@@ -25,7 +25,7 @@ WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 Extract the `addons` folder to the `/csgo/` directory of the dedicated server.  
 
 ---
-# release 1.1.0:  
+# release 1.3.0:  
 - [x] creating, saving and reading spawns
 - [x] player spawn in spawnpoints 
 - [x] scramble teams
@@ -37,16 +37,63 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [x] on ct win -> switch cts to t and the ts to ct
 - [x] auto assign teams -> deny choosing team -> switch team automatically
 - [x] KevlarHelmet being only given as Kevlar without Helmet
+- [x] config system
+- [x] auto plant -> changable to fast plant if prefered in plugin base config 
 
 ---
----
 # future releases:  
-- [ ] config system
 - [ ] editor system for spawns
-- [ ] auto plant -> in a way that the bomb is defusable xD
 - [ ] modular weapon allocator system
 - [ ] change scramble command to do the scramble after round ends and before round starts
 - [ ] multi language support
+
+---
+# plugin base config 
+``
+{
+  //PlantType Options: AutoPlant, FastPlant
+  "PlantType": "AutoPlant",
+
+  //RoundTypeMode Options: Sequence, Specific, Random
+  "RoundTypeMode": "Sequence",
+
+  //Configuration for RoundTypeMode Sequence
+  //Played from top to bottom
+  //AmountOfRounds -1 is for all remaining rounds in the map
+  //Available RoundType Options: FullBuy, Pistol, Mid, Undefined
+  "RoundTypeSequence": [
+    {
+      "RoundType": "Pistol",
+      "AmountOfRounds": 5
+    },
+    {
+      "RoundType": "Mid",
+      "AmountOfRounds": 3
+    },
+    {
+      "RoundType": "FullBuy",
+      "AmountOfRounds": -1
+    }
+  ],
+  
+  //RoundTypeSpecific is for a non changing roundtype
+  //This will only work if RoundTypeMode is Specific
+  //RoundTypeSpecific Options: FullBuy, Pistol, Mid, Undefined
+  "RoundTypeSpecific": "FullBuy",
+
+  "SecondsUntilBombPlantedCheck": 5,
+  "SpotAnnouncerEnabled": true,
+  "EnableQueue": true,
+  "EnableScramble": true,
+  "EnableSwitchOnRoundWin": true,
+  "ScrambleAfterSubsequentTerroristRoundWins": 5,
+  "MaxPlayers": 10,
+  "TeamBalanceRatio": 0.499,
+  "EnableThankYouMessage": true,
+  "EnableDebug": false,
+  "ConfigVersion": 4
+}
+``
 
 ---
 # special thanks:  
