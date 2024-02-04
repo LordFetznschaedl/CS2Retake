@@ -1,6 +1,6 @@
 # CS2Retake 1.3.0
   
-WIP Implementation of a Retake plugin for CS2 using CounterStrikeSharp  
+Implementation of a Retake plugin for CS2 using CounterStrikeSharp  
 <https://docs.cssharp.dev/>  
   
 ---
