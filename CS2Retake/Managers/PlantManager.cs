@@ -32,7 +32,7 @@ namespace CS2Retake.Managers
             }
         }
 
-      
+        private PlantManager() { }
 
         public void HandlePlant()
         {
@@ -112,6 +112,9 @@ namespace CS2Retake.Managers
 
             plantedc4.DispatchSpawn();
 
+            GameRuleManager.Instance.BombPlanted = true;
+            GameRuleManager.Instance.BombDefused = false;
+
             this.FireBombPlantedEvent(planterPlayerController, MapManager.Instance.BombSite);
         }
 
@@ -168,12 +171,13 @@ namespace CS2Retake.Managers
 
             if (planterPlayerController != null)
             {
-                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.Darkred}{planterPlayerController.PlayerName}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
+                Server.PrintToChatAll($"{MessageUtils.PluginPrefix} Player {ChatColors.DarkRed}{planterPlayerController.PlayerName}{ChatColors.White} failed to plant the bomb in time. Counter-Terrorists win this round.");
             }
 
-            var terroristPlayerList = Utilities.GetPlayers().Where(x => x != null && x.IsValid && x.PlayerPawn != null && x.PlayerPawn.IsValid && x.PlayerPawn.Value != null && x.PlayerPawn.Value.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
-            terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
+            //var terroristPlayerList = Utilities.GetPlayers().Where(x => x != null && x.IsValid && x.PlayerPawn != null && x.PlayerPawn.IsValid && x.PlayerPawn.Value != null && x.PlayerPawn.Value.IsValid && x.TeamNum == (int)CsTeam.Terrorist).ToList();
+            //terroristPlayerList.ForEach(x => x?.PlayerPawn?.Value?.CommitSuicide(true, true));
 
+            GameRuleManager.Instance.TerminateRound(CounterStrikeSharp.API.Modules.Entities.Constants.RoundEndReason.CTsWin);
         }
 
         private void FireBombPlantedEvent(CCSPlayerController planterController, BombSiteEnum bombsite)
@@ -210,6 +214,11 @@ namespace CS2Retake.Managers
             {
                 this.HasBombBeenPlantedTimer?.Kill();
             }
+        }
+
+        public override void ResetForNextMap(bool completeReset = true)
+        {
+
         }
     }
 }

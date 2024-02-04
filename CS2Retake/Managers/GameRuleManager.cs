@@ -1,5 +1,6 @@
 ﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
+using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CS2Retake.Managers.Base;
 using CS2Retake.Managers.Interfaces;
 using CS2Retake.Utils;
@@ -58,24 +59,69 @@ namespace CS2Retake.Managers
             }
         }
 
-        public void ModifyBombPlanted(bool bombPlanted)
+        public bool BombPlanted
         {
-            if (this.GameRules == null)
+            get
             {
-                this.GetGameRules();
+                if (this.GameRules == null)
+                {
+                    this.GetGameRules();
+                }
+
+                return this.GameRules!.BombPlanted;
             }
-            this.GameRules!.BombPlanted = bombPlanted;
+
+            set
+            {
+                if (this.GameRules == null)
+                {
+                    this.GetGameRules();
+                }
+
+                this.GameRules!.BombPlanted = value;
+            }
         }
 
-        public void ModifyBombDefused(bool bombDefused)
+        public bool BombDefused
         {
-            if (this.GameRules == null)
+            get
             {
-                this.GetGameRules();
+                if (this.GameRules == null)
+                {
+                    this.GetGameRules();
+                }
+
+                return this.GameRules!.BombDefused;
             }
-            this.GameRules!.BombDefused = bombDefused;
+
+            set
+            {
+                if (this.GameRules == null)
+                {
+                    this.GetGameRules();
+                }
+
+                this.GameRules!.BombDefused = value;
+            }
         }
 
+        public int TotalRoundsPlayed
+        {
+            get
+            {
+                if (this.GameRules == null)
+                {
+                    this.GetGameRules();
+                }
+
+                return this.GameRules!.TotalRoundsPlayed;
+            }
+        }
+
+        public void TerminateRound(RoundEndReason reason = RoundEndReason.RoundDraw)
+        {
+            this.GameRules?.TerminateRound(0, reason);
+        }
 
         private void GetGameRules()
         {
@@ -120,6 +166,11 @@ namespace CS2Retake.Managers
         public override void ResetForNextRound(bool completeReset = true)
         {
             
+        }
+
+        public override void ResetForNextMap(bool completeReset = true)
+        {
+
         }
     }
 }

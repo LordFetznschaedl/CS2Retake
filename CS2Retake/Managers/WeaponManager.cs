@@ -21,7 +21,7 @@ namespace CS2Retake.Managers
         private IWeaponAllocator _weaponKitAllocator;
         private IGrenadeAllocator _grenadeKitAllocator;
 
-        public RoundTypeEnum RoundType { get; private set; } = RoundTypeEnum.Undefined;
+
 
         public static WeaponManager Instance
         {
@@ -66,6 +66,8 @@ namespace CS2Retake.Managers
                 return;
             }
 
+            var roundType = RoundTypeManager.Instance.RoundType;
+
             if(this._weaponKitAllocator == null) 
             {
                 this._weaponKitAllocator = new WeaponKitAllocator(RuntimeConfig.ModuleDirectory);
@@ -81,7 +83,7 @@ namespace CS2Retake.Managers
             {
                 if (this._allocator != null)
                 {
-                    var allocationData = this._allocator.Allocate(player, this.RoundType);
+                    var allocationData = this._allocator.Allocate(player, roundType);
                     weaponAllocationData = (allocationData.primaryWeapon, allocationData.secondaryWeapon, allocationData.kevlar, allocationData.kit);
                     grenadeAllocationList = allocationData.grenades;
                 }
@@ -89,11 +91,11 @@ namespace CS2Retake.Managers
                 {
                     if (this._weaponKitAllocator != null)
                     {
-                        weaponAllocationData = this._weaponKitAllocator.Allocate(player, this.RoundType);
+                        weaponAllocationData = this._weaponKitAllocator.Allocate(player, roundType);
                     }
                     if (this._grenadeKitAllocator != null)
                     {
-                        grenadeAllocationList = this._grenadeKitAllocator.Allocate(player, this.RoundType);
+                        grenadeAllocationList = this._grenadeKitAllocator.Allocate(player, roundType);
                     }
                 }
 
@@ -216,11 +218,6 @@ namespace CS2Retake.Managers
             playerItemService.HasHelmet = false;
         }
 
-        public void RandomRoundType()
-        {
-            this.RoundType = (RoundTypeEnum)new Random().Next(0, Enum.GetNames(typeof(RoundTypeEnum)).Length-1);
-        }
-
         public override void ResetForNextRound(bool completeReset = true)
         {
             if(completeReset) 
@@ -228,10 +225,15 @@ namespace CS2Retake.Managers
                 
             }
 
-            this.RandomRoundType();
+            RoundTypeManager.Instance.HandleRoundType();
             this._allocator?.ResetForNextRound();
             this._weaponKitAllocator?.ResetForNextRound();
             this._grenadeKitAllocator?.ResetForNextRound();
+        }
+
+        public override void ResetForNextMap(bool completeReset = true)
+        {
+
         }
     }
 }

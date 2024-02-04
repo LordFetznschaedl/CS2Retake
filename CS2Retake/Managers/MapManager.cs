@@ -135,5 +135,10 @@ namespace CS2Retake.Managers
             
             this.HasToBeInBombZone = true;
         }
+
+        public override void ResetForNextMap(bool completeReset = true)
+        {
+
+        }
     }
 }

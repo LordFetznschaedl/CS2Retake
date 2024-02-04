@@ -171,5 +171,10 @@ namespace CS2Retake.Managers
 
             this.BombHasBeenPlanted = false;
         }
+
+        public override void ResetForNextMap(bool completeReset = true)
+        {
+
+        }
     }
 }

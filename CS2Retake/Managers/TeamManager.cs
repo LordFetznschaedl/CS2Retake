@@ -167,29 +167,40 @@ namespace CS2Retake.Managers
 
         public void OnTick()
         {
-            var playerIds = this._playerStateDict.Where(x => x.Value == PlayerStateEnum.Connected).Select(x => x.Key).ToList();
+            if(GameRuleManager.Instance.IsWarmup)
+            {
+                return;
+            }
+
+            var playerIds = this._playerStateDict.Where(x => x.Value == PlayerStateEnum.Connected || x.Value == PlayerStateEnum.Spectating || x.Value == PlayerStateEnum.Queue).ToList();
             
             foreach(var playerId in playerIds)
             {
-                var player = Utilities.GetPlayerFromUserid(playerId);
+                var player = Utilities.GetPlayerFromUserid(playerId.Key);
+                var state = playerId.Value;
 
                 if (player == null || !player.IsValid || player.UserId == null || !player.UserId.HasValue)
                 {
                     continue;
                 }
 
-                if(player.TeamNum == (int)CsTeam.Spectator)
+                if(state == PlayerStateEnum.Connected && player.TeamNum == (int)CsTeam.Spectator)
                 {
                     this.UpdatePlayerStateDict(player.UserId.Value, PlayerStateEnum.Spectating);
                 }
 
-                if(player.TeamNum == (int)CsTeam.Terrorist || player.TeamNum == (int)CsTeam.CounterTerrorist)
+                if((state == PlayerStateEnum.Connected || state == PlayerStateEnum.Spectating) && (player.TeamNum == (int)CsTeam.Terrorist || player.TeamNum == (int)CsTeam.CounterTerrorist))
                 {
                     this.PlayerSwitchTeam(player, CsTeam.None, CsTeam.Spectator);
                 }
 
-                
+                if(state == PlayerStateEnum.Queue && (player.TeamNum == (int)CsTeam.Terrorist || player.TeamNum == (int)CsTeam.CounterTerrorist))
+                {
+                    player.ChangeTeam(CsTeam.Spectator);
+                }
             }
+
+            
         }
 
 
@@ -280,8 +291,10 @@ namespace CS2Retake.Managers
             var userId = player.UserId.Value;
             var currentState = this.GetCurrentPlayerState(userId);
 
+            MessageUtils.LogDebug($"UserId: {userId}, State: {currentState}, OldTeam: {previousTeam}, NewTeam: {newTeam}");
+
             //Allow switch to spectator
-            if((currentState == PlayerStateEnum.Connected || currentState == PlayerStateEnum.Playing) && newTeam == CsTeam.Spectator)
+            if ((currentState == PlayerStateEnum.Connected || currentState == PlayerStateEnum.Playing) && newTeam == CsTeam.Spectator)
             {
                 MessageUtils.LogDebug($"Switch to spectator from playing or connected {userId}");
                 this.UpdatePlayerStateDict(userId, PlayerStateEnum.Spectating);
@@ -301,6 +314,26 @@ namespace CS2Retake.Managers
                 this.UpdateQueue(userId);
 
                 player.ChangeTeam(CsTeam.Spectator);
+
+                if(!GameRuleManager.Instance.IsWarmup && !PlayerUtils.AreMoreThenOrEqualPlayersConnected(1))
+                {
+                    GameRuleManager.Instance.TerminateRound();
+                }
+            }
+            //Place player into queue from queue spectator combo
+            else if (currentState == PlayerStateEnum.Queue && (newTeam == CsTeam.Terrorist || newTeam == CsTeam.CounterTerrorist) && (previousTeam == CsTeam.None || previousTeam == CsTeam.Spectator))
+            {
+                MessageUtils.LogDebug($"Switch to queue {userId} from queue spectator");
+
+                if (!GameRuleManager.Instance.IsWarmup && !PlayerUtils.AreMoreThenOrEqualPlayersConnected(2))
+                {
+                    MessageUtils.PrintToPlayerOrServer($"You have been placed into the queue! Please wait for the next round to start.", player);
+                }
+                this.UpdatePlayerStateDict(userId, PlayerStateEnum.Queue);
+                this.UpdateQueue(userId);
+
+                player.ChangeTeam(CsTeam.Spectator);
+
             }
             //Remove player from queue when the player wants to switch to spectator
             else if(currentState == PlayerStateEnum.Queue && newTeam == CsTeam.Spectator)
@@ -311,11 +344,6 @@ namespace CS2Retake.Managers
 
                 player.ChangeTeam(CsTeam.Spectator);
             }
-        }
-
-        public override void ResetForNextRound(bool completeReset = true)
-        {
-
         }
 
         private PlayerStateEnum GetCurrentPlayerState(CCSPlayerController player)
@@ -448,6 +476,16 @@ namespace CS2Retake.Managers
 
                 this.UpdatePlayerStateDict(userId, PlayerStateEnum.Playing);
             }
+        }
+        
+        public override void ResetForNextRound(bool completeReset = true)
+        {
+
+        }
+
+        public override void ResetForNextMap(bool completeReset = true)
+        {
+
         }
     }
 }

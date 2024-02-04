@@ -18,9 +18,9 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.2.0";
+        public override string ModuleVersion => "1.3.0";
         public override string ModuleAuthor => "LordFetznschaedl";
-        public override string ModuleDescription => "Retake Plugin implementation for CS2";
+        public override string ModuleDescription => "Highly configurable and modular implementation Retake for CS2";
 
         public CS2RetakeConfig Config { get; set; } = new CS2RetakeConfig();
         private bool _scrambleAfterWarmupDone = false;
@@ -241,6 +241,8 @@ namespace CS2Retake
                 return HookResult.Handled;
             }
 
+            MessageUtils.LogDebug($"CommandInfo: ArgString: {commandInfo.ArgString}, CommandString: {commandInfo.GetCommandString}");
+
             var oldTeam = (CsTeam)player.TeamNum;
 
             if (commandInfo.ArgCount < 2)
@@ -264,20 +266,6 @@ namespace CS2Retake
             }
 
             return HookResult.Continue;
-
-            //if (GameRuleManager.Instance.IsWarmup || !FeatureConfig.EnableQueue) 
-            //{
-            //    return HookResult.Continue;
-            //}
-            //else if(!PlayerUtils.AreMoreThenPlayersConnected(2))
-            //{
-            //    return HookResult.Continue;
-            //}
-            //else
-            //{
-            //    return HookResult.Handled;
-            //}
-
             
         }
 
@@ -373,7 +361,7 @@ namespace CS2Retake
 
             var ratio = TeamManager.Instance.LatestRatio;
 
-            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.Darkred}{MapManager.Instance.BombSite}{ChatColors.White} - Roundtype: {ChatColors.Darkred}{WeaponManager.Instance.RoundType}{ChatColors.White} - {ChatColors.Blue}{ratio.ctRatio}CTs{ChatColors.White} VS {ChatColors.Red}{ratio.tRatio}Ts{ChatColors.White}");
+            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.DarkRed}{MapManager.Instance.BombSite}{ChatColors.White} - Roundtype: {ChatColors.DarkRed}{RoundTypeManager.Instance.RoundType}{ChatColors.White} - {ChatColors.Blue}{ratio.ctRatio}CTs{ChatColors.White} VS {ChatColors.Red}{ratio.tRatio}Ts{ChatColors.White}");
 
             return HookResult.Continue;
         }
@@ -481,6 +469,8 @@ namespace CS2Retake
 
         private HookResult OnCsIntermission(EventCsIntermission @event, GameEventInfo info)
         {
+            RoundTypeManager.Instance.ResetForNextMap();
+
             return HookResult.Continue;
         }
 
@@ -491,7 +481,8 @@ namespace CS2Retake
             RetakeManager.Instance.ConfigureForRetake();
             GameRuleManager.Instance.GameRules = null;
             this._scrambleAfterWarmupDone = false;
-    }
+            RoundTypeManager.Instance.ResetForNextMap();
+        }
 
 
         public void OnTick()

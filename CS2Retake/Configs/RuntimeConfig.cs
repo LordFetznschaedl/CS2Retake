@@ -1,4 +1,5 @@
-﻿using CS2Retake.Utils;
+﻿using CS2Retake.Entities;
+using CS2Retake.Utils;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -21,6 +22,17 @@ namespace CS2Retake.Configs
         public static float TeamBalanceRatio { get; set; } = 0.499f;
 
         public static PlantTypeEnum PlantType { get; set; } = PlantTypeEnum.AutoPlant;
+        public static RoundTypeModeEnum RoundTypeMode { get; set; } = RoundTypeModeEnum.Sequence;
+
+        public static List<RoundTypeSequenceEntity> RoundTypeSequence { get; set; } = new List<RoundTypeSequenceEntity>()
+        {
+            new RoundTypeSequenceEntity(RoundTypeEnum.Pistol, 5),
+            new RoundTypeSequenceEntity(RoundTypeEnum.Mid, 3),
+            new RoundTypeSequenceEntity(RoundTypeEnum.FullBuy, -1),
+        };
+
+        public static RoundTypeEnum RoundTypeSpecific { get; set; } = RoundTypeEnum.FullBuy;
+
 
         public static void SetModuleInfo(string moduleName, string moduleDirectory)
         {
@@ -38,6 +50,10 @@ namespace CS2Retake.Configs
             TeamBalanceRatio = baseConfig.TeamBalanceRatio;
 
             PlantType = baseConfig.PlantType;
+
+            RoundTypeMode = baseConfig.RoundTypeMode;
+            RoundTypeSequence = baseConfig.RoundTypeSequence;
+            RoundTypeSpecific = baseConfig.RoundTypeSpecific;
         }
     }
 }
