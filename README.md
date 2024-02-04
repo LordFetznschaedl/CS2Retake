@@ -6,7 +6,7 @@ Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 ---
 # reuirements:  
 - min. CounterStrikeSharp API Version: 159  
-- GameType: Casual or Competitive  (Casual does work properly now!)
+- GameType: Casual or Competitive
   
 ---
 # usage:  
