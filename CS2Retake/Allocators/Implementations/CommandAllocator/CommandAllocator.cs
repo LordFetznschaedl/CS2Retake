@@ -8,21 +8,29 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using CS2Retake.Utils;
+using Microsoft.Extensions.Logging;
 
 namespace CS2Retake.Allocators.Implementations.CommandAllocator
 {
+    //public class CommandAllocator : BaseAllocator, IAllocatorConfig<CommandAllocatorConfig>
     public class CommandAllocator : BaseAllocator, IAllocatorConfig<CommandAllocatorConfig>
     {
-        public CommandAllocatorConfig AllocatorConfig { get; set; } = new CommandAllocatorConfig();
+        public CommandAllocatorConfig Config { get; set; } = new CommandAllocatorConfig();
 
         public override (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit, List<GrenadeEnum> grenades) Allocate(CCSPlayerController player, RoundTypeEnum roundType = RoundTypeEnum.Undefined)
         {
-            return ("weapon_ak47", "weapon_deagle", KevlarEnum.KevlarHelmet, true, new List<GrenadeEnum>());
+            return (Config.primary, Config.secondary, KevlarEnum.KevlarHelmet, true, new List<GrenadeEnum>());
+        }
+
+        public void OnAllocatorConfigParsed(CommandAllocatorConfig config)
+        {
+            this.Config = config;
         }
 
         public override void OnGunsCommand(CCSPlayerController? player)
         {
-            
+            MessageUtils.Log(LogLevel.Error, $"---!guns");
         }
     }
 }

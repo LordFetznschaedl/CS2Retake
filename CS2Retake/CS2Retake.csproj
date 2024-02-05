@@ -4,11 +4,13 @@
     <TargetFramework>net7.0</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+    <Version>1.4.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="CounterStrikeSharp.API" Version="1.0.159" />
-    <PackageReference Include="CSZoneNet.Plugin.CS2BaseAllocator" Version="1.0.3" />
+    <PackageReference Include="CSZoneNet.Plugin.CS2BaseAllocator" Version="1.0.7" />
     <PackageReference Include="CSZoneNet.Plugin.Utils" Version="1.0.1" />
   </ItemGroup>
   

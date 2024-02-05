@@ -20,9 +20,11 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.3.0";
+        public override string ModuleVersion => "1.4.0";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Highly configurable and modular implementation Retake for CS2";
+
+        private readonly List<string> _gunsCommandAlias = new List<string>(){"guns", "gans", "gun", "g", "weapon", "waepon", "waffen", "menu"};
 
         public CS2RetakeConfig Config { get; set; } = new CS2RetakeConfig();
         private bool _scrambleAfterWarmupDone = false;
@@ -80,6 +82,13 @@ namespace CS2Retake
             this.RegisterEventHandler<EventPlayerDisconnect>(OnPlayerDisconnect);
 
             this.AddCommandListener("jointeam", OnCommandJoinTeam);
+
+            foreach(var alias in this._gunsCommandAlias)
+            {
+                this.AddCommand(alias.StartsWith($"css_") ? alias : $"css_{alias}", "Base guns command for weapon allocation settings.", OnGuns);
+                
+            }
+            
         }
 
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
@@ -234,10 +243,9 @@ namespace CS2Retake
             MapManager.Instance.AddSpawn(player, (CsTeam)team, (BombSiteEnum)bombSite);
         }
 
-        [ConsoleCommand("css_guns", "Base guns command for weapon allocation settings.")]
         public void OnGuns(CCSPlayerController? player, CommandInfo command)
         {
-            
+            WeaponManager.Instance.OnGunsCommand(player);
         }
 
         private HookResult OnCommandJoinTeam(CCSPlayerController? player, CommandInfo commandInfo)
@@ -319,8 +327,6 @@ namespace CS2Retake
             {
                 PlantManager.Instance.HandlePlant();
             }
-
-            
 
             return HookResult.Continue;
         }

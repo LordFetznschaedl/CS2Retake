@@ -9,6 +9,13 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Configs
 {
     public class CommandAllocatorConfig : BaseAllocatorConfig
     {
+        public bool EnableRoundTypeMenuPistol { get; set; } = true;
+        public bool EnableRoundTypeMenuMid { get; set; } = true;
+        public bool EnableRoundTypeMenuFullBuy { get; set; } = true;
+
+        public string primary { get; set; } = "weapon_ak47";
+        public string secondary { get; set; } = "weapon_deagle";
+
         public CommandAllocatorConfig()
         {
             this.Version = 1;

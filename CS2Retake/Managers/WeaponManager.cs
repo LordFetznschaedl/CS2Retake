@@ -211,7 +211,6 @@ namespace CS2Retake.Managers
             }
 
             this._allocator.OnGunsCommand(player);
-
         }
 
         private bool HandleAllocatorCreation()
