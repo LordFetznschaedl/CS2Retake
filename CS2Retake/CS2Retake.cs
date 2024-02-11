@@ -16,7 +16,7 @@ using CounterStrikeSharp.API.Modules.Entities.Constants;
 
 namespace CS2Retake
 {
-    [MinimumApiVersion(159)]
+    [MinimumApiVersion(166)]
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
@@ -24,7 +24,7 @@ namespace CS2Retake
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Highly configurable and modular implementation Retake for CS2";
 
-        private readonly List<string> _gunsCommandAlias = new List<string>(){"guns", "gans", "gun", "g", "weapon", "waepon", "waffen", "menu"};
+        private readonly List<string> _gunsCommandAlias = new List<string>(){"guns", "gans", "gun", "g", "weapon", "waepon", "waffen", "menu", "allocator", "select"};
 
         public CS2RetakeConfig Config { get; set; } = new CS2RetakeConfig();
         private bool _scrambleAfterWarmupDone = false;
@@ -48,6 +48,8 @@ namespace CS2Retake
             RuntimeConfig.SetModuleInfo(this.ModuleName, this.ModuleDirectory);
             RuntimeConfig.SetBaseConfig(this.Config);
             FeatureConfig.SetBaseConfig(this.Config);
+
+            WeaponManager.Instance.PluginInstance = this;
 
             if (MapManager.Instance.CurrentMap == null)
             {
@@ -86,7 +88,6 @@ namespace CS2Retake
             foreach(var alias in this._gunsCommandAlias)
             {
                 this.AddCommand(alias.StartsWith($"css_") ? alias : $"css_{alias}", "Base guns command for weapon allocation settings.", OnGuns);
-                
             }
             
         }

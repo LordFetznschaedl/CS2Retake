@@ -21,7 +21,7 @@ namespace CS2Retake.Managers
 
         private IBaseAllocator _allocator;
 
-
+        public IPlugin PluginInstance { get; set; } = null;
 
 
         public static WeaponManager Instance
@@ -218,7 +218,7 @@ namespace CS2Retake.Managers
             if (this._allocator == null)
             {
                 AllocatorFactory factory = new AllocatorFactory();
-                this._allocator = factory.GetAllocator(RuntimeConfig.Allocator);
+                this._allocator = factory.GetAllocator(RuntimeConfig.Allocator, this.PluginInstance);
             }
 
             return this._allocator != null;

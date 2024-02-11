@@ -1,4 +1,5 @@
-﻿using CS2Retake.Allocators.Implementations.CommandAllocator;
+﻿using CounterStrikeSharp.API.Core;
+using CS2Retake.Allocators.Implementations.CommandAllocator;
 using CS2Retake.Utils;
 using CSZoneNet.Plugin.CS2BaseAllocator.Interfaces;
 using Microsoft.Extensions.Logging;
@@ -12,7 +13,7 @@ namespace CS2Retake.Allocators.Factory
 {
     public class AllocatorFactory
     {
-        public IBaseAllocator GetAllocator(AllocatorEnum allocator)
+        public IBaseAllocator GetAllocator(AllocatorEnum allocator, IPlugin? pluginInstance = null)
         {
             IBaseAllocator chosenAllocator;
 
@@ -31,6 +32,11 @@ namespace CS2Retake.Allocators.Factory
             }
 
             chosenAllocator.InitializeConfig(chosenAllocator, chosenAllocator.GetType());
+
+            if(pluginInstance != null) 
+            {
+                chosenAllocator.InjectBasePluginInstance(pluginInstance);
+            }
 
             return chosenAllocator;
         }
