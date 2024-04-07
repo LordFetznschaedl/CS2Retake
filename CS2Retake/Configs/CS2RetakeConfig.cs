@@ -40,7 +40,7 @@ namespace CS2Retake.Configs
         public int MaxPlayers { get; set; } = 10;
         public float TeamBalanceRatio { get; set; } = 0.499f;
 
-        public bool EnableThankYouMessage { get; set; } = true;
+        public bool EnableThankYouMessage { get; set; } = false;
 
 
 

@@ -21,7 +21,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Configs
 
             new WeaponEntity("MP-9", "weapon_mp9", CsTeam.CounterTerrorist),
 
-            new WeaponEntity("Mac-10", "weapon_ak47", CsTeam.Terrorist),
+            new WeaponEntity("Mac-10", "weapon_mac10", CsTeam.Terrorist),
         };
 
         public List<WeaponEntity> AvailableSecondaries { get; set; } = new List<WeaponEntity>()
@@ -38,5 +38,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Configs
             new WeaponEntity("Glock", "weapon_glock", CsTeam.Terrorist),
             new WeaponEntity("Tec-9", "weapon_tec9", CsTeam.Terrorist),
         };
+
+        public MidConfig()
+        {
+            this.Version = 1;
+        }
     }
 }

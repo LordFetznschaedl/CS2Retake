@@ -25,7 +25,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Menus
                 return;
             }
 
-            CenterHtmlMenu menu = new CenterHtmlMenu("Gun Menu");
+            ChatMenu menu = new ChatMenu("Gun Menu");
 
             if(enableRoundTypePistolMenu) 
             {
@@ -45,7 +45,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Menus
                 menu.AddMenuOption("CT-FullBuy", OnSelect);
             }
 
-            MenuManager.OpenCenterHtmlMenu(plugin, player, menu);
+            MenuManager.OpenChatMenu(player, menu);
         }
 
         private static void OnSelect(CCSPlayerController player, ChatMenuOption chatMenuOption)
@@ -72,23 +72,22 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Menus
                 return;
             }
 
+            
+
             switch(roundTypeString)
             {
                 case "PISTOL":
-                    PistolMenu.OpenSecondaryMenu(team);
+                    PistolMenu.Instance.OpenSecondaryMenu(player);
                     break;
                 case "MID":
-                    MidMenu.OpenPrimaryMenu(team);
+                    MidMenu.Instance.OpenPrimaryMenu(player);
                     break;
                 case "FULLBUY":
-                    FullBuyMenu.OpenPrimaryMenu(team);
+                    FullBuyMenu.Instance.OpenPrimaryMenu(player);
                     break;
                 default:
                     return;
             }
-
-
-            Console.WriteLine($"ChatMenuOption selected: {chatMenuOption.Text}");
         }
 
     }

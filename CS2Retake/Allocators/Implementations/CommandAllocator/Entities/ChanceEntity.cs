@@ -6,19 +6,25 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace CS2Retake.Allocators.Implementations.CommandAllocator.Entities
-{   
-    public class WeaponEntity
+{
+    public class ChanceEntity
     {
         public string WeaponName { get; set; }
         public string WeaponString { get; set; }
         public CsTeam Team { get; set; } = CsTeam.None;
 
-        public WeaponEntity() { }
+        public List<int> Chances { get; set; }
 
-        public WeaponEntity(string weaponName, string weaponString, CsTeam team = CsTeam.None)
+        public int Limit { get; set; } = -1;
+
+        public ChanceEntity() { }
+
+        public ChanceEntity(string weaponName, string weaponString, List<int> chances, CsTeam team = CsTeam.None)
         {
             this.WeaponName = weaponName;
             this.WeaponString = weaponString;
+            this.Chances = chances;
+
             this.Team = team;
         }
 

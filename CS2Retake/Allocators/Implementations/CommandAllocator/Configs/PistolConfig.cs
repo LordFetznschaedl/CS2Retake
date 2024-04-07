@@ -25,5 +25,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Configs
             new WeaponEntity("Glock", "weapon_glock", CsTeam.Terrorist),
             new WeaponEntity("Tec-9", "weapon_tec9", CsTeam.Terrorist),
         };
+
+        public PistolConfig()
+        {
+            this.Version = 1;
+        }
     }
 }

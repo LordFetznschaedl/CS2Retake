@@ -35,5 +35,28 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Configs
             new WeaponEntity("Tec-9", "weapon_tec9", CsTeam.Terrorist),
         };
 
+        public ChanceEntity AWPChanceCT { get; set; } = new ChanceEntity()
+        {
+            Team = CsTeam.CounterTerrorist,
+            WeaponName = "AWP",
+            WeaponString = "weapon_awp",
+            Limit = 1,
+            Chances = new List<int>() { 10, 20, 30, 40, 50 },
+        };
+
+        public ChanceEntity AWPChanceT { get; set; } = new ChanceEntity()
+        {
+            Team = CsTeam.Terrorist,
+            WeaponName = "AWP",
+            WeaponString = "weapon_awp",
+            Limit = 1,
+            Chances = new List<int>() { 10, 20, 30, 40, 50 },
+        };
+
+
+        public FullBuyConfig()
+        {
+            this.Version = 1;
+        }
     }
 }

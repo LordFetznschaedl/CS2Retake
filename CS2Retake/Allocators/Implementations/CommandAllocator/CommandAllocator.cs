@@ -11,6 +11,8 @@ using System.Threading.Tasks;
 using CS2Retake.Utils;
 using Microsoft.Extensions.Logging;
 using CS2Retake.Allocators.Implementations.CommandAllocator.Menus;
+using CS2Retake.Allocators.Implementations.CommandAllocator.Manager;
+using CounterStrikeSharp.API.Modules.Utils;
 
 namespace CS2Retake.Allocators.Implementations.CommandAllocator
 {
@@ -41,7 +43,43 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
 
             returnValue.grenades = grenades;
 
+            (string? primary, string? secondary) weapons = ("", "");
+            (string primary, string secondary) defaultWeapons = ("", "weapon_deagle");
+            switch (roundType)
+            {
+                case RoundTypeEnum.FullBuy:
+                    weapons = CacheManager.Instance.GetFullBuyWeapons(player);
+                    defaultWeapons.primary = player.Team == CsTeam.CounterTerrorist ? "weapon_m4a1" : "weapon_ak47";
+                    break;
+                case RoundTypeEnum.Mid:
+                    weapons = CacheManager.Instance.GetMidWeapons(player);
+                    defaultWeapons.primary = player.Team == CsTeam.CounterTerrorist ? "weapon_mp9" : "weapon_mac10";
+                    break;
+                case RoundTypeEnum.Pistol:
+                    weapons = CacheManager.Instance.GetPistolWeapons(player);
+                    defaultWeapons.secondary = player.Team == CsTeam.CounterTerrorist ? "weapon_usp_silencer" : "weapon_glock";
+                    break;
 
+            }
+
+            MessageUtils.LogDebug($"Default: {defaultWeapons.primary}, {defaultWeapons.secondary} - Selected: {weapons.primary}, {weapons.secondary}");
+
+            if (string.IsNullOrWhiteSpace(weapons.primary))
+            {
+                returnValue.primaryWeapon = defaultWeapons.primary;
+            }
+            else
+            {
+                returnValue.primaryWeapon = weapons.primary;
+            }
+            if (string.IsNullOrWhiteSpace(weapons.secondary))
+            {
+                returnValue.secondaryWeapon = defaultWeapons.secondary;
+            }
+            else
+            {
+                returnValue.secondaryWeapon = weapons.secondary;
+            }
 
 
 
@@ -61,6 +99,16 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
             }
 
             ChooserMenu.OpenMenu(player, this.BasePluginInstance, this.Config.EnableRoundTypePistolMenu, this.Config.EnableRoundTypeMidMenu, this.Config.EnableRoundTypeFullBuyMenu);
+        }
+
+        public override void OnPlayerConnected(CCSPlayerController? player)
+        {
+            return;
+        }
+
+        public override void OnPlayerDisconnected(CCSPlayerController? player)
+        {
+            return;
         }
     }
 }
