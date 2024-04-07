@@ -39,13 +39,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Menus
             _config = AllocatorConfigManager.Load<PistolConfig>("CommandAllocator", "Pistol");
         }
 
-        public void OpenSecondaryMenu(CCSPlayerController player)
+        public void OpenSecondaryMenu(CCSPlayerController player, CsTeam team)
         {
             ChatMenu menu = new ChatMenu("Pistol Menu");
 
-            foreach (var primary in _config.AvailableSecondaries.FindAll(x => x.Team == player.Team || x.Team == CsTeam.None))
+            var teamString = team == CsTeam.CounterTerrorist ? "CT" : "T";
+
+            foreach (var secondary in _config.AvailableSecondaries.FindAll(x => x.Team == team || x.Team == CsTeam.None))
             {
-                menu.AddMenuOption(primary.WeaponName, OnSelectSecondary);
+                menu.AddMenuOption($"{teamString}_{secondary.WeaponName}", OnSelectSecondary);
             }
 
             MenuManager.OpenChatMenu(player, menu);
@@ -53,16 +55,39 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Menus
 
         private static void OnSelectSecondary(CCSPlayerController player, ChatMenuOption chatMenuOption)
         {
-            var weaponString = _config.AvailableSecondaries.FirstOrDefault(x => x.WeaponName.Equals(chatMenuOption.Text))?.WeaponString;
+            var menuText = chatMenuOption.Text?.Split('_')?.LastOrDefault() ?? string.Empty;
+            var weaponString = _config.AvailableSecondaries.FirstOrDefault(x => x.WeaponName.Equals(menuText))?.WeaponString;
 
             if (string.IsNullOrWhiteSpace(weaponString))
             {
                 return;
             }
 
-            MessageUtils.PrintToPlayerOrServer($"You have now selected {ChatColors.Green}{chatMenuOption.Text}{ChatColors.White} as your pistol for {ChatColors.Green}Pistol{ChatColors.White} rounds!", player);
+            var team = GetTeam(chatMenuOption.Text ?? string.Empty);
 
-            CacheManager.Instance.AddOrUpdatePistolCache(player, weaponString);
+            MessageUtils.PrintToPlayerOrServer($"You have now selected {ChatColors.Green}{menuText}{ChatColors.White} as your pistol for {ChatColors.Green}Pistol{ChatColors.White} rounds!", player);
+
+            MenuManager.CloseActiveMenu(player);
+            CacheManager.Instance.AddOrUpdatePistolCache(player, weaponString, team);
+            DBManager.Instance.InsertOrUpdatePistolWeaponString(player.SteamID, weaponString, (int)team);
+        }
+
+        private static CsTeam GetTeam(string weaponString)
+        {
+            var teamString = weaponString?.Split('_')?.FirstOrDefault()?.ToUpper() ?? string.Empty;
+
+            CsTeam team = CsTeam.None;
+
+            switch (teamString)
+            {
+                case "CT":
+                    return CsTeam.CounterTerrorist;
+                case "T":
+                    return CsTeam.Terrorist;
+                default:
+                    return CsTeam.None;
+            }
+
         }
     }
 }

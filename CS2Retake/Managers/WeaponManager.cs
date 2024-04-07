@@ -12,6 +12,7 @@ using Microsoft.Extensions.Logging;
 using CSZoneNet.Plugin.Utils.Enums;
 using CSZoneNet.Plugin.CS2BaseAllocator.Interfaces;
 using CS2Retake.Allocators.Factory;
+using CounterStrikeSharp.API.Modules.Entities;
 
 namespace CS2Retake.Managers
 {
@@ -36,7 +37,10 @@ namespace CS2Retake.Managers
             }
         }
 
-        private WeaponManager() { }
+        private WeaponManager() 
+        {
+           
+        }
 
         public void AssignWeapons()
         {
@@ -213,6 +217,63 @@ namespace CS2Retake.Managers
             this._allocator.OnGunsCommand(player);
         }
 
+        public void OnPlayerConnected(CCSPlayerController? player)
+        {
+            if (player == null || !player.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Error, $"Player is null or not valid");
+                return;
+            }
+
+            if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Warning, $"PlayerPawn is null or not valid. This might be because of a disconnected player.");
+                return;
+            }
+
+            if (!this.HandleAllocatorCreation())
+            {
+                MessageUtils.Log(LogLevel.Error, $"Error while Handling the creation of an allocator");
+                return;
+            }
+
+            this._allocator.OnPlayerConnected(player);
+        }
+
+        public void OnPlayerDisconnected(CCSPlayerController? player)
+        {
+            if (player == null || !player.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Error, $"Player is null or not valid");
+                return;
+            }
+
+            if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Warning, $"PlayerPawn is null or not valid. This might be because of a disconnected player.");
+                return;
+            }
+
+            if (!this.HandleAllocatorCreation())
+            {
+                MessageUtils.Log(LogLevel.Error, $"Error while Handling the creation of an allocator");
+                return;
+            }
+
+            this._allocator.OnPlayerDisconnected(player);
+        }
+
+        public override void ResetForNextMap(bool completeReset = true)
+        {
+            if (!this.HandleAllocatorCreation())
+            {
+                MessageUtils.Log(LogLevel.Error, $"Error while Handling the creation of an allocator");
+                return;
+            }
+
+            this._allocator.ResetForNextRound();
+        }
+
         private bool HandleAllocatorCreation()
         {
             if (this._allocator == null)
@@ -236,9 +297,6 @@ namespace CS2Retake.Managers
 
         }
 
-        public override void ResetForNextMap(bool completeReset = true)
-        {
 
-        }
     }
 }

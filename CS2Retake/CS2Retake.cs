@@ -16,7 +16,7 @@ using CounterStrikeSharp.API.Modules.Entities.Constants;
 
 namespace CS2Retake
 {
-    [MinimumApiVersion(166)]
+    [MinimumApiVersion(205)]
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
@@ -454,6 +454,7 @@ namespace CS2Retake
             }
 
             TeamManager.Instance.PlayerConnectedFull(@event.Userid);
+            WeaponManager.Instance.OnPlayerConnected(@event.Userid);
 
             return HookResult.Continue;
         }
@@ -469,6 +470,7 @@ namespace CS2Retake
             }
 
             TeamManager.Instance.PlayerDisconnected(@event.Userid);
+            WeaponManager.Instance.OnPlayerDisconnected(@event.Userid);
 
             return HookResult.Continue;
         }

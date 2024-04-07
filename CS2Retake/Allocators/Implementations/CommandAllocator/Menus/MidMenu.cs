@@ -38,58 +38,90 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Menus
             _config = AllocatorConfigManager.Load<MidConfig>("CommandAllocator", "Mid");
         }
 
-        public void OpenPrimaryMenu(CCSPlayerController player)
+        public void OpenPrimaryMenu(CCSPlayerController player, CsTeam team)
         {
             ChatMenu menu = new ChatMenu("Mid Primary Menu");
 
-            foreach (var primary in _config.AvailablePrimaries.FindAll(x => x.Team == player.Team || x.Team == CsTeam.None))
+            var teamString = team == CsTeam.CounterTerrorist ? "CT" : "T";
+
+            foreach (var primary in _config.AvailablePrimaries.FindAll(x => x.Team == team || x.Team == CsTeam.None))
             {
-                menu.AddMenuOption(primary.WeaponName, OnSelectPrimary);
+                menu.AddMenuOption($"{teamString}_{primary.WeaponName}", OnSelectPrimary);
             }
 
+            MenuManager.CloseActiveMenu(player);
             MenuManager.OpenChatMenu(player, menu);
         }
 
-        public void OpenSecondaryMenu(CCSPlayerController player)
+        public void OpenSecondaryMenu(CCSPlayerController player, CsTeam team)
         {
             ChatMenu menu = new ChatMenu("Mid Secondary Menu");
 
-            foreach (var primary in _config.AvailableSecondaries.FindAll(x => x.Team == player.Team || x.Team == CsTeam.None))
+            var teamString = team == CsTeam.CounterTerrorist ? "CT" : "T";
+
+            foreach (var secondary in _config.AvailableSecondaries.FindAll(x => x.Team == team || x.Team == CsTeam.None))
             {
-                menu.AddMenuOption(primary.WeaponName, OnSelectSecondary);
+                menu.AddMenuOption($"{teamString}_{secondary.WeaponName}", OnSelectSecondary);
             }
 
+            MenuManager.CloseActiveMenu(player);
             MenuManager.OpenChatMenu(player, menu);
         }
 
-        private void OnSelectPrimary(CCSPlayerController player, ChatMenuOption chatMenuOption)
+        private static void OnSelectPrimary(CCSPlayerController player, ChatMenuOption chatMenuOption)
         {
-            var weaponString = _config.AvailablePrimaries.FirstOrDefault(x => x.WeaponName.Equals(chatMenuOption.Text))?.WeaponString;
-
+            var menuText = chatMenuOption.Text?.Split('_')?.LastOrDefault() ?? string.Empty;
+            var weaponString = _config.AvailablePrimaries.FirstOrDefault(x => x.WeaponName.Equals(menuText))?.WeaponString;
+            
             if (string.IsNullOrWhiteSpace(weaponString))
             {
                 return;
             }
 
-            CacheManager.Instance.AddOrUpdateMidPrimaryCache(player, weaponString);
+            var team = GetTeam(chatMenuOption.Text ?? string.Empty);
 
-            MessageUtils.PrintToPlayerOrServer($"You have now selected {ChatColors.Green}{chatMenuOption.Text}{ChatColors.White} as your primary for {ChatColors.Green}Mid{ChatColors.White} rounds!", player);
+            MessageUtils.PrintToPlayerOrServer($"You have now selected {ChatColors.Green}{menuText}{ChatColors.White} as your primary for {ChatColors.Green}Mid{ChatColors.White} rounds!", player);
 
-            OpenSecondaryMenu(player);
+            CacheManager.Instance.AddOrUpdateMidPrimaryCache(player, weaponString, team);
+            DBManager.Instance.InsertOrUpdateMidPrimaryWeaponString(player.SteamID, weaponString, (int)team);
+
+            MidMenu.Instance.OpenSecondaryMenu(player, team);
         }
 
-        private void OnSelectSecondary(CCSPlayerController player, ChatMenuOption chatMenuOption)
+        private static void OnSelectSecondary(CCSPlayerController player, ChatMenuOption chatMenuOption)
         {
-            var weaponString = _config.AvailableSecondaries.FirstOrDefault(x => x.WeaponName.Equals(chatMenuOption.Text))?.WeaponString;
-
+            var menuText = chatMenuOption.Text?.Split('_')?.LastOrDefault() ?? string.Empty;
+            var weaponString = _config.AvailableSecondaries.FirstOrDefault(x => x.WeaponName.Equals(menuText))?.WeaponString;
+            
             if (string.IsNullOrWhiteSpace(weaponString))
             {
                 return;
             }
 
-            CacheManager.Instance.AddOrUpdateMidSecondaryCache(player, weaponString);
+            var team = GetTeam(chatMenuOption.Text ?? string.Empty);
 
-            MessageUtils.PrintToPlayerOrServer($"You have now selected {ChatColors.Green}{chatMenuOption.Text}{ChatColors.White} as your secondary for {ChatColors.Green}Mid{ChatColors.White} rounds!", player);
+            MessageUtils.PrintToPlayerOrServer($"You have now selected {ChatColors.Green}{menuText}{ChatColors.White} as your secondary for {ChatColors.Green}Mid{ChatColors.White} rounds!", player);
+
+            CacheManager.Instance.AddOrUpdateMidSecondaryCache(player, weaponString, team);
+            DBManager.Instance.InsertOrUpdateMidSecondaryWeaponString(player.SteamID, weaponString, (int)team);
+        }
+
+        private static CsTeam GetTeam(string weaponString)
+        {
+            var teamString = weaponString?.Split('_')?.FirstOrDefault()?.ToUpper() ?? string.Empty;
+
+            CsTeam team = CsTeam.None;
+
+            switch (teamString)
+            {
+                case "CT":
+                    return CsTeam.CounterTerrorist;
+                case "T":
+                    return CsTeam.Terrorist;
+                default:
+                    return CsTeam.None;
+            }
+
         }
     }
 }
