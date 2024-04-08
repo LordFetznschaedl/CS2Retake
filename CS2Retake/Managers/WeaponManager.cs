@@ -4,13 +4,15 @@ using CounterStrikeSharp.API.Modules.Entities.Constants;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Allocators;
 using CS2Retake.Allocators.Exceptions;
-using CS2Retake.Allocators.Interfaces;
 using CS2Retake.Configs;
 using CS2Retake.Managers.Base;
 using CS2Retake.Managers.Interfaces;
 using CS2Retake.Utils;
 using Microsoft.Extensions.Logging;
 using CSZoneNet.Plugin.Utils.Enums;
+using CSZoneNet.Plugin.CS2BaseAllocator.Interfaces;
+using CS2Retake.Allocators.Factory;
+using CounterStrikeSharp.API.Modules.Entities;
 
 namespace CS2Retake.Managers
 {
@@ -18,10 +20,9 @@ namespace CS2Retake.Managers
     {
         private static WeaponManager? _instance = null;
 
-        private IAllocator _allocator;
-        private IWeaponAllocator _weaponKitAllocator;
-        private IGrenadeAllocator _grenadeKitAllocator;
+        private IBaseAllocator _allocator;
 
+        public IPlugin PluginInstance { get; set; } = null;
 
 
         public static WeaponManager Instance
@@ -36,7 +37,10 @@ namespace CS2Retake.Managers
             }
         }
 
-        private WeaponManager() { }
+        private WeaponManager() 
+        {
+           
+        }
 
         public void AssignWeapons()
         {
@@ -69,45 +73,16 @@ namespace CS2Retake.Managers
 
             var roundType = RoundTypeManager.Instance.RoundType;
 
-            if(this._weaponKitAllocator == null) 
+
+            if(!this.HandleAllocatorCreation())
             {
-                this._weaponKitAllocator = new WeaponKitAllocator(RuntimeConfig.ModuleDirectory);
-            }
-            if(this._grenadeKitAllocator == null)
-            {
-                this._grenadeKitAllocator = new GrenadeKitAllocator(RuntimeConfig.ModuleDirectory);
+                MessageUtils.Log(LogLevel.Error, $"Error while Handling the creation of an allocator");
+                return;
             }
 
-            (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit) weaponAllocationData = (string.Empty, string.Empty, KevlarEnum.None, false);
-            List<GrenadeEnum> grenadeAllocationList = new List<GrenadeEnum>();
-            try
-            {
-                if (this._allocator != null)
-                {
-                    var allocationData = this._allocator.Allocate(player, roundType);
-                    weaponAllocationData = (allocationData.primaryWeapon, allocationData.secondaryWeapon, allocationData.kevlar, allocationData.kit);
-                    grenadeAllocationList = allocationData.grenades;
-                }
-                else
-                {
-                    if (this._weaponKitAllocator != null)
-                    {
-                        weaponAllocationData = this._weaponKitAllocator.Allocate(player, roundType);
-                    }
-                    if (this._grenadeKitAllocator != null)
-                    {
-                        grenadeAllocationList = this._grenadeKitAllocator.Allocate(player, roundType);
-                    }
-                }
 
-            }
-            catch(AllocatorException ex)
-            {
-                MessageUtils.Log(LogLevel.Error,$"An error happened while assigning the weapons. Message: {ex.Message}");
-                MessageUtils.PrintToPlayerOrServer($"An error occurred while assigning your weapons. Using fallback weapons!");
+            var allocationData = this._allocator.Allocate(player, roundType);
 
-                weaponAllocationData = (string.Empty, "weapon_deagle", KevlarEnum.KevlarHelmet, (CsTeam)player.TeamNum == CsTeam.CounterTerrorist);
-            }
 
 
             if (player?.PlayerPawn?.Value?.ItemServices == null)
@@ -118,7 +93,7 @@ namespace CS2Retake.Managers
 
             var itemService = new CCSPlayer_ItemServices(player.PlayerPawn.Value.ItemServices.Handle);
 
-            foreach (var grenade in grenadeAllocationList)
+            foreach (var grenade in allocationData.grenades)
             {
                 var enumMemberValue = EnumUtils.GetEnumMemberAttributeValue(grenade);
 
@@ -129,22 +104,22 @@ namespace CS2Retake.Managers
 
             }
 
-            if (!string.IsNullOrWhiteSpace(weaponAllocationData.secondaryWeapon))
+            if (!string.IsNullOrWhiteSpace(allocationData.secondaryWeapon))
             {
-                player.GiveNamedItem(weaponAllocationData.secondaryWeapon);
+                player.GiveNamedItem(allocationData.secondaryWeapon);
             }
-            if (!string.IsNullOrWhiteSpace(weaponAllocationData.primaryWeapon))
+            if (!string.IsNullOrWhiteSpace(allocationData.primaryWeapon))
             {
-                player.GiveNamedItem(weaponAllocationData.primaryWeapon);
+                player.GiveNamedItem(allocationData.primaryWeapon);
             }
            
 
-            if (weaponAllocationData.kit)
+            if (allocationData.kit)
             {
                 itemService.HasDefuser = true;
             }
 
-            switch (weaponAllocationData.kevlar)
+            switch (allocationData.kevlar)
             {
                 case KevlarEnum.Kevlar:
                     player.GiveNamedItem(CsItem.Kevlar);
@@ -219,6 +194,97 @@ namespace CS2Retake.Managers
             playerItemService.HasHelmet = false;
         }
 
+        public void OnGunsCommand(CCSPlayerController? player)
+        {
+            if (player == null || !player.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Error, $"Player is null or not valid");
+                return;
+            }
+
+            if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Warning, $"PlayerPawn is null or not valid. This might be because of a disconnected player.");
+                return;
+            }
+
+            if (!this.HandleAllocatorCreation())
+            {
+                MessageUtils.Log(LogLevel.Error, $"Error while Handling the creation of an allocator");
+                return;
+            }
+
+            this._allocator.OnGunsCommand(player);
+        }
+
+        public void OnPlayerConnected(CCSPlayerController? player)
+        {
+            if (player == null || !player.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Error, $"Player is null or not valid");
+                return;
+            }
+
+            if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Warning, $"PlayerPawn is null or not valid. This might be because of a disconnected player.");
+                return;
+            }
+
+            if (!this.HandleAllocatorCreation())
+            {
+                MessageUtils.Log(LogLevel.Error, $"Error while Handling the creation of an allocator");
+                return;
+            }
+
+            this._allocator.OnPlayerConnected(player);
+        }
+
+        public void OnPlayerDisconnected(CCSPlayerController? player)
+        {
+            if (player == null || !player.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Error, $"Player is null or not valid");
+                return;
+            }
+
+            if (player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value.IsValid)
+            {
+                MessageUtils.Log(LogLevel.Warning, $"PlayerPawn is null or not valid. This might be because of a disconnected player.");
+                return;
+            }
+
+            if (!this.HandleAllocatorCreation())
+            {
+                MessageUtils.Log(LogLevel.Error, $"Error while Handling the creation of an allocator");
+                return;
+            }
+
+            this._allocator.OnPlayerDisconnected(player);
+        }
+
+        public override void ResetForNextMap(bool completeReset = true)
+        {
+            if (!this.HandleAllocatorCreation())
+            {
+                MessageUtils.Log(LogLevel.Error, $"Error while Handling the creation of an allocator");
+                return;
+            }
+
+            this._allocator.ResetForNextRound();
+        }
+
+        private bool HandleAllocatorCreation()
+        {
+            if (this._allocator == null)
+            {
+                AllocatorFactory factory = new AllocatorFactory();
+                this._allocator = factory.GetAllocator(RuntimeConfig.Allocator, this.PluginInstance);
+            }
+
+            return this._allocator != null;
+        }
+
         public override void ResetForNextRound(bool completeReset = true)
         {
             if(completeReset) 
@@ -227,14 +293,10 @@ namespace CS2Retake.Managers
             }
 
             RoundTypeManager.Instance.HandleRoundType();
-            this._allocator?.ResetForNextRound();
-            this._weaponKitAllocator?.ResetForNextRound();
-            this._grenadeKitAllocator?.ResetForNextRound();
-        }
-
-        public override void ResetForNextMap(bool completeReset = true)
-        {
+            //this._allocator?.ResetForNextRound();
 
         }
+
+
     }
 }

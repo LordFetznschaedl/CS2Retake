@@ -34,6 +34,7 @@ namespace CS2Retake.Configs
 
         public static RoundTypeEnum RoundTypeSpecific { get; set; } = RoundTypeEnum.FullBuy;
 
+        public static AllocatorEnum Allocator { get; set; } = AllocatorEnum.Command;
 
         public static void SetModuleInfo(string moduleName, string moduleDirectory)
         {
@@ -55,6 +56,8 @@ namespace CS2Retake.Configs
             RoundTypeMode = baseConfig.RoundTypeMode;
             RoundTypeSequence = baseConfig.RoundTypeSequence;
             RoundTypeSpecific = baseConfig.RoundTypeSpecific;
+
+            Allocator = baseConfig.Allocator;
         }
     }
 }

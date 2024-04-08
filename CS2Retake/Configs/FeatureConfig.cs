@@ -13,7 +13,7 @@ namespace CS2Retake.Configs
         public static bool EnableScramble { get; set; } = true;
         public static bool EnableSwitchOnRoundWin { get; set; } = true;
 
-        public static bool EnableThankYouMessage { get; set; } = true;
+        public static bool EnableThankYouMessage { get; set; } = false;
 
         public static bool EnableDebug { get; set; } = false;
 
