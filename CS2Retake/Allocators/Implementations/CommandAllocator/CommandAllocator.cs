@@ -123,6 +123,8 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
             this.Config = config;
 
             var fullBuyConfig = FullBuyMenu.Instance.Config;
+            _ = MidMenu.Instance;
+            _ = PistolMenu.Instance;
 
             this._awpChanceCT = fullBuyConfig.AWPChanceCT;
             this._awpChanceT = fullBuyConfig.AWPChanceT;
@@ -153,6 +155,8 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
 
             //----------------------------FULLBUY--------------------------------------
 
+            var fullBuyConfig = FullBuyMenu.Instance.Config;
+
             (string? primaryWeapon, string? secondaryWeapon, int? awpChance) fullBuyCT = DBManager.Instance.GetFullBuyWeapons(player.SteamID, (int)CsTeam.CounterTerrorist);
 
             if(!string.IsNullOrWhiteSpace(fullBuyCT.primaryWeapon))
@@ -165,7 +169,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
             }
             if(fullBuyCT.awpChance != null && fullBuyCT.awpChance.HasValue) 
             {
-                CacheManager.Instance.AddOrUpdateFullBuyAWPChanceCache(player, fullBuyCT.awpChance.Value, CsTeam.CounterTerrorist);
+                var chance = fullBuyCT.awpChance.Value;
+                var highestChance = fullBuyConfig.AWPChanceCT.Chances.OrderDescending().FirstOrDefault();
+
+                if (!fullBuyConfig.EnableAWPChance)
+                {
+                    chance = 0;
+                }
+
+                CacheManager.Instance.AddOrUpdateFullBuyAWPChanceCache(player, chance <= highestChance ? chance : highestChance, CsTeam.CounterTerrorist);
             }
 
             var fullBuyT = DBManager.Instance.GetFullBuyWeapons(player.SteamID, (int)CsTeam.Terrorist);
@@ -180,7 +192,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
             }
             if (fullBuyT.awpChance != null && fullBuyT.awpChance.HasValue)
             {
-                CacheManager.Instance.AddOrUpdateFullBuyAWPChanceCache(player, fullBuyT.awpChance.Value, CsTeam.Terrorist);
+                var chance = fullBuyT.awpChance.Value;
+                var highestChance = fullBuyConfig.AWPChanceT.Chances.OrderDescending().FirstOrDefault();
+
+                if(!fullBuyConfig.EnableAWPChance)
+                {
+                    chance = 0;
+                }
+
+                CacheManager.Instance.AddOrUpdateFullBuyAWPChanceCache(player, chance <= highestChance ? chance : highestChance, CsTeam.Terrorist);
             }
 
             MessageUtils.LogDebug($"CT: {fullBuyCT.primaryWeapon}, {fullBuyCT.secondaryWeapon}, {fullBuyCT.awpChance} - T: {fullBuyT.primaryWeapon}, {fullBuyT.secondaryWeapon}, {fullBuyT.awpChance}");

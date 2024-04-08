@@ -133,7 +133,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Menus
             CacheManager.Instance.AddOrUpdateFullBuySecondaryCache(player, weaponString, team);
             DBManager.Instance.InsertOrUpdateFullBuySecondaryWeaponString(player.SteamID, weaponString, (int)team);
 
-            FullBuyMenu.Instance.OpenAWPChanceMenu(player, team);
+            if(_config.EnableAWPChance)
+            {
+                FullBuyMenu.Instance.OpenAWPChanceMenu(player, team);
+            }
+            else
+            {
+                CacheManager.Instance.AddOrUpdateFullBuyAWPChanceCache(player, 0, team);
+            }
+            
         }
 
         private static void OnSelectAWPChance(CCSPlayerController player, ChatMenuOption chatMenuOption)

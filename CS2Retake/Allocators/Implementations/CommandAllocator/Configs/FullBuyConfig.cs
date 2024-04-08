@@ -53,6 +53,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Configs
             Chances = new List<int>() { 10, 20, 30, 40, 50 },
         };
 
+        public bool EnableAWPChance { get; set; } = true;
 
         public FullBuyConfig()
         {
