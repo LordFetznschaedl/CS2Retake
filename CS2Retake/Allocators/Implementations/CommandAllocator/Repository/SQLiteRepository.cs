@@ -335,7 +335,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
             cmd.Parameters.AddWithValue("@id", userId);
             cmd.Parameters.AddWithValue("@team", team);
 
-            cmd.CommandText = $"SELECT DISTINCT fp.WeaponString, fs.WeaponString, fa.AWPChance FROM FullBuyPrimary AS fp INNER JOIN FullBuySecondary AS fs ON fp.UserId = fs.UserId INNER JOIN FullBuyAWPChance AS fa ON fp.UserId = fa.UserId WHERE fp.UserId = @id AND fp.Team = @team";
+            cmd.CommandText = $"SELECT DISTINCT fp.WeaponString, fs.WeaponString, fa.AWPChance FROM FullBuyPrimary AS fp LEFT JOIN FullBuySecondary AS fs ON fp.UserId = fs.UserId LEFT JOIN FullBuyAWPChance AS fa ON fp.UserId = fa.UserId WHERE fp.UserId = @id AND fp.Team = @team";
 
             cmd.Prepare();
 
@@ -343,9 +343,9 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
 
             if(reader.Read()) 
             {
-                returnValue.primaryWeapon = reader.GetString(0);
-                returnValue.secondaryWeapon = reader.GetString(1);
-                returnValue.awpChance = reader.GetInt32(2);
+                returnValue.primaryWeapon = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
+                returnValue.secondaryWeapon = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
+                returnValue.awpChance = reader.IsDBNull(2) ? 0 : reader.GetInt32(2);
             }
 
             return returnValue;
@@ -365,7 +365,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
             cmd.Parameters.AddWithValue("@id", userId);
             cmd.Parameters.AddWithValue("@team", team);
 
-            cmd.CommandText = $"SELECT DISTINCT mp.WeaponString, ms.WeaponString FROM MidPrimary AS mp INNER JOIN MidSecondary AS ms ON mp.UserId = ms.UserId WHERE mp.UserId = @id AND mp.Team = @team";
+            cmd.CommandText = $"SELECT DISTINCT mp.WeaponString, ms.WeaponString FROM MidPrimary AS mp LEFT JOIN MidSecondary AS ms ON mp.UserId = ms.UserId WHERE mp.UserId = @id AND mp.Team = @team";
 
             cmd.Prepare();
 
@@ -373,8 +373,8 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
 
             if (reader.Read())
             {
-                returnValue.primaryWeapon = reader.GetString(0);
-                returnValue.secondaryWeapon = reader.GetString(1);
+                returnValue.primaryWeapon = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
+                returnValue.secondaryWeapon = reader.IsDBNull(1) ? string.Empty : reader.GetString(1);
             }
 
             return returnValue;
@@ -402,7 +402,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
 
             if (reader.Read())
             {
-                returnValue.secondaryWeapon = reader.GetString(0);
+                returnValue.secondaryWeapon = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
             }
 
             return returnValue;

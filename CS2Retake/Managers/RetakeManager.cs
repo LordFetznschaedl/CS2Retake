@@ -81,69 +81,8 @@ namespace CS2Retake.Managers
 
             if (RuntimeConfig.SecondsUntilBombPlantedCheck > 0)
             {
-                this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.Darkred}{RuntimeConfig.SecondsUntilBombPlantedCheck}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
+                this._planterPlayerController.PrintToCenter($"YOU HAVE {ChatColors.DarkRed}{RuntimeConfig.SecondsUntilBombPlantedCheck}{ChatColors.White} SECONDS TO PLANT THE BOMB!");
             }
-            
-
-            //_ = new CounterStrikeSharp.API.Modules.Timers.Timer(seconds, this.HasBombBeenPlantedCallback);
-
-            //c4.BombPlacedAnimation = false;
-
-
-
-            //var plantedBomb = this.FindPlantedBomb();
-
-            //if(plantedBomb == null)
-            //{
-            //    MessageUtils.Log(LogLevel.Warning,$"No planted bomb was found!");
-            //    return;
-            //}
-
-            //var playerPawn = player.PlayerPawn.Value;
-
-            //if(playerPawn == null)
-            //{
-            //    MessageUtils.Log(LogLevel.Warning,$"Player pawn is null");
-            //    return;
-            //}
-            //if(playerPawn.AbsRotation == null)
-            //{
-            //    MessageUtils.Log(LogLevel.Warning,$"Player pawn rotation is null");
-            //    return;
-            //}
-            //if(playerPawn.AbsOrigin == null)
-            //{
-            //    MessageUtils.Log(LogLevel.Warning,$"Player pawn position is null");
-            //    return;
-            //}
-
-
-            //plantedBomb.Teleport(playerPawn.AbsOrigin, playerPawn.AbsRotation, new Vector(0f, 0f, 0f));
-
-            //this.ModifyGameRulesBombPlanted(true);
-
-            //plantedBomb.BombTicking = true;
-            ////plantedBomb.BombSite = 168 + (int)MapManager.Instance.BombSite;
-
-
-            //var bombTarget = this.GetBombTarget();
-
-            //if (bombTarget == null)
-            //{
-            //    return;
-            //}
-
-            //bombTarget.BombPlantedHere = true;
-
-
-
-            //var bombPlantedEventPtr = NativeAPI.CreateEvent("bomb_planted", false);
-            //NativeAPI.SetEventPlayerController(bombPlantedEventPtr, "userid", player.Handle);
-            //NativeAPI.SetEventInt(bombPlantedEventPtr, "site", 0);
-            ////NativeAPI.SetEventEntity(bombPlantedEventPtr, "userid_pawn", player.PlayerPawn.Value.Handle);
-            //NativeAPI.FireEvent(bombPlantedEventPtr, false);
-
-
         }
 
 

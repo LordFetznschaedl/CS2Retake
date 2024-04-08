@@ -94,7 +94,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
 
             }
 
-            MessageUtils.LogDebug($"Default: {defaultWeapons.primary}, {defaultWeapons.secondary}, {defaultWeapons.awpChance} - Selected: {weapons.primary}, {weapons.secondary}, {weapons.awpChance}");
+            MessageUtils.LogDebug($"SteamID: {player.SteamID} - Default: {defaultWeapons.primary}, {defaultWeapons.secondary}, {defaultWeapons.awpChance} - Selected: {weapons.primary}, {weapons.secondary}, {weapons.awpChance}");
 
             if (string.IsNullOrWhiteSpace(weapons.primary))
             {
@@ -203,7 +203,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
                 CacheManager.Instance.AddOrUpdateFullBuyAWPChanceCache(player, chance <= highestChance ? chance : highestChance, CsTeam.Terrorist);
             }
 
-            MessageUtils.LogDebug($"CT: {fullBuyCT.primaryWeapon}, {fullBuyCT.secondaryWeapon}, {fullBuyCT.awpChance} - T: {fullBuyT.primaryWeapon}, {fullBuyT.secondaryWeapon}, {fullBuyT.awpChance}");
+            MessageUtils.LogDebug($"SteamID: {player.SteamID} - CT: {fullBuyCT.primaryWeapon}, {fullBuyCT.secondaryWeapon}, {fullBuyCT.awpChance} - T: {fullBuyT.primaryWeapon}, {fullBuyT.secondaryWeapon}, {fullBuyT.awpChance}");
 
             //----------------------------MID--------------------------------------
 
@@ -229,7 +229,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
                 CacheManager.Instance.AddOrUpdateMidSecondaryCache(player, midT.secondaryWeapon, CsTeam.Terrorist);
             }
 
-            MessageUtils.LogDebug($"CT: {midCT.primaryWeapon}, {midCT.secondaryWeapon}, {midCT.awpChance} - T: {midT.primaryWeapon}, {midT.secondaryWeapon}, {midT.awpChance}");
+            MessageUtils.LogDebug($"SteamID: {player.SteamID} - CT: {midCT.primaryWeapon}, {midCT.secondaryWeapon}, {midCT.awpChance} - T: {midT.primaryWeapon}, {midT.secondaryWeapon}, {midT.awpChance}");
 
             //----------------------------PISTOLS--------------------------------------
 
@@ -247,7 +247,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
                 CacheManager.Instance.AddOrUpdatePistolCache(player, pistolT.secondaryWeapon, CsTeam.Terrorist);
             }
 
-            MessageUtils.LogDebug($"CT: {pistolCT.primaryWeapon}, {pistolCT.secondaryWeapon}, {pistolCT.awpChance} - T: {pistolT.primaryWeapon}, {pistolT.secondaryWeapon}, {pistolT.awpChance}");
+            MessageUtils.LogDebug($"SteamID: {player.SteamID} - CT: {pistolCT.primaryWeapon}, {pistolCT.secondaryWeapon}, {pistolCT.awpChance} - T: {pistolT.primaryWeapon}, {pistolT.secondaryWeapon}, {pistolT.awpChance}");
         }
 
         public override void OnPlayerDisconnected(CCSPlayerController? player)
