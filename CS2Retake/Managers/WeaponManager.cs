@@ -134,7 +134,7 @@ namespace CS2Retake.Managers
                     break;
             }
 
-            
+            player.ExecuteClientCommand($"slot3; slot2; slot1");
         }
 
         public void RemoveWeapons(CCSPlayerController player)

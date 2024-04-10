@@ -20,11 +20,11 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "2.0.1";
+        public override string ModuleVersion => "2.1.0";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Highly configurable and modular implementation Retake for CS2";
 
-        private readonly List<string> _gunsCommandAlias = new List<string>(){"guns", "gans", "gun", "g", "weapon", "waepon", "waffen", "menu", "allocator", "select"};
+        private readonly List<string> _gunsCommandAlias = new List<string>(){"guns", "gans", "gun", "g", "gns", "weapon", "waepon", "waffen", "menu", "allocator", "select"};
 
         public CS2RetakeConfig Config { get; set; } = new CS2RetakeConfig();
         private bool _scrambleAfterWarmupDone = false;
