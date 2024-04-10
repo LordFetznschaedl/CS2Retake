@@ -50,12 +50,11 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Manager
                     this._retakeDB = null;
                     break;
             }
-
-
         }
 
         public bool InsertOrUpdateFullBuyPrimaryWeaponString(ulong userId, string weaponString, int team)
         {
+
             if(this.DBType == DBType.Cache || this._retakeDB == null)
             {
                 return false;

@@ -36,7 +36,20 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Menus
 
         private PistolMenu()
         {
-            _config = AllocatorConfigManager.Load<PistolConfig>("CommandAllocator", "Pistol");
+            var config = AllocatorConfigManager.Load<PistolConfig>("CommandAllocator", "Pistol");
+
+            if (config == null)
+            {
+                MessageUtils.Log(Microsoft.Extensions.Logging.LogLevel.Error, $"The Pistol configuration could not be parsed!");
+                return;
+            }
+
+            if (_config.Version > config.Version)
+            {
+                MessageUtils.Log(Microsoft.Extensions.Logging.LogLevel.Warning, $"The Pistol configuration is out of date. Consider updating the config. [Current Version: {config.Version} - Pistol Version: {_config.Version}]");
+            }
+
+            _config = config;
         }
 
         public void OpenSecondaryMenu(CCSPlayerController player, CsTeam team)

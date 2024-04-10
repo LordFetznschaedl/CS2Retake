@@ -8,6 +8,7 @@ using CS2Retake.Utils;
 using CSZoneNet.Plugin.CS2BaseAllocator.Configs;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Numerics;
 using System.Runtime.CompilerServices;
@@ -46,7 +47,20 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Menus
 
         private FullBuyMenu()
         {
-            _config = AllocatorConfigManager.Load<FullBuyConfig>("CommandAllocator", "FullBuy");
+            var config = AllocatorConfigManager.Load<FullBuyConfig>("CommandAllocator", "FullBuy");
+
+            if (config == null)
+            {
+                MessageUtils.Log(Microsoft.Extensions.Logging.LogLevel.Error, $"The FullBuy configuration could not be parsed!");
+                return;
+            }
+
+            if (_config.Version > config.Version)
+            {
+                MessageUtils.Log(Microsoft.Extensions.Logging.LogLevel.Warning, $"The FullBuy configuration is out of date. Consider updating the config. [Current Version: {config.Version} - FullBuy Version: {_config.Version}]");
+            }
+
+            _config = config;
         }
 
         public void OpenPrimaryMenu(CCSPlayerController player, CsTeam team)

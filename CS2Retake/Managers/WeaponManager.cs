@@ -113,8 +113,12 @@ namespace CS2Retake.Managers
                 player.GiveNamedItem(allocationData.primaryWeapon);
             }
            
+            if(allocationData.zeus)
+            {
+                player.GiveNamedItem(CsItem.Taser);
+            }
 
-            if (allocationData.kit)
+            if (allocationData.kit && player.Team == CsTeam.CounterTerrorist)
             {
                 itemService.HasDefuser = true;
             }

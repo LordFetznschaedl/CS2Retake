@@ -16,11 +16,16 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Configs
         public bool EnableRoundTypeMidMenu { get; set; } = true;
         public bool EnableRoundTypeFullBuyMenu { get; set; } = true;
 
+        public int DefuseKitChance { get; set; } = 100;
+
+        public bool EnableZeus { get; set; } = false;
+        public int ZeusChance { get; set; } = 20;
+
         public DBType DatabaseType { get; set; } = DBType.SQLite;
 
         public CommandAllocatorConfig()
         {
-            this.Version = 1;
+            this.Version = 2;
         }
     }
 }

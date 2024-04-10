@@ -20,7 +20,7 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "1.4.0";
+        public override string ModuleVersion => "2.0.1";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Highly configurable and modular implementation Retake for CS2";
 

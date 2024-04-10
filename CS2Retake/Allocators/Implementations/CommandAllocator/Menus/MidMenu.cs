@@ -35,7 +35,20 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Menus
 
         private MidMenu()
         {
-            _config = AllocatorConfigManager.Load<MidConfig>("CommandAllocator", "Mid");
+            var config = AllocatorConfigManager.Load<MidConfig>("CommandAllocator", "Mid");
+
+            if(config == null)
+            {
+                MessageUtils.Log(Microsoft.Extensions.Logging.LogLevel.Error, $"The Mid configuration could not be parsed!");
+                return;
+            }
+
+            if (_config.Version > config.Version)
+            {
+                MessageUtils.Log(Microsoft.Extensions.Logging.LogLevel.Warning, $"The Mid configuration is out of date. Consider updating the config. [Current Version: {config.Version} - Mid Version: {_config.Version}]");
+            }
+
+            _config = config;
         }
 
         public void OpenPrimaryMenu(CCSPlayerController player, CsTeam team)

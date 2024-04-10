@@ -10,7 +10,7 @@
 
   <ItemGroup>
     <PackageReference Include="CounterStrikeSharp.API" Version="1.0.205" />
-    <PackageReference Include="CSZoneNet.Plugin.CS2BaseAllocator" Version="1.0.12" />
+    <PackageReference Include="CSZoneNet.Plugin.CS2BaseAllocator" Version="1.0.13" />
     <PackageReference Include="CSZoneNet.Plugin.Utils" Version="1.0.1" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />

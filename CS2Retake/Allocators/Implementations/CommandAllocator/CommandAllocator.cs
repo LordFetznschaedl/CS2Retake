@@ -32,14 +32,18 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
 
         }
 
-        public override (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit, List<GrenadeEnum> grenades) Allocate(CCSPlayerController player, RoundTypeEnum roundType = RoundTypeEnum.Undefined)
+        public override (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit, bool zeus, List<GrenadeEnum> grenades) Allocate(CCSPlayerController player, RoundTypeEnum roundType = RoundTypeEnum.Undefined)
         {
-            (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit, List<GrenadeEnum> grenades) returnValue = ("", "weapon_deagle", KevlarEnum.KevlarHelmet, true, new List<GrenadeEnum>());
+            (string primaryWeapon, string secondaryWeapon, KevlarEnum kevlar, bool kit, bool zeus, List<GrenadeEnum> grenades) returnValue = ("", "weapon_deagle", KevlarEnum.KevlarHelmet, true, false, new List<GrenadeEnum>());
 
             if (player == null || !player.IsValid || player.PlayerPawn == null || !player.PlayerPawn.IsValid || player.PlayerPawn.Value == null || !player.PlayerPawn.Value!.IsValid)
             {
                 return returnValue;
             }
+
+            var random = new Random();
+
+            //GRENADES
 
             var grenades = this.AllocateGrenades(player, roundType);
 
@@ -49,6 +53,8 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
             }
 
             returnValue.grenades = grenades;
+
+            //RIFLES AND PISTOLS
 
             (string? primary, string? secondary, int? awpChance) weapons = ("", "", null);
             (string primary, string secondary, int? awpChance) defaultWeapons = ("", "weapon_deagle", 0);
@@ -65,7 +71,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
                         break;
                     }
 
-                    var randomValue = new Random().Next(1, 100);
+                    var randomValue = random.Next(1, 100);
 
                     if(randomValue <= weapons.awpChance)
                     {
@@ -114,12 +120,28 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
             }
 
 
+            //ZEUS
+            if (this.Config.EnableZeus)
+            {
+                returnValue.zeus = random.Next(1,100) <= this.Config.ZeusChance;
+            }
+
+
+            //DEFUSEKIT
+            returnValue.kit = this.Config.DefuseKitChance == 100 || random.Next(1, 100) <= this.Config.DefuseKitChance;
+
+
 
             return returnValue;
         }
 
         public void OnAllocatorConfigParsed(CommandAllocatorConfig config)
         {
+            if (this.Config.Version > config.Version)
+            {
+                MessageUtils.Log(Microsoft.Extensions.Logging.LogLevel.Warning, $"The command allocator configuration is out of date. Consider updating the config. [Current Version: {config.Version} - Allocator Version: {this.Config.Version}]");
+            }
+
             this.Config = config;
 
             var fullBuyConfig = FullBuyMenu.Instance.Config;
@@ -128,6 +150,8 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
 
             this._awpChanceCT = fullBuyConfig.AWPChanceCT;
             this._awpChanceT = fullBuyConfig.AWPChanceT;
+
+            MessageUtils.Log(LogLevel.Warning, $"For some reason sometimes an exception happens with the sqlite stuff. It still works. So no worries needed.");
 
             DBManager.Instance.DBType = Config.DatabaseType;
             DBManager.Instance.AllocatorConfigDirectoryPath = Config.AllocatorConfigDirectoryPath;
