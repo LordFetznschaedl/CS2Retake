@@ -1,17 +1,18 @@
-# CS2Retake 1.3.0
+# CS2Retake 2.1.0
   
 Implementation of a Retake plugin for CS2 using CounterStrikeSharp  
 <https://docs.cssharp.dev/>  
   
 ---
 # reuirements:  
-- min. CounterStrikeSharp API Version: 159  
+- min. CounterStrikeSharp API Version: 205  
 - GameType: Casual or Competitive
   
 ---
 # usage:  
 | Command         | Parameter                                  | Description                                                           | Permissions      |
 |-----------------|--------------------------------------------|-----------------------------------------------------------------------|------------------|
+| !guns           |                                            | opens up the gun menu for the allocator system                        |                  |
 | !retakeinfo     |                                            | prints the plugin information                                         |                  |
 | !retakespawn    | <index (integer)>                          | teleports the player to the given spawn index                         | @cs2retake/admin |
 | !retakewrite    |                                            | writes the spawns of the current map to the corresponding map config  | @cs2retake/admin |
@@ -25,7 +26,8 @@ Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 Extract the `addons` folder to the `/csgo/` directory of the dedicated server.  
 
 ---
-# release 1.3.0:  
+# release 2.1.0:  
+- [x] modular weapon allocator system
 - [x] creating, saving and reading spawns
 - [x] player spawn in spawnpoints 
 - [x] scramble teams
@@ -38,12 +40,11 @@ Extract the `addons` folder to the `/csgo/` directory of the dedicated server.
 - [x] auto assign teams -> deny choosing team -> switch team automatically
 - [x] KevlarHelmet being only given as Kevlar without Helmet
 - [x] config system
-- [x] auto plant -> changable to fast plant if prefered in plugin base config 
+- [x] auto plant -> changable to fast plant if prefered in plugin base config
 
 ---
 # future releases:  
 - [ ] editor system for spawns
-- [ ] modular weapon allocator system
 - [ ] change scramble command to do the scramble after round ends and before round starts
 - [ ] multi language support
 
@@ -82,6 +83,11 @@ location: addons\counterstrikesharp\configs\plugins\CS2Retake.json
   //RoundTypeSpecific Options: FullBuy, Pistol, Mid, Undefined
   "RoundTypeSpecific": "FullBuy",
 
+  //Change this to change the way how the allocator system works
+  //More allocators coming in the future
+  //Allocator Options: Command
+  "Allocator": "Command",
+
   "SecondsUntilBombPlantedCheck": 5,
   "SpotAnnouncerEnabled": true,
   "EnableQueue": true,
@@ -90,9 +96,9 @@ location: addons\counterstrikesharp\configs\plugins\CS2Retake.json
   "ScrambleAfterSubsequentTerroristRoundWins": 5,
   "MaxPlayers": 10,
   "TeamBalanceRatio": 0.499,
-  "EnableThankYouMessage": true,
+  "EnableThankYouMessage": false,
   "EnableDebug": false,
-  "ConfigVersion": 4
+  "ConfigVersion": 5
 }
 ```
 
