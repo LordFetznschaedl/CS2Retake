@@ -15,6 +15,8 @@ namespace CS2Retake.Managers.Interfaces
         public void AddQueuePlayers();
         public void SwitchTeams();
 
+        public void FixTeams();
+
         public void OnTick();
 
 

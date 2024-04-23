@@ -38,7 +38,6 @@ namespace CS2Retake.Managers
 
         private TeamManager() { }
 
-        //TODO FIX: AddQueuePlayers does not rebalance properly
         public void AddQueuePlayers()
         {
             MessageUtils.LogDebug($"Methode: AddQueuePlayers");
@@ -163,6 +162,48 @@ namespace CS2Retake.Managers
             playingCounterTerroristPlayers.Take(ctsToSwitchToT).ToList().ForEach(x => x.SwitchTeam(CsTeam.Terrorist));
             playingTerroristPlayers.Take(tsToSwitchToCT).ToList().ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
             queuedPlayers.ForEach(x => x.SwitchTeam(CsTeam.CounterTerrorist));
+        }
+
+        public void FixTeams()
+        {
+            MessageUtils.LogDebug($"Methode: FixTeams");
+
+            var playingPlayers = this.GetPlayingPlayers();
+
+            var playingCounterTerroristPlayers = playingPlayers.Where(x => x.TeamNum == (int)CsTeam.CounterTerrorist).Where(x => x.UserId.HasValue).Select(x => x.UserId).ToList();
+            var playingTerroristPlayers = playingPlayers.Where(x => x.TeamNum == (int)CsTeam.Terrorist).Where(x => x.UserId.HasValue).Select(x => x.UserId).ToList();
+
+            foreach(var ct in PlayerUtils.GetCounterTerroristPlayers())
+            {
+                if(!ct.UserId.HasValue)
+                {
+                    continue;
+                }
+
+                if(playingCounterTerroristPlayers.Contains(ct.UserId.Value))
+                {
+                    continue;
+                }
+
+                this.UpdatePlayerStateDict(ct.UserId.Value, PlayerStateEnum.Playing);
+            }
+
+            foreach(var t in PlayerUtils.GetTerroristPlayers())
+            {
+                if (!t.UserId.HasValue)
+                {
+                    continue;
+                }
+
+                if (playingTerroristPlayers.Contains(t.UserId.Value))
+                {
+                    continue;
+                }
+
+                this.UpdatePlayerStateDict(t.UserId.Value, PlayerStateEnum.Playing);
+            }
+
+            this.ScrambleTeams();
         }
 
         public void OnTick()

@@ -23,9 +23,12 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Configs
 
         public DBType DatabaseType { get; set; } = DBType.SQLite;
 
+        public float HowToMessageDelayInMinutes { get; set; } = 3.5f;
+        public string HowToMessage { get; set; } = $"Customize your weapons by using !guns";
+
         public CommandAllocatorConfig()
         {
-            this.Version = 2;
+            this.Version = 3;
         }
     }
 }

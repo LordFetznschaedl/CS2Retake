@@ -1,4 +1,4 @@
-using CounterStrikeSharp.API;
+﻿using CounterStrikeSharp.API;
 using CounterStrikeSharp.API.Core;
 using CounterStrikeSharp.API.Core.Attributes;
 using CounterStrikeSharp.API.Core.Attributes.Registration;
@@ -20,7 +20,7 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "2.1.0";
+        public override string ModuleVersion => "2.1.1";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Highly configurable and modular implementation Retake for CS2";
 
@@ -316,6 +316,7 @@ namespace CS2Retake
             if(!GameRuleManager.Instance.IsWarmup && (ratios.ctRatio != PlayerUtils.GetCounterTerroristPlayers().Count || ratios.tRatio != PlayerUtils.GetTerroristPlayers().Count))
             {
                 MessageUtils.PrintToChatAll($"Player ratios not matching how they should be. Resetting...");
+                TeamManager.Instance.FixTeams();
                 PlayerUtils.SuicideAll();
                 return HookResult.Continue;
             }
@@ -375,7 +376,11 @@ namespace CS2Retake
 
             var ratio = TeamManager.Instance.LatestRatio;
 
-            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.DarkRed}{MapManager.Instance.BombSite}{ChatColors.White} - Roundtype: {ChatColors.DarkRed}{RoundTypeManager.Instance.RoundType}{ChatColors.White} - {ChatColors.Blue}{ratio.ctRatio}CTs{ChatColors.White} VS {ChatColors.Red}{ratio.tRatio}Ts{ChatColors.White}");
+            MessageUtils.PrintToChatAll($"================================");
+            MessageUtils.PrintToChatAll($"{ChatColors.Blue}{ratio.ctRatio}CTs{ChatColors.White} VS {ChatColors.Red}{ratio.tRatio}Ts{ChatColors.White}");
+            MessageUtils.PrintToChatAll($"Roundtype: {ChatColors.DarkRed}{RoundTypeManager.Instance.RoundType}{ChatColors.White}");
+            MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.DarkRed}{MapManager.Instance.BombSite}{ChatColors.White}");
+            MessageUtils.PrintToChatAll($"================================");
 
             return HookResult.Continue;
         }

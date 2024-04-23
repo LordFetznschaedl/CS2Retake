@@ -297,7 +297,7 @@ namespace CS2Retake.Managers
             }
 
             RoundTypeManager.Instance.HandleRoundType();
-            //this._allocator?.ResetForNextRound();
+            this._allocator?.ResetForNextRound();
 
         }
 

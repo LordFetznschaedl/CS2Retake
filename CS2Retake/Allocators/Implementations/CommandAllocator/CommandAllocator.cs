@@ -14,10 +14,12 @@ using CS2Retake.Allocators.Implementations.CommandAllocator.Menus;
 using CS2Retake.Allocators.Implementations.CommandAllocator.Manager;
 using CounterStrikeSharp.API.Modules.Utils;
 using CS2Retake.Allocators.Implementations.CommandAllocator.Entities;
+using CounterStrikeSharp.API;
+using CounterStrikeSharp.API.Modules.Timers;
 
 namespace CS2Retake.Allocators.Implementations.CommandAllocator
 {
-    public class CommandAllocator : BaseGrenadeAllocator, IAllocatorConfig<CommandAllocatorConfig>
+    public class CommandAllocator : BaseGrenadeAllocator, IAllocatorConfig<CommandAllocatorConfig>, IDisposable
     {
         public CommandAllocatorConfig Config { get; set; } = new CommandAllocatorConfig();
 
@@ -26,6 +28,8 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
 
         private int _awpInUseCountCT { get; set; } = 0;
         private int _awpInUseCountT { get; set; } = 0;
+
+        private CounterStrikeSharp.API.Modules.Timers.Timer? _howToTimer { get; set; } = null;
 
         public CommandAllocator()
         {
@@ -158,6 +162,13 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
             DBManager.Instance.Init();
 
             PlayerUtils.GetValidPlayerControllers().ForEach(x => this.OnPlayerConnected(x));
+
+
+            if(this.Config.HowToMessageDelayInMinutes > 0)
+            {
+                this._howToTimer = new CounterStrikeSharp.API.Modules.Timers.Timer(this.Config.HowToMessageDelayInMinutes * 60, PrintHowToMessage, CounterStrikeSharp.API.Modules.Timers.TimerFlags.REPEAT);
+            }
+            
         }
 
         public override void OnGunsCommand(CCSPlayerController? player)
@@ -288,6 +299,16 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
         {
             this._awpInUseCountCT = 0;
             this._awpInUseCountT = 0;
+        }
+
+        private void PrintHowToMessage()
+        {
+            Server.PrintToChatAll($"[{ChatColors.Gold}CommandAllocator{ChatColors.White}] {this.Config.HowToMessage}");
+        }
+
+        public void Dispose()
+        {
+            this._howToTimer?.Kill();
         }
     }
 }
