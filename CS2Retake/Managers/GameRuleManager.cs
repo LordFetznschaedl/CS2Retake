@@ -127,6 +127,8 @@ namespace CS2Retake.Managers
         {
             MessageUtils.Log(LogLevel.Information, $"GameRules is null. Fetching gamerule...");
 
+            RetakeManager.Instance.ConfigureForRetake();
+
             var gameRuleProxyList = this.GetGameRulesProxies();
 
             if (gameRuleProxyList.Count > 1)

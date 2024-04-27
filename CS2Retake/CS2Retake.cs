@@ -16,15 +16,15 @@ using CounterStrikeSharp.API.Modules.Entities.Constants;
 
 namespace CS2Retake
 {
-    [MinimumApiVersion(205)]
+    [MinimumApiVersion(217)]
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "2.1.1";
+        public override string ModuleVersion => "2.1.2";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Highly configurable and modular implementation Retake for CS2";
 
-        private readonly List<string> _gunsCommandAlias = new List<string>(){"guns", "gans", "gun", "g", "gns", "weapon", "waepon", "waffen", "menu", "allocator", "select"};
+        private readonly List<string> _gunsCommandAlias = new List<string>(){"guns", "gans", "gun", "g", "gns", "gnus", "weapon", "waepon", "weapons", "waepons", "waffen", "menu", "allocator", "select"};
 
         public CS2RetakeConfig Config { get; set; } = new CS2RetakeConfig();
         private bool _scrambleAfterWarmupDone = false;
@@ -61,9 +61,15 @@ namespace CS2Retake
                 this.AddTimer(7 * 60, MessageUtils.ThankYouMessage, TimerFlags.REPEAT);
             }
 
-            if(hotReload)
+            if (hotReload)
             {
-                Server.ExecuteCommand($"map {Server.MapName}");
+                var map = "de_dust2";
+                if(!string.IsNullOrWhiteSpace(Server.MapName))
+                {
+                    map = Server.MapName;
+                }
+
+                Server.ExecuteCommand($"map {map}");
             }
 
             this.RegisterListener<Listeners.OnMapStart>(mapName => this.OnMapStart(mapName));
@@ -303,6 +309,10 @@ namespace CS2Retake
             {
                 return HookResult.Continue;
             }
+            if(@event.Userid.IsBot)
+            {
+                return HookResult.Continue;
+            }
 
             MapManager.Instance.TeleportPlayerToSpawn(@event.Userid);
 
@@ -443,7 +453,14 @@ namespace CS2Retake
                 return HookResult.Continue;
             }
 
+            if(@event.Userid.IsBot)
+            {
+                return HookResult.Continue;
+            }
+
             TeamManager.Instance.PlayerConnected(@event.Userid);
+
+            
 
             return HookResult.Continue;
         }
@@ -454,6 +471,11 @@ namespace CS2Retake
                 return HookResult.Continue;
             }
             if (!@event.Userid.IsValid)
+            {
+                return HookResult.Continue;
+            }
+
+            if (@event.Userid.IsBot)
             {
                 return HookResult.Continue;
             }
@@ -470,6 +492,11 @@ namespace CS2Retake
                 return HookResult.Continue;
             }
             if (!@event.Userid.IsValid)
+            {
+                return HookResult.Continue;
+            }
+
+            if (@event.Userid.IsBot)
             {
                 return HookResult.Continue;
             }
