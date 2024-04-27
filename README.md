@@ -1,11 +1,11 @@
-# CS2Retake 2.1.0
+# CS2Retake 2.1.2
   
 Implementation of a Retake plugin for CS2 using CounterStrikeSharp  
 <https://docs.cssharp.dev/>  
   
 ---
 # reuirements:  
-- min. CounterStrikeSharp API Version: 205  
+- min. CounterStrikeSharp API Version: 217  
 - GameType: Casual or Competitive
   
 ---
@@ -26,7 +26,7 @@ Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 Extract the `addons` folder to the `/csgo/` directory of the dedicated server.  
 
 ---
-# release 2.1.0:  
+# release 2.1.2:  
 - [x] modular weapon allocator system
 - [x] creating, saving and reading spawns
 - [x] player spawn in spawnpoints 
