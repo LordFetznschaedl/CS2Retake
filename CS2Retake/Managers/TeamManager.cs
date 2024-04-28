@@ -24,6 +24,8 @@ namespace CS2Retake.Managers
 
         public (int ctRatio, int tRatio) LatestRatio { get; private set; } = (0, 0);
 
+        public bool ScrambleSignal { get; set; } = false;
+
         public static TeamManager Instance
         {
             get

@@ -17,6 +17,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Manager
 
         public DBType DBType { get; set; } = DBType.Cache;
         public string AllocatorConfigDirectoryPath { get; set; } = string.Empty;
+        public string ConnectionString { get; set; } = string.Empty;
 
         private IRetakeRepository? _retakeDB = null;
 
@@ -45,6 +46,9 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Manager
                     break;
                 case DBType.SQLite:
                     this._retakeDB = new SQLiteRepository(this.AllocatorConfigDirectoryPath);
+                    break;
+                case DBType.PostgreSql:
+                    this._retakeDB = new PostgreSqlRepository(this.ConnectionString);
                     break;
                 default:
                     this._retakeDB = null;

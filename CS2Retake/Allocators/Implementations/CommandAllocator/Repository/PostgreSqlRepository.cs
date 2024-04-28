@@ -1,21 +1,27 @@
-﻿using System;
+﻿using CounterStrikeSharp.API.Modules.Utils;
+using CS2Retake.Allocators.Implementations.CommandAllocator.Interfaces;
+using CS2Retake.Utils;
+using Npgsql;
+using NpgsqlTypes;
+using System;
 using System.Collections.Generic;
+using System.Data.SQLite;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using System.Data.SQLite;
-using CS2Retake.Utils;
-using CS2Retake.Allocators.Implementations.CommandAllocator.Interfaces;
 
 namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
 {
-    public class SQLiteRepository : IDisposable, IRetakeRepository
+    public class PostgreSqlRepository : IDisposable, IRetakeRepository
     {
-        private SQLiteConnection _connection;
+        private List<NpgsqlConnection> _connectionPool = new List<NpgsqlConnection>();
 
-        public SQLiteRepository(string path)
+        private string _connectionString = string.Empty;
+
+
+        public PostgreSqlRepository(string connectionString)
         {
-            this._connection = new SQLiteConnection($"Data Source={path}/cs2retake.db;Version=3;");
+            this._connectionString = connectionString;
             this.Init();
         }
 
@@ -23,7 +29,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
         {
             try
             {
-                this._connection.Open();
+                this.GetConnectionFromPool();
             }
             catch (Exception ex)
             {
@@ -31,35 +37,58 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
             }
         }
 
+        private NpgsqlConnection GetConnectionFromPool()
+        {
+            var openConnections = this._connectionPool.Where(x => x.FullState == System.Data.ConnectionState.Closed);
+
+            var connection = openConnections.FirstOrDefault() ?? null;
+
+            if (!openConnections.Any() || connection == null) 
+            {
+                connection = new NpgsqlConnection(this._connectionString);
+
+                this._connectionPool.Add(connection);
+            }
+
+            connection.Open();
+            return connection;
+        }
+
+        public void Dispose()
+        {
+            foreach(var connection in this._connectionPool) 
+            {
+                connection.Close();
+            }
+            this._connectionPool.Clear();
+        }
+
         public void Init()
         {
-            SQLiteCommand? cmd = null;
+            NpgsqlCommand? cmd = null;
+
+            var connection = this.GetConnectionFromPool();
 
             try
             {
-                if (this._connection.State != System.Data.ConnectionState.Open)
-                {
-                    this.OpenConnection();
-                }
+                cmd = connection.CreateCommand();
 
-                cmd = this._connection.CreateCommand();
-
-                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS FullBuyPrimary (UserId UNSIGNED BIG INT, WeaponString VARCHAR(255), Team INT)";
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS FullBuyPrimary (UserId VARCHAR(64), WeaponString VARCHAR(255), Team INT)";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS FullBuySecondary (UserId UNSIGNED BIG INT, WeaponString VARCHAR(255), Team INT)";
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS FullBuySecondary (UserId VARCHAR(64), WeaponString VARCHAR(255), Team INT)";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS FullBuyAWPChance (UserId UNSIGNED BIG INT, AWPChance INT, Team INT)";
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS FullBuyAWPChance (UserId VARCHAR(64), AWPChance INT, Team INT)";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS MidPrimary (UserId UNSIGNED BIG INT, WeaponString VARCHAR(255), Team INT)";
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS MidPrimary (UserId VARCHAR(64), WeaponString VARCHAR(255), Team INT)";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS MidSecondary (UserId UNSIGNED BIG INT, WeaponString VARCHAR(255), Team INT)";
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS MidSecondary (UserId VARCHAR(64), WeaponString VARCHAR(255), Team INT)";
                 cmd.ExecuteNonQuery();
 
-                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS Pistol (UserId UNSIGNED BIG INT, WeaponString VARCHAR(255), Team INT)";
+                cmd.CommandText = $"CREATE TABLE IF NOT EXISTS Pistol (UserId VARCHAR(64), WeaponString VARCHAR(255), Team INT)";
                 cmd.ExecuteNonQuery();
 
                 cmd.Dispose();
@@ -74,32 +103,24 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 {
                     cmd.Dispose();
                 }
-            }
-        }
-
-        public void Dispose()
-        {
-            if (this._connection.State != System.Data.ConnectionState.Closed)
-            {
-                this._connection.Close();
+                if(connection.State != System.Data.ConnectionState.Closed)
+                {
+                    connection.Close();
+                }
             }
         }
 
         public bool InsertOrUpdateFullBuyPrimaryWeaponString(ulong userId, string weaponString, int team)
         {
-            SQLiteCommand? cmd = null;
+            NpgsqlCommand? cmd = null;
+
+            var connection = this.GetConnectionFromPool();
 
             try
             {
+                cmd = connection.CreateCommand();
 
-                if (this._connection.State != System.Data.ConnectionState.Open)
-                {
-                    this.OpenConnection();
-                }
-
-                cmd = this._connection.CreateCommand();
-
-                cmd.Parameters.AddWithValue("@id", userId);
+                cmd.Parameters.AddWithValue("@id", userId.ToString());
                 cmd.Parameters.AddWithValue("@weapon", weaponString);
                 cmd.Parameters.AddWithValue("@team", team);
 
@@ -130,7 +151,6 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 cmd.Prepare();
 
                 return cmd.ExecuteNonQuery() == 1;
-
             }
             catch (Exception ex)
             {
@@ -143,6 +163,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 {
                     cmd.Dispose();
                 }
+                if (connection.State != System.Data.ConnectionState.Closed)
+                {
+                    connection.Close();
+                }
             }
 
             return false;
@@ -150,19 +174,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
 
         public bool InsertOrUpdateFullBuySecondaryWeaponString(ulong userId, string weaponString, int team)
         {
-            SQLiteCommand? cmd = null;
+            NpgsqlCommand? cmd = null;
+
+            var connection = this.GetConnectionFromPool();
 
             try
             {
+                cmd = connection.CreateCommand();
 
-                if (this._connection.State != System.Data.ConnectionState.Open)
-                {
-                    this.OpenConnection();
-                }
-
-                cmd = this._connection.CreateCommand();
-
-                cmd.Parameters.AddWithValue("@id", userId);
+                cmd.Parameters.AddWithValue("@id", userId.ToString());
                 cmd.Parameters.AddWithValue("@weapon", weaponString);
                 cmd.Parameters.AddWithValue("@team", team);
 
@@ -205,6 +225,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 {
                     cmd.Dispose();
                 }
+                if (connection.State != System.Data.ConnectionState.Closed)
+                {
+                    connection.Close();
+                }
             }
 
             return false;
@@ -212,19 +236,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
 
         public bool InsertOrUpdateFullBuyAWPChance(ulong userId, int chance, int team)
         {
-            SQLiteCommand? cmd = null;
+            NpgsqlCommand? cmd = null;
+
+            var connection = this.GetConnectionFromPool();
 
             try
             {
+                cmd = connection.CreateCommand();
 
-                if (this._connection.State != System.Data.ConnectionState.Open)
-                {
-                    this.OpenConnection();
-                }
-
-                cmd = this._connection.CreateCommand();
-
-                cmd.Parameters.AddWithValue("@id", userId);
+                cmd.Parameters.AddWithValue("@id", userId.ToString());
                 cmd.Parameters.AddWithValue("@chance", chance);
                 cmd.Parameters.AddWithValue("@team", team);
 
@@ -267,6 +287,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 {
                     cmd.Dispose();
                 }
+                if (connection.State != System.Data.ConnectionState.Closed)
+                {
+                    connection.Close();
+                }
             }
 
             return false;
@@ -274,19 +298,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
 
         public bool InsertOrUpdateMidPrimaryWeaponString(ulong userId, string weaponString, int team)
         {
-            SQLiteCommand? cmd = null;
+            NpgsqlCommand? cmd = null;
+
+            var connection = this.GetConnectionFromPool();
 
             try
             {
+                cmd = connection.CreateCommand();
 
-                if (this._connection.State != System.Data.ConnectionState.Open)
-                {
-                    this.OpenConnection();
-                }
-
-                cmd = this._connection.CreateCommand();
-
-                cmd.Parameters.AddWithValue("@id", userId);
+                cmd.Parameters.AddWithValue("@id", userId.ToString());
                 cmd.Parameters.AddWithValue("@weapon", weaponString);
                 cmd.Parameters.AddWithValue("@team", team);
 
@@ -329,6 +349,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 {
                     cmd.Dispose();
                 }
+                if (connection.State != System.Data.ConnectionState.Closed)
+                {
+                    connection.Close();
+                }
             }
 
             return false;
@@ -336,19 +360,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
 
         public bool InsertOrUpdateMidSecondaryWeaponString(ulong userId, string weaponString, int team)
         {
-            SQLiteCommand? cmd = null;
+            NpgsqlCommand? cmd = null;
+
+            var connection = this.GetConnectionFromPool();
 
             try
             {
+                cmd = connection.CreateCommand();
 
-                if (this._connection.State != System.Data.ConnectionState.Open)
-                {
-                    this.OpenConnection();
-                }
-
-                cmd = this._connection.CreateCommand();
-
-                cmd.Parameters.AddWithValue("@id", userId);
+                cmd.Parameters.AddWithValue("@id", userId.ToString());
                 cmd.Parameters.AddWithValue("@weapon", weaponString);
                 cmd.Parameters.AddWithValue("@team", team);
 
@@ -378,7 +398,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
 
                 cmd.Prepare();
 
-                return cmd.ExecuteNonQuery() == 1;
+                return cmd.ExecuteNonQuery() == 1; ;
             }
             catch (Exception ex)
             {
@@ -391,6 +411,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 {
                     cmd.Dispose();
                 }
+                if (connection.State != System.Data.ConnectionState.Closed)
+                {
+                    connection.Close();
+                }
             }
 
             return false;
@@ -398,19 +422,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
 
         public bool InsertOrUpdatePistolWeaponString(ulong userId, string weaponString, int team)
         {
-            SQLiteCommand? cmd = null;
+            NpgsqlCommand? cmd = null;
+
+            var connection = this.GetConnectionFromPool();
 
             try
             {
+                cmd = connection.CreateCommand();
 
-                if (this._connection.State != System.Data.ConnectionState.Open)
-                {
-                    this.OpenConnection();
-                }
-
-                cmd = this._connection.CreateCommand();
-
-                cmd.Parameters.AddWithValue("@id", userId);
+                cmd.Parameters.AddWithValue("@id", userId.ToString());
                 cmd.Parameters.AddWithValue("@weapon", weaponString);
                 cmd.Parameters.AddWithValue("@team", team);
 
@@ -453,6 +473,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 {
                     cmd.Dispose();
                 }
+                if (connection.State != System.Data.ConnectionState.Closed)
+                {
+                    connection.Close();
+                }
             }
 
             return false;
@@ -463,19 +487,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
         {
             (string? primaryWeapon, string? secondaryWeapon, int? awpChance) returnValue = (null, null, null);
 
-            SQLiteCommand? cmd = null;
+            NpgsqlCommand? cmd = null;
+
+            var connection = this.GetConnectionFromPool();
 
             try
             {
+                cmd = connection.CreateCommand();
 
-                if (this._connection.State != System.Data.ConnectionState.Open)
-                {
-                    this.OpenConnection();
-                }
-
-                cmd = this._connection.CreateCommand();
-
-                cmd.Parameters.AddWithValue("@id", userId);
+                cmd.Parameters.AddWithValue("@id", userId.ToString());
                 cmd.Parameters.AddWithValue("@team", team);
 
                 cmd.CommandText = $"SELECT DISTINCT fp.WeaponString, fs.WeaponString, fa.AWPChance FROM FullBuyPrimary AS fp LEFT JOIN FullBuySecondary AS fs ON fp.UserId = fs.UserId LEFT JOIN FullBuyAWPChance AS fa ON fp.UserId = fa.UserId WHERE fp.UserId = @id AND fp.Team = @team";
@@ -504,6 +524,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 {
                     cmd.Dispose();
                 }
+                if (connection.State != System.Data.ConnectionState.Closed)
+                {
+                    connection.Close();
+                }
             }
 
             return returnValue;
@@ -512,19 +536,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
         public (string? primaryWeapon, string? secondaryWeapon, int? awpChance) GetMidWeapons(ulong userId, int team)
         {
             (string? primaryWeapon, string? secondaryWeapon, int? awpChance) returnValue = (null, null, 0);
-            SQLiteCommand? cmd = null;
+            NpgsqlCommand? cmd = null;
+
+            var connection = this.GetConnectionFromPool();
 
             try
             {
+                cmd = connection.CreateCommand();
 
-                if (this._connection.State != System.Data.ConnectionState.Open)
-                {
-                    this.OpenConnection();
-                }
-
-                cmd = this._connection.CreateCommand();
-
-                cmd.Parameters.AddWithValue("@id", userId);
+                cmd.Parameters.AddWithValue("@id", userId.ToString());
                 cmd.Parameters.AddWithValue("@team", team);
 
                 cmd.CommandText = $"SELECT DISTINCT mp.WeaponString, ms.WeaponString FROM MidPrimary AS mp LEFT JOIN MidSecondary AS ms ON mp.UserId = ms.UserId WHERE mp.UserId = @id AND mp.Team = @team";
@@ -552,6 +572,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 {
                     cmd.Dispose();
                 }
+                if (connection.State != System.Data.ConnectionState.Closed)
+                {
+                    connection.Close();
+                }
             }
 
             return returnValue;
@@ -560,19 +584,15 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
         public (string? primaryWeapon, string? secondaryWeapon, int? awpChance) GetPistolWeapons(ulong userId, int team)
         {
             (string? primaryWeapon, string? secondaryWeapon, int? awpChance) returnValue = (string.Empty, null, 0);
-            SQLiteCommand? cmd = null;
+            NpgsqlCommand? cmd = null;
+
+            var connection = this.GetConnectionFromPool();
 
             try
             {
+                cmd = connection.CreateCommand();
 
-                if (this._connection.State != System.Data.ConnectionState.Open)
-                {
-                    this.OpenConnection();
-                }
-
-                cmd = this._connection.CreateCommand();
-
-                cmd.Parameters.AddWithValue("@id", userId);
+                cmd.Parameters.AddWithValue("@id", userId.ToString());
                 cmd.Parameters.AddWithValue("@team", team);
 
                 cmd.CommandText = $"SELECT DISTINCT p.WeaponString FROM Pistol AS p WHERE p.UserId = @id AND p.Team = @team";
@@ -586,6 +606,8 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                     returnValue.secondaryWeapon = reader.IsDBNull(0) ? string.Empty : reader.GetString(0);
                 }
 
+                cmd.Dispose();
+
                 return returnValue;
             }
             catch (Exception ex)
@@ -598,6 +620,10 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Repository
                 if (cmd != null)
                 {
                     cmd.Dispose();
+                }
+                if (connection.State != System.Data.ConnectionState.Closed)
+                {
+                    connection.Close();
                 }
             }
 
