@@ -96,7 +96,7 @@ namespace CS2Retake.Managers
             }
         }
 
-        public void ConfigureForRetake()
+        public void ConfigureForRetake(bool complete = true)
         {   
             Server.ExecuteCommand($"execifexists cs2retake/retake.cfg");
         }

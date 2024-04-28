@@ -20,7 +20,7 @@ namespace CS2Retake
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";
-        public override string ModuleVersion => "2.1.2";
+        public override string ModuleVersion => "2.2.0";
         public override string ModuleAuthor => "LordFetznschaedl";
         public override string ModuleDescription => "Highly configurable and modular implementation Retake for CS2";
 
@@ -84,6 +84,7 @@ namespace CS2Retake
             this.RegisterEventHandler<EventBeginNewMatch>(OnBeginNewMatch, HookMode.Pre);
             this.RegisterEventHandler<EventCsIntermission>(OnCsIntermission);
             this.RegisterEventHandler<EventRoundStart>(OnRoundStart);
+            this.RegisterEventHandler<EventServerCvar>(OnServerCvar);
 
             this.RegisterEventHandler<EventPlayerConnect>(OnPlayerConnect);
             this.RegisterEventHandler<EventPlayerConnectFull>(OnPlayerConnectFull);
@@ -97,6 +98,8 @@ namespace CS2Retake
             }
             
         }
+
+
 
         [ConsoleCommand("css_retakeinfo", "This command prints the plugin information")]
         public void OnCommandInfo(CCSPlayerController? player, CommandInfo command)
@@ -155,7 +158,7 @@ namespace CS2Retake
         [RequiresPermissions("@cs2retake/admin")]
         public void OnCommandScramble(CCSPlayerController? player, CommandInfo command)
         {
-            TeamManager.Instance.ScrambleTeams();
+            TeamManager.Instance.ScrambleSignal = true;
         }
 
         [ConsoleCommand("css_retaketeleport", "This command teleports the player to the given coordinates")]
@@ -387,7 +390,7 @@ namespace CS2Retake
             var ratio = TeamManager.Instance.LatestRatio;
 
             MessageUtils.PrintToChatAll($"================================");
-            MessageUtils.PrintToChatAll($"{ChatColors.Blue}{ratio.ctRatio}CTs{ChatColors.White} VS {ChatColors.Red}{ratio.tRatio}Ts{ChatColors.White}");
+            MessageUtils.PrintToChatAll($"{ChatColors.DarkBlue}{ratio.ctRatio}CTs{ChatColors.White} VS {ChatColors.DarkRed}{ratio.tRatio}Ts{ChatColors.White}");
             MessageUtils.PrintToChatAll($"Roundtype: {ChatColors.DarkRed}{RoundTypeManager.Instance.RoundType}{ChatColors.White}");
             MessageUtils.PrintToChatAll($"Bombsite: {ChatColors.DarkRed}{MapManager.Instance.BombSite}{ChatColors.White}");
             MessageUtils.PrintToChatAll($"================================");
@@ -396,13 +399,13 @@ namespace CS2Retake
         }
 
         private HookResult OnRoundEnd(EventRoundEnd @event, GameEventInfo info)
-        {   
+        {
             MapManager.Instance.ResetForNextRound();
             WeaponManager.Instance.ResetForNextRound();
             RetakeManager.Instance.ResetForNextRound();
             PlantManager.Instance.ResetForNextRound();
 
-            if(GameRuleManager.Instance.IsWarmup)
+            if (GameRuleManager.Instance.IsWarmup)
             {
                 return HookResult.Continue;
             }
@@ -410,20 +413,27 @@ namespace CS2Retake
             if (@event.Winner == (int)CsTeam.Terrorist)
             {
                 MapManager.Instance.TerroristRoundWinStreak++;
-                MessageUtils.PrintToChatAll($"The Terrorists have won {ChatColors.Darkred}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
+                MessageUtils.PrintToChatAll($"The {ChatColors.DarkRed}Terrorists{ChatColors.White} have won {ChatColors.DarkRed}{MapManager.Instance.TerroristRoundWinStreak}{ChatColors.White} rounds subsequently.");
                 TeamManager.Instance.AddQueuePlayers();
             }
             else
             {
-                MessageUtils.PrintToChatAll($"The Counter-Terrorists have won!");
+                MessageUtils.PrintToChatAll($"The {ChatColors.DarkBlue}Counter-Terrorists{ChatColors.White} have won!");
                 MapManager.Instance.TerroristRoundWinStreak = 0;
                 TeamManager.Instance.SwitchTeams();
             }
-             
-            if(MapManager.Instance.TerroristRoundWinStreak == RuntimeConfig.ScrambleAfterSubsequentTerroristRoundWins)
+
+            if (MapManager.Instance.TerroristRoundWinStreak == RuntimeConfig.ScrambleAfterSubsequentTerroristRoundWins)
             {
                 MessageUtils.PrintToChatAll($"Teams will be scrambled now!");
                 MapManager.Instance.TerroristRoundWinStreak = 0;
+                TeamManager.Instance.ScrambleTeams();
+            }
+
+            if (TeamManager.Instance.ScrambleSignal)
+            {
+                TeamManager.Instance.ScrambleSignal = false;
+                MessageUtils.PrintToChatAll($"Scramble Signal received. Teams will be scrambled now!");
                 TeamManager.Instance.ScrambleTeams();
             }
 
@@ -522,6 +532,16 @@ namespace CS2Retake
             return HookResult.Continue;
         }
 
+        private HookResult OnServerCvar(EventServerCvar @event, GameEventInfo info)
+        {
+            if(@event.Cvarname.Equals("mp_maxrounds"))
+            {
+                RoundTypeManager.Instance.ResetSequenceRoundType();
+            }
+
+            return HookResult.Continue;
+        }
+
         public void OnMapStart(string mapName)
         {
             this.Logger?.LogInformation($"Map changed to {mapName}");
@@ -538,7 +558,7 @@ namespace CS2Retake
             if(GameRuleManager.Instance.IsWarmup && Server.CurrentTime >= GameRuleManager.Instance.WarmupEnd && !this._scrambleAfterWarmupDone)
             {
                 this._scrambleAfterWarmupDone = true;
-                TeamManager.Instance.ScrambleTeams();
+                TeamManager.Instance.FixTeams();
             }
 
             TeamManager.Instance.OnTick();
