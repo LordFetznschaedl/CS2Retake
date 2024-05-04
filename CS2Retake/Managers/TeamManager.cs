@@ -336,6 +336,11 @@ namespace CS2Retake.Managers
 
             MessageUtils.LogDebug($"UserId: {userId}, State: {currentState}, OldTeam: {previousTeam}, NewTeam: {newTeam}");
 
+            if(currentState == PlayerStateEnum.Spectating && newTeam == CsTeam.Spectator && (previousTeam == CsTeam.None || previousTeam == CsTeam.Spectator))
+            {
+                return;
+            }
+
             //Allow switch to spectator
             if ((currentState == PlayerStateEnum.Connected || currentState == PlayerStateEnum.Playing) && newTeam == CsTeam.Spectator)
             {

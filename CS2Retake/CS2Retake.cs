@@ -330,7 +330,7 @@ namespace CS2Retake
             {
                 MessageUtils.PrintToChatAll($"Player ratios not matching how they should be. Resetting...");
                 TeamManager.Instance.FixTeams();
-                PlayerUtils.SuicideAll();
+                GameRuleManager.Instance.TerminateRound();
                 return HookResult.Continue;
             }
 
