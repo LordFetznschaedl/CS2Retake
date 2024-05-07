@@ -1,4 +1,4 @@
-# CS2Retake 2.1.2
+# CS2Retake 2.2.0
   
 Implementation of a Retake plugin for CS2 using CounterStrikeSharp  
 <https://docs.cssharp.dev/>  
@@ -17,7 +17,7 @@ Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 | !retakespawn    | <index (integer)>                          | teleports the player to the given spawn index                         | @cs2retake/admin |
 | !retakewrite    |                                            | writes the spawns of the current map to the corresponding map config  | @cs2retake/admin |
 | !retakeread     |                                            | reads the spawns of the current map from the corresponding map config | @cs2retake/admin |
-| !retakescramble |                                            | scrambles the teams instantly                                         | @cs2retake/admin |
+| !retakescramble |                                            | scrambles the teams after the round is finished                       | @cs2retake/admin |
 | !retaketeleport | <X (float)> <Y (float)> <Z (float)>        | teleports player to the given coordinates                             | @cs2retake/admin |
 | !retakeaddspawn | <2/3 - 2 = T; 3 = CT> <0/1 - 0 = A; 1 = B> | creates a new spawn                                                   | @cs2retake/admin |
   
@@ -26,7 +26,7 @@ Implementation of a Retake plugin for CS2 using CounterStrikeSharp
 Extract the `addons` folder to the `/csgo/` directory of the dedicated server.  
 
 ---
-# release 2.1.2:  
+# release 2.2.0:  
 - [x] modular weapon allocator system
 - [x] creating, saving and reading spawns
 - [x] player spawn in spawnpoints 
