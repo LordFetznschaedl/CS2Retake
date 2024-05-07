@@ -159,6 +159,7 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator
 
             DBManager.Instance.DBType = Config.DatabaseType;
             DBManager.Instance.AllocatorConfigDirectoryPath = Config.AllocatorConfigDirectoryPath;
+            DBManager.Instance.ConnectionString = Config.ConnectionString;
             DBManager.Instance.Init();
 
             PlayerUtils.GetValidPlayerControllers().ForEach(x => this.OnPlayerConnected(x));

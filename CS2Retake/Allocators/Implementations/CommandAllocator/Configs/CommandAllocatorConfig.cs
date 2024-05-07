@@ -23,12 +23,14 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Configs
 
         public DBType DatabaseType { get; set; } = DBType.SQLite;
 
+        public string ConnectionString { get; set; } = "Server=<server>;Port=<port-(dafault:5432)>;Database=<dbName>;Userid=<username>;Password=<password>";
+
         public float HowToMessageDelayInMinutes { get; set; } = 3.5f;
         public string HowToMessage { get; set; } = $"Customize your weapons by using !guns";
 
         public CommandAllocatorConfig()
         {
-            this.Version = 3;
+            this.Version = 4;
         }
     }
 }

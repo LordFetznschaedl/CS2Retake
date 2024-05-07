@@ -11,5 +11,7 @@ namespace CS2Retake.Managers.Interfaces
     {
         public void PlaySpotAnnouncer();
         public void AssignRandomPlayerInBombZoneAsPlanter();
+
+        public void ConfigureForRetake(bool complete = true);
     }
 }

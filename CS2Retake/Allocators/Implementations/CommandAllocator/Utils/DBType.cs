@@ -12,5 +12,6 @@ namespace CS2Retake.Allocators.Implementations.CommandAllocator.Utils
     {
         Cache = 0,
         SQLite = 1,
+        PostgreSql = 2,
     }
 }

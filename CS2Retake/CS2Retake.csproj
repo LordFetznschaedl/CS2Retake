@@ -5,13 +5,14 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
-    <Version>2.1.2</Version>
+    <Version>2.2.0</Version>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.217" />
+    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.219" />
     <PackageReference Include="CSZoneNet.Plugin.CS2BaseAllocator" Version="1.0.13" />
     <PackageReference Include="CSZoneNet.Plugin.Utils" Version="1.0.1" />
+    <PackageReference Include="Npgsql" Version="8.0.2" />
     <PackageReference Include="System.Data.SQLite" Version="1.0.118" />
     <PackageReference Include="System.Data.SQLite.Core" Version="1.0.118" />
   </ItemGroup>

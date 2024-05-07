@@ -52,6 +52,12 @@ namespace CS2Retake.Managers
             }
         }
 
+        public void ResetSequenceRoundType()
+        {
+            this._roundTypeList.Clear();
+            this.CreateRoundTypeList();
+        }
+
         private void HandleRandomRoundType()
         {
             this.RoundType = (RoundTypeEnum)new Random().Next(0, Enum.GetNames(typeof(RoundTypeEnum)).Length - 1);
@@ -87,6 +93,8 @@ namespace CS2Retake.Managers
         {
             var maxRounds = ConVar.Find("mp_maxrounds")!.GetPrimitiveValue<int>();
 
+            MessageUtils.LogDebug($"MaxRounds: {maxRounds}");
+
             var roundTypeSequence = RuntimeConfig.RoundTypeSequence;
 
             foreach (var roundType in roundTypeSequence)
@@ -95,7 +103,7 @@ namespace CS2Retake.Managers
 
                 if (roundType.AmountOfRounds < 0)
                 {
-                    roundsToAddToQueue = maxRounds - this._roundTypeList.Count;
+                    roundsToAddToQueue = maxRounds - this._roundTypeList.Count + 1;
                 }
 
                 for (int i = 0; i < roundsToAddToQueue; i++)
@@ -122,7 +130,5 @@ namespace CS2Retake.Managers
                 this._roundTypeList.Clear();
             }
         }
-
-
     }
 }

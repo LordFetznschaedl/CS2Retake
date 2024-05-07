@@ -24,6 +24,8 @@ namespace CS2Retake.Managers
 
         public (int ctRatio, int tRatio) LatestRatio { get; private set; } = (0, 0);
 
+        public bool ScrambleSignal { get; set; } = false;
+
         public static TeamManager Instance
         {
             get
@@ -333,6 +335,11 @@ namespace CS2Retake.Managers
             var currentState = this.GetCurrentPlayerState(userId);
 
             MessageUtils.LogDebug($"UserId: {userId}, State: {currentState}, OldTeam: {previousTeam}, NewTeam: {newTeam}");
+
+            if(currentState == PlayerStateEnum.Spectating && newTeam == CsTeam.Spectator && (previousTeam == CsTeam.None || previousTeam == CsTeam.Spectator))
+            {
+                return;
+            }
 
             //Allow switch to spectator
             if ((currentState == PlayerStateEnum.Connected || currentState == PlayerStateEnum.Playing) && newTeam == CsTeam.Spectator)
