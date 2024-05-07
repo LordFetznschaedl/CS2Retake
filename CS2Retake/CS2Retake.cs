@@ -16,7 +16,7 @@ using CounterStrikeSharp.API.Modules.Entities.Constants;
 
 namespace CS2Retake
 {
-    [MinimumApiVersion(217)]
+    [MinimumApiVersion(228)]
     public class CS2Retake : BasePlugin, IPluginConfig<CS2RetakeConfig>
     {
         public override string ModuleName => "CS2Retake";

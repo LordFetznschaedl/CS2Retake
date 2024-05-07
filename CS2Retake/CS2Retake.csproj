@@ -9,7 +9,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.219" />
+    <PackageReference Include="CounterStrikeSharp.API" Version="1.0.228" />
     <PackageReference Include="CSZoneNet.Plugin.CS2BaseAllocator" Version="1.0.13" />
     <PackageReference Include="CSZoneNet.Plugin.Utils" Version="1.0.1" />
     <PackageReference Include="Npgsql" Version="8.0.2" />

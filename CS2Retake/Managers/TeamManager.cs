@@ -373,7 +373,7 @@ namespace CS2Retake.Managers
             {
                 MessageUtils.LogDebug($"Switch to queue {userId} from queue spectator");
 
-                if (!GameRuleManager.Instance.IsWarmup && !PlayerUtils.AreMoreThenOrEqualPlayersConnected(2))
+                if (!GameRuleManager.Instance.IsWarmup || !PlayerUtils.AreMoreThenOrEqualPlayersConnected(2))
                 {
                     MessageUtils.PrintToPlayerOrServer($"You have been placed into the queue! Please wait for the next round to start.", player);
                 }
