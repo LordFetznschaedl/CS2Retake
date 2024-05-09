@@ -210,14 +210,14 @@ namespace CS2Retake.Managers
 
         public void OnTick()
         {
-            if(GameRuleManager.Instance.IsWarmup)
+            if (GameRuleManager.Instance.IsWarmup)
             {
                 return;
             }
 
             var playerIds = this._playerStateDict.Where(x => x.Value == PlayerStateEnum.Connected || x.Value == PlayerStateEnum.Spectating || x.Value == PlayerStateEnum.Queue).ToList();
-            
-            foreach(var playerId in playerIds)
+
+            foreach (var playerId in playerIds)
             {
                 var player = Utilities.GetPlayerFromUserid(playerId.Key);
                 var state = playerId.Value;
@@ -338,6 +338,17 @@ namespace CS2Retake.Managers
 
             if(currentState == PlayerStateEnum.Spectating && newTeam == CsTeam.Spectator && (previousTeam == CsTeam.None || previousTeam == CsTeam.Spectator))
             {
+                return;
+            }
+
+            if (GameRuleManager.Instance.IsWarmup && (newTeam == CsTeam.Terrorist || newTeam == CsTeam.CounterTerrorist))
+            {
+                MessageUtils.LogDebug($"Switch to playing while warmup {userId}");
+                this.UpdatePlayerStateDict(userId, PlayerStateEnum.Playing);
+                this.RemoveFromQueue(userId);
+
+                player.ChangeTeam(newTeam);
+
                 return;
             }
 
